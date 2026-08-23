@@ -23,8 +23,9 @@ Do **not** delete archived plans. Move them; do not rewrite history in place.
 | Plan | Role |
 |---|---|
 | [`2026-08-23-product-roadmap.md`](2026-08-23-product-roadmap.md) | Product roadmap M0–M8 (stays active) |
-| [`2026-08-23-m0-tauri-foundation.md`](2026-08-23-m0-tauri-foundation.md) | Tauri shell + book schema |
-| [`2026-08-23-m1-scan-viewer.md`](2026-08-23-m1-scan-viewer.md) | First product milestone (depends on M0; pending review fixes) |
+| [`2026-08-23-m0-tauri-foundation.md`](2026-08-23-m0-tauri-foundation.md) | Tauri shell + data architecture + schema |
+| [`2026-08-23-pre-m1-flipbook-spike.md`](2026-08-23-pre-m1-flipbook-spike.md) | Flip library ADR — blocks M1 |
+| [`2026-08-23-m1-scan-viewer.md`](2026-08-23-m1-scan-viewer.md) | First product milestone (after M0 + spike) |
 
 Superseded: [`archive/superseded/2026-08-23-mvp-scaffold.md`](archive/superseded/2026-08-23-mvp-scaffold.md).
 Backlog index: [`to_do.md`](../to_do.md).

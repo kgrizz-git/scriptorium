@@ -9,7 +9,8 @@ Linked issue/PR: n/a
 ## Goal
 
 Single source of truth for **all** planned product phases and features. Immediate work lives in
-[`2026-08-23-m0-tauri-foundation.md`](2026-08-23-m0-tauri-foundation.md) then
+[`2026-08-23-m0-tauri-foundation.md`](2026-08-23-m0-tauri-foundation.md) →
+[`2026-08-23-pre-m1-flipbook-spike.md`](2026-08-23-pre-m1-flipbook-spike.md) →
 [`2026-08-23-m1-scan-viewer.md`](2026-08-23-m1-scan-viewer.md). Later milestones stay here and in
 [`to_do.md`](../to_do.md) until promoted. Combined draft:
 [`archive/superseded/2026-08-23-mvp-scaffold.md`](archive/superseded/2026-08-23-mvp-scaffold.md).
@@ -37,35 +38,42 @@ Three layers, not a single rendering choice:
 
 ### M0 — Harness & scaffold (in progress)
 
-**Active plans:** [`2026-08-23-m0-tauri-foundation.md`](2026-08-23-m0-tauri-foundation.md) then
-[`2026-08-23-m1-scan-viewer.md`](2026-08-23-m1-scan-viewer.md). Later milestones stay here and in
-[`to_do.md`](../to_do.md) until promoted.
+**Active plan:** [`2026-08-23-m0-tauri-foundation.md`](2026-08-23-m0-tauri-foundation.md)
 
-### M0.5 — Harness follow-ups (after Tauri scaffold / when app code exists)
+- [x] CI fast lane + Semgrep + pre-push basedpyright
+- [ ] Tauri shell + app-data library root + book schema v1 + JSON Schema
+- [ ] Rust CI: fmt / clippy -D warnings / test / check; commit `Cargo.lock`
+- [ ] `.envrc.example`, agent tooling contract
 
-Promote items into an active plan when starting them. Tracked in [`to_do.md`](../to_do.md).
+### M0.25 — Flipbook spike (blocks M1)
 
-- [ ] Extend CI + pre-commit/pre-push for **TypeScript**: `pnpm lint`, `tsc --noEmit` (pre-push + CI)
-- [ ] Extend CI + hooks for **Rust/Tauri**: `cargo fmt --check`, `cargo clippy`, `cargo test`, `cargo check`
-- [ ] Frontend tests: Vitest (+ coverage report); raise coverage `fail_under` for app code
-- [ ] Rust tests + coverage (`cargo llvm-cov` or tarpaulin) when meaningful
-- [ ] Tighten Python harness coverage gate (`fail_under` > 0 once in-process tests cover scripts)
-- [ ] Optional: CodeQL workflow from `ci/examples/codeql.yml`
-- [ ] Optional: Dependabot (`ci/examples/dependabot.yml`) for npm / cargo / Actions
-- [ ] GitHub ruleset: mark CI + Semgrep jobs as **required** checks
-- [ ] `.envrc.example` + document `direnv allow`
+**Active plan:** [`2026-08-23-pre-m1-flipbook-spike.md`](2026-08-23-pre-m1-flipbook-spike.md)
+
+- [ ] ADR: flip library, aspect policy, StrictMode, asset load (gates G1–G5)
+- [ ] No silent non-flip fallback
+
+### M0.5 — Harness follow-ups (after Tauri / remaining quality)
+
+Promote when starting. Tracked in [`to_do.md`](../to_do.md).
+
+- [ ] Extend CI + pre-push for **TypeScript** lint (tsc already in M0)
+- [ ] Frontend Vitest coverage gates; raise `fail_under` for app code
+- [ ] Rust coverage (`cargo llvm-cov` / tarpaulin) when useful
+- [ ] Tighten Python harness coverage gate when in-process tests exist
+- [ ] Optional: CodeQL; Dependabot (required before public)
+- [ ] GitHub ruleset: required CI + Semgrep checks
+- [ ] Note: `cargo fmt` / `clippy` / `test` moved **into M0** (not deferred)
 
 ### M1 — Scan viewer (MVP core)
 
-**Active plan:** [`2026-08-23-m1-scan-viewer.md`](2026-08-23-m1-scan-viewer.md) (after M0 foundation)
+**Active plan:** [`2026-08-23-m1-scan-viewer.md`](2026-08-23-m1-scan-viewer.md) (after M0 + flipbook spike ADR)
 
-- [ ] Tauri command: pick folder → natural sort → copy/link into book package
-- [ ] StPageFlip (or `react-pageflip`) viewer over page images
-- [ ] Paper/book chrome (texture, spread, cover — iterate on UX)
-- [ ] Persist last-read page per book
-- [ ] Open existing book package from disk
+- [ ] Atomic folder ingest → book package (relative paths, checksums)
+- [ ] Page-turn reader per ADR (not assumed StPageFlip)
+- [ ] Persist last-read page; Open… inspect-and-branch
+- [ ] Perf budget + error taxonomy tests
 
-**Out of scope for M1:** library, authoring UI, OCR, hotspots, web deploy.
+**Out of scope for M1:** library shelf, authoring, OCR, hotspots, web deploy.
 
 ### M2 — OCR-aware scans (text under the image)
 
@@ -126,16 +134,42 @@ Promote items into an active plan when starting them. Tracked in [`to_do.md`](..
 
 ## Book package schema (evolving)
 
-Documented in code when scaffold lands; roadmap fields:
+**Source of truth:** authored in M0 as `docs/book-format.md` + `docs/book-format.schema.json`
+(see [`2026-08-23-m0-tauri-foundation.md`](2026-08-23-m0-tauri-foundation.md)). Do not treat this
+roadmap as schema authority.
+
+Until those files exist, schema **v1** minimum (aligned with M0):
+
+- `formatVersion` = 1
+- `id`, `title`, `createdAt`, `updatedAt`
+- `renderMode` (`scan` | reserved `text` / `hybrid`)
+- `lastReadPage`
+- `rights`, `attribution`
+- `pages[]`: `index`, `file` (relative), `width`, `height`, `byteSize`, `sha256`; optional
+  `pageLabel`, `storage`
+- Reserved: `pages/`, `ocr/`, `annotations.json`
+
+Illustrative shape (field names match M0 — not the superseded `image` / `defaultView` draft):
 
 ```json
 {
+  "formatVersion": 1,
   "id": "uuid",
   "title": "string",
   "renderMode": "scan",
-  "defaultView": "scan",
-  "pages": [{ "index": 1, "image": "pages/001.jpg", "ocr": "ocr/001.json" }],
-  "annotations": "annotations.json",
+  "lastReadPage": 0,
+  "rights": "",
+  "attribution": "",
+  "pages": [
+    {
+      "index": 0,
+      "file": "pages/001.jpg",
+      "width": 2400,
+      "height": 3200,
+      "byteSize": 1234567,
+      "sha256": "hex"
+    }
+  ],
   "createdAt": "ISO-8601",
   "updatedAt": "ISO-8601"
 }

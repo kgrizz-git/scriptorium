@@ -3,54 +3,35 @@
 Last reviewed: 2026-08-23
 
 **Active plans (in order):**
-1. [`plans/2026-08-23-m0-tauri-foundation.md`](plans/2026-08-23-m0-tauri-foundation.md) — Tauri shell + book schema
-2. [`plans/2026-08-23-m1-scan-viewer.md`](plans/2026-08-23-m1-scan-viewer.md) — first product milestone (scan flipbook)
+1. [`plans/2026-08-23-m0-tauri-foundation.md`](plans/2026-08-23-m0-tauri-foundation.md)
+2. [`plans/2026-08-23-pre-m1-flipbook-spike.md`](plans/2026-08-23-pre-m1-flipbook-spike.md) — blocks M1
+3. [`plans/2026-08-23-m1-scan-viewer.md`](plans/2026-08-23-m1-scan-viewer.md)
 
-**Roadmap:** [`plans/2026-08-23-product-roadmap.md`](plans/2026-08-23-product-roadmap.md) ·
-**CI/hooks:** [`docs/ci-and-hooks.md`](docs/ci-and-hooks.md)
+**Roadmap:** [`plans/2026-08-23-product-roadmap.md`](plans/2026-08-23-product-roadmap.md)
 
 ## Now
 
-- [ ] Address M0/M1 plan-review top 5 (esp. pre-M1 flipbook spike ADR); review notes live under gitignored `tmp/` — do not link from tracked docs
-- [ ] Revise M0/M1 plans per review; then execute M0 → M1
-- [x] Plan folder layout: `deferred/`, `archive/completed/`, `archive/superseded/` + AGENTS/policy
+- [ ] Execute M0 (revised): scaffold, data architecture, schema+JSON Schema, Rust CI, Cargo.lock
+- [ ] Execute pre-M1 flipbook spike + ADR (gates G1–G5)
+- [ ] Execute M1 after spike (binary acceptance A1–A9)
+- [ ] Second plan review (opencode ox-alpha-free) — notes in `tmp/` only, do not link
 
-## Next after Tauri lands (M0.5 — harness follow-ups)
+## Next after app exists (M0.5)
 
-See [roadmap M0.5](plans/2026-08-23-product-roadmap.md#m05--harness-follow-ups-after-tauri-scaffold--when-app-code-exists).
+- [ ] TS lint pre-push; Vitest coverage gates
+- [ ] Rust coverage when useful; Python harness fail_under when in-process tests exist
+- [ ] Dependabot before public; CodeQL optional; GitHub required checks
 
-- [ ] CI + pre-push: TypeScript lint + `tsc --noEmit`
-- [ ] CI + hooks: `cargo fmt` / `clippy` / `test` / `check`
-- [ ] Vitest (+ coverage); raise app coverage gate
-- [ ] Rust test coverage when useful
-- [ ] Raise Python harness `fail_under` once scripts have in-process tests
-- [ ] Optional CodeQL; Dependabot for npm/cargo/Actions
-- [ ] GitHub required checks for CI + Semgrep jobs
-
-## Next product (M2 — OCR on scans)
-
-- [ ] OCR pipeline + per-page bbox JSON
-- [ ] Search; select/copy via text layer on scans
-- [ ] Background OCR + progress UI
-
-## Later (product)
+## Later product
 
 | Milestone | Summary |
 |---|---|
-| **M3** | Rendered text mode |
-| **M4** | Hybrid mode + toggle |
-| **M5** | Multi-book library |
-| **M6** | Authoring + hotspot lore popups |
-| **M7** | Figure extraction, deep-zoom, polish |
-| **M8** | Web/PWA, IIIF, optional CMS, advanced OCR |
-
-## Decisions pending
-
-- [ ] React vs Svelte (default: React in M0 plan)
-- [ ] Library root: app-data vs user-picked (spike in M1 Phase 0)
-- [ ] OCR runtime (decide at M2)
+| **M2** | OCR on scans — search, select/copy |
+| **M3–M4** | Text mode / hybrid |
+| **M5–M6** | Library / authoring hotspots |
+| **M7–M8** | Polish, web/PWA, IIIF |
 
 ## Recently done
 
-- [x] CI/hooks baseline + pre-push basedpyright + `tmp/`
-- [x] Product roadmap; split M0/M1 plans from combined mvp-scaffold
+- [x] Plan folder layout + AGENTS guidance; mvp-scaffold → archive/superseded
+- [x] Revise M0/M1 + add pre-M1 spike from agreed Hy3 findings

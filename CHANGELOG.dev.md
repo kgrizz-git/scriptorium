@@ -16,6 +16,10 @@ Internal / developer-facing changes that do not belong in the public
 - Ruff complexity rules aligned with `policies/file-size-and-counts.md`.
 - Removed `template-checks.yml` (superseded by `ci.yml`).
 - Formatted four legacy Python scripts for `ruff format --check`.
+- M0 / pre-M1 spike / M1 plans tightened after ox-alpha review: copy collisions + orphan temps +
+  checksum re-verify; natural-sort tie-break; named perf machine/corpus/fps; `lastReadPage` by
+  book id; spike candidate shortlist; roadmap schema synced to M0; Rust required-check name in
+  `docs/ci-and-hooks.md`.
 
 ## [0.1.1] - 2026-08-23
 

@@ -32,7 +32,7 @@ Two product architectures both fit; choose deliberately later:
 
 | Item | Role | Notes |
 |---|---|---|
-| [StPageFlip](https://github.com/Nodlik/StPageFlip) (`page-flip`) | Core page-turn (images or HTML) | Mature, no deps; React: `react-pageflip` |
+| [StPageFlip](https://github.com/Nodlik/StPageFlip) (`page-flip`) | Page-turn candidate | Last npm publish ~2022; **fixed width/height**; evaluate in pre-M1 spike before adopting. React wrapper may need StrictMode care. |
 | [elk-flipbook](https://github.com/kokiddp/elk-flipbook) | PDF → flipbook + search + optional Tesseract OCR | Built on pdf.js + StPageFlip |
 | [read-as-book](https://github.com/Ethical-Tech-CoLab/read-as-book) | Pre-render PDF→images CLI + viewer | Fast static hosting; no pdf.js in browser |
 | [PDFlipbook](https://github.com/SympleNZ/PDFlipbook) / [PageFlipOpen](https://github.com/philhoyt/PageFlipOpen) | PDF flip viewers | Smaller / newer; evaluate before depending |

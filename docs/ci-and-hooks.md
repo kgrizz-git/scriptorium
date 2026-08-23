@@ -11,11 +11,12 @@ Last reviewed: 2026-08-23
 | **Secrets** | ✅ gitleaks + private-key | — | ✅ gitleaks full history | TruffleHog weekly (advisory) |
 | **Lint** | ✅ ruff, markdownlint, shellcheck | — | ✅ same + actionlint | — |
 | **Type check (Python)** | — | ✅ basedpyright | ✅ basedpyright | — |
+| **Rust fmt / clippy / test** | — | — | ✅ required from **M0** once `src-tauri/` exists | — |
 | **Tests + coverage** | — | — | ✅ pytest-cov (report; gate later) | — |
 | **SAST** | — | — | — | ✅ Semgrep on PR |
 | **CodeQL** | — | — | — | later — [M0.5](../plans/2026-08-23-product-roadmap.md#m05--harness-follow-ups-after-tauri-scaffold--when-app-code-exists) |
 
-**Later (M0.5), when Tauri/TS/Rust exist:** add `tsc` and `cargo clippy` to pre-push + CI; Vitest/cargo tests + coverage gates; optional CodeQL/Dependabot. See roadmap M0.5 and [`to_do.md`](../to_do.md).
+**Later (M0.5):** Vitest coverage gates, TS eslint pre-push, CodeQL/Dependabot. **Rust fmt/clippy/test belong in M0**, not M0.5 — see foundation plan.
 
 ## Quick start
 
@@ -36,6 +37,9 @@ After the first green `CI` run, set default-branch ruleset required checks to:
 - `Tests & coverage`
 - `Secret scan (gitleaks)`
 - `SAST — Semgrep` (from Security workflow)
+- `Rust (src-tauri)` — **required from M0** once `src-tauri/` exists (`cargo fmt` / `clippy` / `test` / `check`; exact job name must match `ci.yml`)
+
+Until M0 lands, omit the Rust job from the ruleset so the branch is not blocked on a missing check.
 
 ## Thresholds
 

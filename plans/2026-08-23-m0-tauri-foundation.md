@@ -2,119 +2,148 @@
 
 Last reviewed: 2026-08-23
 Date: 2026-08-23
-Author: bootstrap session
+Author: bootstrap session (revised after Hy3 + ox-alpha plan reviews)
 Status: draft
 Linked issue/PR: n/a
 Depends on: harness CI/hooks already on `main`
 Blocks: [`2026-08-23-m1-scan-viewer.md`](2026-08-23-m1-scan-viewer.md)
+Parallel OK: [`2026-08-23-pre-m1-flipbook-spike.md`](2026-08-23-pre-m1-flipbook-spike.md) after Phase 1 window exists
 
 ## Goal
 
-Stand up a **runnable Tauri 2 desktop shell** (Vite + React + TypeScript) and a **versioned book
-package schema** so M1 can implement folder ingest and the flipbook without inventing project
-layout mid-feature. Close remaining bootstrap harness leftovers that do not require app code.
+Stand up a **runnable Tauri 2 desktop shell** (Vite + React + TypeScript), lock **data
+architecture + book package schema v1**, and wire **Rust quality gates in CI** so M1 can implement
+ingest/viewer without inventing layout, paths, or untested Rust mid-feature.
 
 ## Out of scope
 
-- Page-turn viewer, ingest UX, last-read page (→ M1)
-- OCR, text layer, library, hotspots, web deploy (→ M2+)
-- Full M0.5 CI matrix for TS/Rust (→ after this lands; tracked in roadmap M0.5)
-- Visual polish / paper texture beyond a minimal chrome placeholder
+- Page-turn viewer, ingest UX, last-read page (→ M1; flip library → pre-M1 spike)
+- OCR, text layer, library shelf, hotspots, web deploy (→ M2+)
+- Vitest / coverage gates / CodeQL / Dependabot as required checks (→ M0.5; advisory audits OK here)
+- Visual polish beyond minimal chrome
 
-## Approach
+## Decisions (locked in this plan — ADR-light in `docs/book-format.md` + short ADR if needed)
 
-Create the app at **repo root** (standard Tauri layout: `src/`, `src-tauri/`) rather than a nested
-monorepo package — one product, one app for now. Use **pnpm** + **React** (default; Svelte only if
-explicitly requested). Document book package v1 in `docs/book-format.md` **before** writing Rust
-I/O so schema and commands stay aligned.
-
-Harness leftovers (`.envrc.example`, agent tooling contract) ship in the same PR stream as the
-scaffold so agents and humans share one setup story.
+| Topic | Decision |
+|---|---|
+| App layout | Repo root: `src/` + `src-tauri/` (not `apps/desktop`) |
+| UI | React + TypeScript + Vite + pnpm |
+| Library root | OS **app-data** directory, subfolder `books/` (managed library) |
+| Portability | Packages are **self-contained**; **relative paths only** in `meta.json` (no absolute home paths) |
+| Ingest default | **Copy** pages into the package (not symlink). Future `pages[].storage: "copied" \| "referenced"` reserved; referenced not implemented in M1 |
+| Source collisions | If two source files would map to the same destination stem (including case-insensitive match on APFS/NTFS, e.g. `1.jpg` + `1.JPG`), ingest **fails** with `DuplicatePageStem` — do not silently overwrite |
+| Copy write | Atomic: write to temp dir under destination parent → validate → rename into place. If dest book id exists → **fail** (`DestinationExists`). On startup and before ingest, delete orphaned `*.scriptorium-tmp` / `.ingest-tmp-*` dirs under the library root older than 1 hour (or any left from a previous crashed run) |
+| Checksums | Compute `sha256` at ingest and store in `meta.json`. `load_book` **re-verifies** sha256 for each page file (fail `ChecksumMismatch` if drift). Skip re-verify only behind an explicit future flag — not in M1 |
+| Free space | Pre-flight check: refuse copy if free space is less than estimated bytes × 1.1 + 50 MB headroom |
+| Schema version | `formatVersion: 1`; M1 may only make **additive** field changes; breaking change requires bump + migration note |
+| Lockfiles | **Commit** `Cargo.lock` and `pnpm-lock.yaml`. Remove `Cargo.lock` from `.gitignore` |
+| Large fixtures | Committed **generator script** writes synthetic corpora into gitignored `tmp/`; no large binaries in git |
 
 ### Alternatives considered
 
 | Option | Why not chosen |
 |---|---|
-| `apps/desktop` monorepo | Overkill for a single-app MVP; revisit if a web-only package appears |
-| Svelte | User OK with React default; avoid dual-framework churn |
-| Defer book-format docs until M1 | Schema mistakes are expensive; document first |
-| Symlink scans into package by default | Portability; default **copy** (confirm in M1) |
+| User-picked library root as default | Forces persisted-scope + evaporating dialog grants; harder M1. Revisit later if needed |
+| Symlink default | Breaks when source moves; doubles curator pain only if we force copy without a future referenced mode |
+| Docs-after-I/O only | Schema mistakes expensive; decide architecture first, then document |
+| Defer all Rust CI to M0.5 | M1 is where filesystem Rust lands; `fmt`/`clippy`/`test` are cheap on existing toolchain |
 
 ## Proposed file changes
 
 ```
-package.json, pnpm-lock.yaml     — Vite + React + TS + @tauri-apps/cli/api
-src/                             — React shell: App, empty home, routes stub
-src-tauri/                       — Tauri 2: Cargo.toml, main.rs, tauri.conf.json, capabilities
-index.html, vite.config.ts, tsconfig*.json
-docs/book-format.md              — package schema v1 (renderMode, pages, ocr/, annotations)
-.envrc.example                   — direnv: PATH hints for node/pnpm/rustc/cargo
-AGENTS.md                        — paste agent-tooling contract block
-README.md                        — prerequisites + pnpm tauri dev
-.github/workflows/ci.yml         — minimal cargo check + (optional) pnpm typecheck if cheap
-.gitignore                       — node_modules, dist, target, large fixtures
-tests/fixtures/README.md         — how to place tiny sample pages (binaries gitignored if large)
+package.json, pnpm-lock.yaml, .nvmrc
+src/, index.html, vite.config.ts, tsconfig*.json
+src-tauri/                       — Tauri 2; COMMIT Cargo.lock
+docs/book-format.md              — prose + rules
+docs/book-format.schema.json     — JSON Schema for meta.json
+docs/adr/0001-…                  — only if flip spike needs it (spike-owned) or data-arch note
+.envrc.example
+AGENTS.md                        — agent-tooling contract block
+README.md                        — prereqs, tauri dev, fixture generator
+.github/workflows/ci.yml         — cargo fmt, clippy -D warnings, test, check; tsc; advisory audits
+.gitignore                       — drop Cargo.lock ignore; keep tmp/*, target/, node_modules
+scripts/generate-fixture-book.py — or .mjs — synthetic pages → tmp/
+tests/fixtures/README.md
 ```
+
+## Schema v1 fields (minimum in M0 docs + JSON Schema)
+
+`meta.json` (illustrative):
+
+- `formatVersion` (number, required, = 1)
+- `id`, `title`, `createdAt`, `updatedAt`
+- `renderMode` (`scan` default; reserve `text` / `hybrid`)
+- `lastReadPage` (0-based index)
+- `rights`, `attribution` (strings; may be empty)
+- `pages[]`: `index`, `file` (relative path under package), `width`, `height`, `byteSize`,
+  `sha256`, optional `pageLabel`, optional `storage` (default `"copied"`)
+- Reserved dirs: `pages/`, `ocr/`, `annotations.json` (empty array/object OK)
+
+**Provenance:** do not store absolute `sourcePath` in `meta.json`. Optional one-line note in
+book-format on EXIF/XMP: M1 copies bytes as-is; stripping/policy deferred but documented.
 
 ## Phases & checklist
 
 ### Phase 0 — Harness closeout
 
-- [ ] Add `.envrc.example` (Node, pnpm, Rust toolchain notes); document `direnv allow` in README
-- [ ] Paste agent-tooling contract from `policies/agent-tooling-contract.md` into `AGENTS.md`
-- [ ] Confirm `.agent-state/` already gitignored
-- [ ] Update `scripts/validate-env.sh` / README with Tauri prerequisites checklist
+- [ ] `.envrc.example` + README `direnv allow`
+- [ ] Paste agent-tooling contract into `AGENTS.md`
+- [ ] Confirm `.agent-state/` gitignored
+- [ ] README / `validate-env.sh`: Tauri prereqs (Rust, Node LTS, pnpm, platform webview)
 
 ### Phase 1 — Scaffold
 
-- [ ] Create Tauri 2 + Vite + React + TypeScript app (official create flow or equivalent)
-- [ ] `pnpm install` succeeds; `pnpm tauri dev` launches a window with placeholder UI
-- [ ] Document run/build commands in README
-- [ ] Pin Node via `.nvmrc` or `package.json` `engines` (current LTS)
+- [ ] Tauri 2 + Vite + React + TS at repo root
+- [ ] `pnpm install` + `pnpm tauri dev` shows placeholder window
+- [ ] Pin Node (`engines` / `.nvmrc`)
+- [ ] Remove `Cargo.lock` from `.gitignore`; ensure lockfile committed after first `cargo build`
 
-### Phase 2 — Book format v1 (docs + stubs)
+### Phase 2 — Data architecture + book format
 
-- [ ] Write `docs/book-format.md`: directory layout, `meta.json` fields, reserved `ocr/`,
-      `annotations.json`, `renderMode` enum (`scan` default; future `text` / `hybrid`)
-- [ ] Add empty Rust module(s) or types matching the schema (compile-only; full I/O in M1)
-- [ ] Fixture instructions under `tests/fixtures/` (no large binaries in git)
+- [ ] Write `docs/book-format.md` including locked decisions table above
+- [ ] Write `docs/book-format.schema.json`
+- [ ] Compile-only Rust types matching schema (full I/O in M1)
+- [ ] **Schema bind test:** serialize a sample Rust `BookMeta` and validate it against `docs/book-format.schema.json` in `cargo test` (prevents silent drift)
+- [ ] Fixture generator script + `tests/fixtures/README.md`
 
-### Phase 3 — CI smoke (minimal)
+### Phase 3 — CI (Rust + TS smoke)
 
-- [ ] CI: `cargo check` in `src-tauri/` on PR/push
-- [ ] CI: `pnpm exec tsc --noEmit` if `tsconfig` exists (or document deferral to M0.5)
-- [ ] Do **not** block M0 on full clippy/vitest matrix (roadmap M0.5)
+- [ ] CI jobs for `src-tauri/`: `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test`, `cargo check` (job name e.g. `Rust (src-tauri)` — add to required-checks list in `docs/ci-and-hooks.md` in the same PR)
+- [ ] CI: `pnpm exec tsc --noEmit`
+- [ ] Advisory: `pnpm audit` / `cargo audit` (`continue-on-error: true` OK until public)
+- [ ] Extend markdownlint path list / shellcheck scandir if new dirs need coverage
+- [ ] Update `docs/ci-and-hooks.md` in the same change (doc-freshness + required-check names)
 
 ## Verification
 
-- [ ] Fresh clone path: install prereqs → `pnpm install` → `pnpm tauri dev` shows window
-- [ ] `docs/book-format.md` reviewed against profile/roadmap (scan-first, OCR reserved)
-- [ ] `cargo check` clean; CI green for new jobs
+- [ ] Fresh clone → install → `pnpm tauri dev` shows window
+- [ ] `Cargo.lock` tracked; `git check-ignore -v Cargo.lock` does not ignore it under `src-tauri/`
+- [ ] `cargo fmt --check`, `clippy -D warnings`, `test`, `check` pass locally and in CI
+- [ ] JSON Schema validates a sample `meta.json` fixture
 - [ ] `bash scripts/check-bootstrap.sh` findings explained or fixed
 
 ## Open questions
 
-- [ ] Exact Tauri 2 create-app flags / template version at implementation time
-- [ ] Whether book packages live under OS app-data dir vs user-chosen library root (decide in M1; document preference here)
+- [ ] Exact `create-tauri-app` template version at implementation time (record in README when chosen)
 
 ## Risks
 
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
-| Tauri/macOS signing noise for local dev | med | low | Document unsigned local-only first |
 | Scaffold fights existing root files | med | med | Careful merge of package.json / gitignore |
-| Over-building M0.5 into M0 | med | med | Explicit out-of-scope; checklist discipline |
+| Over-building M0.5 | med | med | Vitest/coverage/CodeQL stay out; Rust gates stay in |
+| Schema still wrong after M1 | low | med | `formatVersion` + additive-only rule |
 
 ## Completion steps
 
 1. Status → `complete`; move to `plans/archive/completed/`
-2. Changelog: user-facing “Tauri app scaffold” in `CHANGELOG.md`; harness bits in `CHANGELOG.dev.md`
-3. Unblock M1 plan; update `to_do.md` and roadmap M0 checkboxes
-4. Supersede leftover items in [`archive/superseded/2026-08-23-mvp-scaffold.md`](archive/superseded/2026-08-23-mvp-scaffold.md) (already archived)
+2. Changelog: user-facing scaffold note; harness/CI in `CHANGELOG.dev.md`
+3. Unblock pre-M1 spike (if not done) and M1 after spike ADR
+4. Update `to_do.md` / roadmap
 
 ## Related
 
 - Roadmap: [`2026-08-23-product-roadmap.md`](2026-08-23-product-roadmap.md)
-- Next: [`2026-08-23-m1-scan-viewer.md`](2026-08-23-m1-scan-viewer.md)
-- Profile: `.context/project-profile.md`
-- Prior combined draft: [`archive/superseded/2026-08-23-mvp-scaffold.md`](archive/superseded/2026-08-23-mvp-scaffold.md)
+- Spike: [`2026-08-23-pre-m1-flipbook-spike.md`](2026-08-23-pre-m1-flipbook-spike.md)
+- Next product: [`2026-08-23-m1-scan-viewer.md`](2026-08-23-m1-scan-viewer.md)
+- Superseded draft: [`archive/superseded/2026-08-23-mvp-scaffold.md`](archive/superseded/2026-08-23-mvp-scaffold.md)

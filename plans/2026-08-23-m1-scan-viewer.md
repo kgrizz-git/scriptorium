@@ -2,140 +2,208 @@
 
 Last reviewed: 2026-08-23
 Date: 2026-08-23
-Author: bootstrap session
+Author: bootstrap session (revised after Hy3 + ox-alpha plan reviews)
 Status: draft
 Linked issue/PR: n/a
-Depends on: [`2026-08-23-m0-tauri-foundation.md`](2026-08-23-m0-tauri-foundation.md) complete
+Depends on:
+- [`2026-08-23-m0-tauri-foundation.md`](2026-08-23-m0-tauri-foundation.md) **complete**
+- [`2026-08-23-pre-m1-flipbook-spike.md`](2026-08-23-pre-m1-flipbook-spike.md) **complete** (ADR gates G1–G5)
 Follows: product roadmap M1
 
 ## Goal
 
-Deliver the **first usable product slice**: a librarian/curator can **open a folder of scanned page
-images**, Scriptorium builds a **book package**, and the visitor (or same user) can **flip through
-faithful page images** in a virtual book. UX priorities: reliability and correctness over polish.
+Deliver the **first usable product slice**: open a folder of scanned page images → create a
+**book package** → **page-turn** through faithful page images (no stretch) with persisted
+last-read page. Priorities: reliability and correctness over polish.
 
 ## Out of scope
 
-- OCR, search, select/copy text layer (M2)
-- Rendered text / hybrid modes (M3–M4)
-- Multi-book library UI beyond “open another book” (M5)
-- Hotspot authoring / lore popups (M6)
-- Deep-zoom, figure extraction, heavy texture art (M7)
+- OCR / search / text layer (M2)
+- Text / hybrid reader modes (M3–M4)
+- Multi-book shelf UI (M5) — reopen package is enough
+- Hotspot authoring (M6)
+- Deep-zoom, figure extraction, heavy texture (M7) — except whatever the flip ADR already chose
 - Web/PWA / IIIF (M8)
-- Full M0.5 quality matrix unless already cheap from M0
+- Referenced/symlink storage mode (schema-reserved only)
+- HEIC (document unsupported)
 
 ## Approach
 
-**Image-first reader.** Pages are the scan files themselves (JPEG/PNG/WebP), displayed via
-**StPageFlip** (`page-flip` / `react-pageflip`). Ingest uses Tauri dialog + filesystem APIs:
-natural-sort image files → **copy** into a book package (portable default) under a known library
-root (app data or user-chosen — decide in Phase 0 spike). Schema from M0 `docs/book-format.md`.
+**Image-first reader** using the **library chosen in the pre-M1 ADR** (not assumed StPageFlip).
+Ingest per M0 decisions: natural-sort → **atomic copy** into app-data `books/<id>/` with
+**relative paths only** in `meta.json`. Resolve to absolute paths only in Rust at load time for
+`convertFileSrc`.
 
-Spike **early**: `convertFileSrc` (or asset protocol) so flipbook can load local page paths inside
-the webview.
+**UX:** single **Open…** action that inspects the chosen folder — if `meta.json` present, load
+book; else treat as scan folder and ingest (confirm dialog before copy). Avoid two near-identical
+folder pickers.
+
+**No silent non-flip fallback.** If the ADR library fails in integration, stop and escalate.
 
 ### Alternatives considered
 
-| Option | Why not chosen for M1 |
+| Option | Why not |
 |---|---|
-| PDF-only ingest | User model is folder-of-scans; PDF can be M7+ |
-| Symlink pages into package | Breaks when source folder moves; copy is safer default |
-| IIIF / OpenSeadragon as primary UI | Wrong metaphor for “book”; optional later for inspect |
-| Full library shelf UI | YAGNI; open folder + reopen package is enough |
+| PDF-only ingest | Product is folder-of-scans |
+| Dual Open folder / Open book pickers | Confusing; use inspect-and-branch |
+| `<img>` strip if flip fails | Deletes the product metaphor |
+| Defer lazy-load always to M7 | Only if perf budget met; else windowed load is **in** M1 |
 
-## Acceptance criteria (done when)
+## Acceptance criteria (binary)
 
-1. User runs the desktop app and chooses **Open folder…**
-2. App creates a book package conforming to `docs/book-format.md` with ordered pages
-3. Flipbook shows **scan images** (not placeholder HTML) with turn animation
-4. Keyboard and on-screen next/prev work; last-read page persists across relaunch
-5. User can **Open book…** pointing at an existing package directory
-6. Corrupt/empty folder fails with a clear error (no crash)
+| ID | Criterion | How verified |
+|---|---|---|
+| A1 | Ingest of a fixture folder produces a package that **validates** against `docs/book-format.schema.json` | `cargo test` + schema validation |
+| A2 | Page order matches the **natural-sort table** below for the committed sort fixture | `cargo test` |
+| A3 | Each defined error variant returns its required user-visible message and does not abort the process | `cargo test` (+ manual spot-check in UI) |
+| A4 | Reader shows **page-turn** for ≥2 pages using ADR library; images are scan files (not placeholders); **no aspect stretch** (pad policy from ADR) | Manual + spike gates carried forward |
+| A5 | Keys: **←/→** and on-screen prev/next; at last page next is no-op; at first page prev is no-op | Manual script |
+| A6 | `lastReadPage` persists across quit/relaunch for the same book **`id`** (not filesystem path); progress flush on window close (not only debounced flip) | Manual script |
+| A7 | Open… on an existing package directory loads without re-copy | Manual script |
+| A8 | Unsupported `formatVersion` → `SchemaVersionUnsupported` message | `cargo test` |
+| A9 | Perf budget (below) holds on the **named reference class** against the **pinned gate corpus** | Manual timed run; record results in PR |
+
+### Error taxonomy (Rust enum → user message)
+
+| Variant | When | Message must convey |
+|---|---|---|
+| `EmptyFolder` | No files | Folder has no files |
+| `NoSupportedImages` | No jpg/jpeg/png/webp | No supported images found |
+| `UnreadableFile` | I/O error on a page | Which file failed |
+| `DestinationExists` | Target book path exists | Refuse overwrite |
+| `DuplicatePageStem` | Two sources map to same stem (incl. case-insensitive) | Duplicate page names |
+| `InsufficientDiskSpace` | Pre-flight fail | Need more free space |
+| `SchemaVersionUnsupported` | Unknown/newer formatVersion | Unsupported book version |
+| `InvalidPackage` | missing meta / schema fail | Not a valid Scriptorium book |
+| `ChecksumMismatch` | Page bytes ≠ stored sha256 | Book files corrupted or modified |
+| `PermissionDenied` | OS denied | Permission denied |
+
+### Natural-sort specification (normative for M1)
+
+Sort **filename stem** with natural order (numeric chunks as integers), case-insensitive
+extension ignored for ordering. Only `.jpg` `.jpeg` `.png` `.webp` included.
+
+**Tie-break (normative):** after natural compare of stems is equal, order by:
+1. Longer zero-padded numeric representation wins for that chunk only when integer values
+   are equal but digit strings differ (`001` before `01` before `1` — longer pad first).
+2. Else lexicographic compare of the full stem as UTF-8 bytes (stable, locale-independent).
+3. Else original path string as UTF-8 bytes.
+
+| Input filenames (unordered) | Expected order |
+|---|---|
+| `2.jpg`, `10.jpg`, `1.jpg` | `1`, `2`, `10` |
+| `page-2.PNG`, `page-10.png`, `page-1.png` | `page-1`, `page-2`, `page-10` |
+| `img01.jpg`, `img001.jpg` | `img001`, `img01` (longer pad first per rule 1) |
+| `cover.jpg`, `1.jpg`, `2.jpg` | `1`, `2`, `cover` (letters after pure-numeric stems that sort as numbers first — pure numeric stems ordered by value; non-numeric follow by UTF-8) |
+| `1.jpg`, `1b.jpg`, `1a.jpg` | `1`, `1a`, `1b` |
+
+Expand to ≥12 cases in `cargo test` beside the sort function. Do not leave tie-breaks as open questions.
+
+### Performance budget (M1)
+
+**Reference machine class (named up front):** Apple Silicon Mac (M-series), **16 GB RAM**,
+development build via `pnpm tauri dev` (or release build if noted). If developing primarily
+on another class, amend this plan before claiming A9.
+
+**Gate corpus (pinned):** generated script output — **200 pages**, average **~5 MB** JPEG each
+(total ~1 GB ±10%). The 2–8 MB range is for smoke only, not the gate.
+
+| Metric | Target | Measurement |
+|---|---|---|
+| Open to first interactive flip | ≤ 15 s | Wall clock from Open confirm → first successful flip gesture |
+| Steady-state RSS after open | ≤ 2 GB | Sample process RSS 30 s after first flip (Activity Monitor / `ps`) |
+| Flip animation | ≥ 30 fps average over 10 flips | `requestAnimationFrame` deltas while flipping; log mean fps |
+
+If targets fail without lazy/windowed loading, **implement windowed page load in M1**. Soft-warn at **500** pages; no hard cap unless ADR says so.
+
+## Tauri asset-protocol checklist (required before reader Phase)
+
+- [ ] `app.security.assetProtocol.enable: true`
+- [ ] `assetProtocol.scope.allow` covers app-data `books/**` (app-wide scope ≠ fs capability)
+- [ ] CSP allows `img-src` (and media if needed) for `asset:` and `https://asset.localhost`
+- [ ] `convertFileSrc` only given **absolute** paths (Rust resolves relative → absolute)
+- [ ] macOS: account for `/var` → `/private/var` canonicalization in scopes
+- [ ] Windows: verify `https://asset.localhost` form
+- [ ] Persisted-scope plugin **not** required for app-data default; revisit if library root changes
 
 ## Proposed file changes
 
 ```
-src-tauri/src/book/          — create_book_from_folder, load_book, save_progress
-src-tauri/src/lib.rs / commands — #[tauri::command] wrappers + error types
-src/features/reader/         — FlipbookView (StPageFlip), page URL resolution
-src/features/home/           — Open folder / Open book actions
-src/lib/bookTypes.ts         — TS types mirroring meta.json
-docs/book-format.md          — amend if I/O reveals gaps (keep versioned)
-tests/                       — Rust unit tests for sort/package; optional TS smoke
-README.md                    — “Try it” with fixture folder instructions
+src-tauri/src/book/     — sort, create (atomic copy), load, validate, progress, errors
+src/features/reader/    — FlipbookView per ADR
+src/features/home/      — Open… inspect-and-branch
+src/lib/bookTypes.ts
+docs/manual-test-m1.md  — step script + fixtures
+scripts/generate-fixture-book.*  — small + large corpora → tmp/
 ```
 
 ## Phases & checklist
 
-### Phase 0 — Path & package spike (time-box ≤ half day)
+### Phase 0 — Integration gate (ADR already done)
 
-- [ ] Confirm library root: app-data `books/` vs user-picked parent folder
-- [ ] Prove one local image loads in webview via Tauri asset/convertFileSrc
-- [ ] Prove StPageFlip renders ≥2 images in Tauri webview
-- [ ] Record spike notes in `.context/` (gitignored) or short ADR if decisions stick
+- [ ] Confirm ADR library still loads in current shell
+- [ ] Complete asset-protocol checklist above (macOS required; Windows if available)
+- [ ] Stop if G1–G5 from spike no longer hold
 
 ### Phase 1 — Book I/O (Rust)
 
-- [ ] Natural sort of image extensions (`.jpg`, `.jpeg`, `.png`, `.webp`; case-insensitive)
-- [ ] `create_book_from_folder(src, dest)` → copy pages, write `meta.json`, stub `ocr/`,
-      empty `annotations.json`
-- [ ] `load_book(path)` → validate schema, return metadata + ordered page paths
-- [ ] `set_last_read_page(path, index)` / read on load
-- [ ] Unit tests: sort order, reject empty folder, reject unsupported-only folder
+- [ ] Natural sort + table tests
+- [ ] Atomic create_book_from_folder + free-space check + DestinationExists
+- [ ] Per-page width/height/sha256/byteSize written
+- [ ] load_book + schema validation
+- [ ] lastReadPage read/write keyed by book **`id`**; flush API for window close
+- [ ] load_book re-verifies per-page sha256
+- [ ] Orphan temp-dir sweep + DuplicatePageStem tests
+- [ ] All error taxonomy variants tested with `tempfile`
+- [ ] Schema bind: Rust sample serialize ↔ `docs/book-format.schema.json`
 
-### Phase 2 — Commands + UI wiring
+### Phase 2 — Commands + UI
 
-- [ ] Tauri commands + permissions (dialog, fs scope for library root)
-- [ ] Home: Open folder → progress/status → navigate to reader
-- [ ] Home: Open book → validate → reader
-- [ ] Error toasts/dialogs for user-visible failures
+- [ ] Commands + capabilities for dialog + app-data fs + asset scope
+- [ ] Open… inspect-and-branch + confirm before ingest copy
+- [ ] Map errors to dialogs/toasts
+- [ ] Vitest (or equivalent) for pure TS helpers (URL resolve / UI state) — required, not optional
 
-### Phase 3 — Flipbook reader
+### Phase 3 — Reader
 
-- [ ] StPageFlip bound to page list (cover mode if trivial; else soft pages)
-- [ ] Next/prev controls + Left/Right (or space) keyboard
-- [ ] Persist page index on flip (debounce writes)
-- [ ] Basic empty/loading states; no “library grid” yet
+- [ ] ADR flip library bound to page list
+- [ ] ←/→ + on-screen controls; edge no-ops
+- [ ] Debounced progress + **flush on close**
+- [ ] Loading / empty states
 
-### Phase 4 — Docs & handoff
+### Phase 4 — Docs & release
 
-- [ ] README: how to run + how to test with a local scan folder
-- [ ] Changelog 0.2.0 (or 0.1.x) user-facing notes
-- [ ] Update `to_do.md` / roadmap M1 checkboxes; archive this plan when verified
+- [ ] `docs/manual-test-m1.md` + README try-it
+- [ ] `VERSION` → **0.2.0**; `CHANGELOG.md` user-facing
+- [ ] Update roadmap / `to_do.md`; archive this plan when verified
 
 ## Verification
 
-- [ ] Manual: folder with 4–10 mixed-case numbered images → correct order in flipbook
-- [ ] Manual: relaunch → opens at last page
-- [ ] Manual: open existing package without re-ingest
-- [ ] `cargo test` for book module; CI still green
-- [ ] No secrets or absolute user home paths committed in fixtures
+- [ ] All acceptance IDs A1–A9 checked
+- [ ] `cargo test` / `clippy` / `fmt` green in CI
+- [ ] Manual script executed once on reference machine; results noted in PR or README
+- [ ] No absolute user home paths in committed fixtures or sample `meta.json`
 
 ## Open questions
 
-- [ ] Max pages soft-warn in M1? (defer hard limits; note large-book risk)
-- [ ] HEIC support? (defer; document unsupported)
-- [ ] Single-page vs spread on wide screens (StPageFlip defaults OK for M1)
+- [ ] Single vs spread layout: follow ADR / library defaults
 
 ## Risks
 
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
-| StPageFlip + Tauri file URLs fail | med | high | Phase 0 spike; fallback `<img>` strip if blocked |
-| Huge scans OOM / slow open | med | med | Document; lazy-load later (M7); copy progress UI |
-| Schema drift TS vs Rust | med | med | Single `docs/book-format.md`; generate or hand-sync types |
-| Scope creep into OCR/hotspots | high | med | Out-of-scope list; reject in review |
+| ADR library still painful in product UI | med | high | Phase 0 gate; escalate — no strip fallback |
+| Large books OOM | med | high | Budget A9; windowed load if needed |
+| Schema drift TS/Rust | med | med | JSON Schema + Rust serialize-and-validate test (M0/M1) |
 
 ## Completion steps
 
 1. Status → `complete`; move to `plans/archive/completed/`
-2. `CHANGELOG.md` user-facing; bump `VERSION` to **0.2.0**
-3. Roadmap M1 items `[x]`; `to_do.md` prune
-4. Kick M0.5 harness follow-ups if not already done during M0/M1
+2. `VERSION` **0.2.0** + changelog
+3. Roadmap M1 `[x]`; prune `to_do.md`
 
 ## Related
 
-- Prerequisite: [`2026-08-23-m0-tauri-foundation.md`](2026-08-23-m0-tauri-foundation.md)
-- Roadmap: [`2026-08-23-product-roadmap.md`](2026-08-23-product-roadmap.md)
-- Domain menu: [`inventory/virtual-books-flipbook.md`](../inventory/virtual-books-flipbook.md)
-- Profile: `.context/project-profile.md`
+- [`2026-08-23-m0-tauri-foundation.md`](2026-08-23-m0-tauri-foundation.md)
+- [`2026-08-23-pre-m1-flipbook-spike.md`](2026-08-23-pre-m1-flipbook-spike.md)
+- [`2026-08-23-product-roadmap.md`](2026-08-23-product-roadmap.md)
