@@ -13,7 +13,7 @@ Each card has the same four sections:
 
 | Card | Phase | Branches on |
 |---|---|---|
-| [card-data-classification.md](card-data-classification.md) | P0 → PS | What data may enter the repo |
+| [card-data-classification.md](card-data-classification.md) | P0 | What data may enter the repo |
 | [card-environment.md](card-environment.md) | P4.5 | Language and runtime |
 | [card-ci-tier.md](card-ci-tier.md) | P4 | Team size, visibility, Actions budget |
 | [card-orchestration.md](card-orchestration.md) | P5 | Agent count and workflow shape |

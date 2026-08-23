@@ -20,10 +20,10 @@ From the profile, report to the user in a single short paragraph:
 - Orchestration tier and any active subagents/skills
 - Any open questions listed at the bottom of the profile
 
-If the profile says `regulated` data or mentions PII, PHI, medical, FHIR/HL7, or DICOM, read
-[`prompts/strict-phi-agent-guidance.md`](strict-phi-agent-guidance.md) before inspecting or
-editing data-bearing files. Verify the strict sensitive-data hook/CI setup before making a
-relevant commit; do not modify its human approval inventory.
+If the profile says `confidential` data or mentions customer exports or credentials, read
+[`policies/github-repository-hygiene.md`](../policies/github-repository-hygiene.md) before
+inspecting or editing data-bearing files. Verify gitleaks is wired locally and in required CI
+before making a relevant commit.
 
 ---
 

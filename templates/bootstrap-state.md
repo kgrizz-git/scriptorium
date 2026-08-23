@@ -1,6 +1,6 @@
 # Template: Bootstrap State
 
-Last reviewed: 2026-08-11
+Last reviewed: 2026-08-23
 
 Copy to `.context/bootstrap-state.md` at the start of Phase 0 and update it **as each phase
 completes**, not at the end. `.context/` is gitignored, so this never ships with the project.
@@ -24,7 +24,6 @@ Checklist: prompts/bootstrap-checklist.md
 | Phase | Topic | Status | Notes |
 |---|---|---|---|
 | P0 | Discovery | pending | |
-| PS | Sensitive data | pending | Only if P0 flags real/possible regulated data |
 | P1 | Profile | pending | |
 | P2 | Remote repointed | pending | |
 | P3 | Repo hygiene & GitHub settings | pending | |
@@ -41,7 +40,7 @@ Checklist: prompts/bootstrap-checklist.md
 <!-- One line per decision that a later phase or a future session depends on. -->
 
 - Data classification: 
-- Approval owner (if regulated): 
+- Approval owner (if confidential): 
 - Required CI check names (P4 → consumed by P3): 
 - Orchestration tier: 
 - Agent tooling adopted / rejected: 

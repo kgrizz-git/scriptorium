@@ -1,19 +1,19 @@
-# Policy: GitHub Repository Hygiene & Sensitive-Data Gates
+# Policy: GitHub Repository Hygiene & Secret Gates
 
-Last reviewed: 2026-07-15
+Last reviewed: 2026-08-23
 Enforced by: GitHub rulesets/branch protection, hooks, CI, and selected GitHub Apps.
 
 ## Purpose
 
 Set a small, enforceable GitHub baseline before a repository receives real work. Scale it
-to the data it may contain: a public utility needs less process than a medical product, but
-neither should accept direct pushes, red CI, credentials, personal data, or machine-specific
-paths by accident.
+to the data it may contain: a public utility needs less process than a confidential
+business repo, but neither should accept direct pushes, red CI, credentials, customer
+exports, or machine-specific paths by accident.
 
 This policy complements [`security-baseline.md`](security-baseline.md). It does **not** make
-a project HIPAA-, GDPR-, or otherwise compliance-certified. In particular, a scanner cannot
-prove that PHI is absent. For a regulated project, obtain the organization's privacy,
-security, legal, and compliance decisions before committing or sending data to a CI service.
+a project compliance-certified. Obtain the organization's privacy, security, legal, and
+compliance decisions before committing customer data or sending repository contents to a
+third-party service.
 
 ## 1. Classify before configuring
 
@@ -22,21 +22,18 @@ If the answer is unknown, use the more protective tier until it is resolved.
 
 | Tier | Use when | Minimum decision |
 |---|---|---|
-| Standard | Source code and public/synthetic test data only | State that real PII/PHI and production exports are prohibited. |
-| Sensitive | The repo may hold internal identifiers, restricted designs, or de-identified data | Define allowed data, prohibited patterns/paths, an exception owner, and a local+CI content gate. |
-| Regulated | Medical, financial, identity, education, government, or similarly regulated work | Treat all real regulated data as prohibited unless an approved data-handling design says otherwise; complete a threat/risk review and obtain the required contracts, retention, access, audit, and incident-response approvals. |
+| Public | Open-source code and public/synthetic test data only | State that production credentials, customer exports, and internal-only material are prohibited. |
+| Internal | Team code, internal designs, or non-public documentation | State what may enter the repo; prohibit real credentials and production exports unless an approved handling design exists. |
+| Confidential | Customer data, credentials, business-confidential designs, or financial records | Treat real customer/credential data as prohibited unless an approved data-handling design says otherwise; document who owns exceptions and how leaks are contained. |
 
-**Data rule:** source control is not a data store. Do not commit production dumps, patient
-records, support tickets, screenshots, PDFs, chat transcripts, database backups, or model
-training corpora containing real people. Use deterministic synthetic fixtures and document
-their provenance. De-identification is a risk decision, not a label a developer can apply
-unilaterally.
+**Data rule:** source control is not a data store. Do not commit production dumps, support
+tickets, screenshots with secrets, chat transcripts, database backups, or unreviewed exports.
+Use deterministic synthetic fixtures and document their provenance.
 
-For a medical or other highly regulated repository, also document: permitted data classes,
-where scans run, who can read workflow logs/artifacts, retention periods, encryption and key
-ownership, approved subprocessors, audit requirements, a breach/escalation contact, and how
-an accidental disclosure is contained. Do not upload candidate PHI to a third-party scanner
-without an approved data-processing arrangement and explicit authorization.
+For confidential repositories, also document: permitted data classes, where scans run, who
+can read workflow logs/artifacts, retention periods, encryption and key ownership, approved
+subprocessors, and a breach/escalation contact. Do not upload candidate sensitive content to a
+third-party scanner without an approved data-processing arrangement.
 
 ## 2. Protect the default branch
 
@@ -45,23 +42,23 @@ protection only where rulesets are unavailable). Start in evaluate mode if the r
 already busy, fix failures, then make it active. GitHub rulesets can require PRs, status
 checks, reviews, deployments, signed commits, and code-scanning results; push rulesets can
 restrict paths, extensions, path length, and file size. They do not inspect a file's content
-for PII or PHI. See GitHub's [available ruleset rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets)
+for secrets. See GitHub's [available ruleset rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets)
 and [push-ruleset limits](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/creating-rulesets-for-a-repository).
 
-| Control | Standard | Sensitive / regulated |
+| Control | Public / internal | Confidential |
 |---|---|---|
 | Pull requests | Require PRs; block direct pushes to the default branch | Same; allow bypass only to a small, named break-glass group. |
 | Reviews | 1 approval; dismiss stale approvals; require resolved conversations | 2 approvals or 1 + required CODEOWNER; require approval of the latest push for high-risk paths. |
-| Checks | Require the fast CI, tests, secret scan, and policy/data gate; require branches up to date or use merge queue | Same, plus required SAST/code scanning and any approved privacy/data gate. |
+| Checks | Require the fast CI, tests, secret scan, and policy gate; require branches up to date or use merge queue | Same, plus required SAST/code scanning when the project warrants it. |
 | History | Block force pushes and deletions; restrict pushes | Also consider signed commits and linear history where the team can support them. |
 | Deployment | Optional staging deployment gate | Require an approved staging/control environment when a deployable service warrants it. |
 | Exceptions | Keep the bypass list narrow and review it periodically | Record who bypassed, why, approval, remediation, and whether an incident review is required. |
 
 Use stable, specific required-check names (for example, `ci / test`, `ci / policy`,
-`security / secret scan`, `security / sensitive data`) and remove obsolete checks when a
-workflow is renamed. A required status check only protects a branch if the matching workflow
-actually runs for that PR. Protect workflow, policy, dependency, and deployment files with
-`CODEOWNERS` so the people responsible for the controls review their changes.
+`security / secret scan`) and remove obsolete checks when a workflow is renamed. A required
+status check only protects a branch if the matching workflow actually runs for that PR.
+Protect workflow, policy, dependency, and deployment files with `CODEOWNERS` so the people
+responsible for the controls review their changes.
 
 For active repositories with frequent merges, a merge queue can replace repeatedly rebasing
 PRs just to satisfy “up to date”; GitHub documents it as an alternative to that requirement
@@ -76,7 +73,7 @@ alerts are owned and triaged.
 1. Enable the dependency graph, Dependabot alerts, security updates, and version-update PRs.
 2. Enable secret scanning and push protection where available. Push protection blocks many
    credentials *before* they reach the repository; configure custom secret patterns only for
-   high-confidence, organization-specific secrets. It is not a generic PII/PHI detector.
+   high-confidence, organization-specific secrets. It is not a substitute for local gitleaks.
    [GitHub push protection](https://docs.github.com/en/code-security/concepts/secret-security/push-protection)
    explains its bypass and custom-pattern behavior.
 3. Enable CodeQL code scanning. Default setup is a sensible low-maintenance start for eligible
@@ -91,70 +88,41 @@ alerts are owned and triaged.
    grant each workflow only the permissions it needs (normally `contents: read`), and keep
    workflow artifact/log retention appropriate for the data classification.
 
-## 4. Hooks and CI: block sensitive content before it spreads
+## 4. Hooks and CI: block secrets and path leaks before they spread
 
 Local hooks make feedback fast; CI makes the control unavoidable. Run the same checker in
-both places and make the CI job a required check. Keep finding output minimal: report a path,
-line number, rule ID, and remediation—not the sensitive match itself. For medical or regulated
-repositories, the first-party strict gate scans every Git-indexed file (not just a PR diff),
-including tests and `.xlsx` internals, and fails closed on images, DICOM, extensionless, and
-opaque files unless an exact file hash has named human approval. See
-[`inventory/medical-data-security.md`](../inventory/medical-data-security.md).
-
-For the same tier, install a `commit-msg` gate. File approvals must never apply to immutable
-commit prose: reject PII/PHI, local paths/usernames/hostnames, private network addresses, and
-PACS/DICOM endpoints in the message; refer to a sanitized issue or incident record instead.
+both places and make the CI job a required check when the project needs it. Keep finding output
+minimal: report a path, line number, rule ID, and remediation—not the secret itself.
 
 | Risk | Local hook | Required CI job | Notes |
 |---|---|---|---|
-| Credentials | gitleaks + `detect-private-key` | gitleaks and scheduled history scan | Already included in [`hooks/.pre-commit-config.yaml`](../hooks/.pre-commit-config.yaml). |
-| Absolute local paths | A fast staged-diff rule | Re-run against the PR diff | Detect Unix home paths, Windows drive paths, and `file://` URLs; allow only documented portable examples. Prefer project-relative paths, env vars, or config values. |
-| PII / PHI | Project-specific staged-diff rule | Re-run on the PR diff and block | Match known identifiers and high-confidence formats; allow reviewed test fixtures by path and rule ID, never by silently disabling the scanner. |
-| Binary / data exports | Filename, extension, size, and allowlist rule | Re-run and scan unpacked permitted fixtures if justified | A ruleset can block risky paths/extensions/sizes; content inspection needs a hook or CI scanner. |
+| Credentials | gitleaks + `detect-private-key` | gitleaks and scheduled history scan | Already included in [`hooks/.pre-commit-config.yaml`](../hooks/.pre-commit-config.yaml). See [`inventory/security-quality.md`](../inventory/security-quality.md). |
+| Absolute local paths | Optional staged-diff rule | Re-run against the PR diff when justified | Detect Unix home paths, Windows drive paths, and `file://` URLs; allow only documented portable examples. Prefer project-relative paths, env vars, or config values. |
+| Large binaries / exports | Filename, extension, size, and allowlist rule | Re-run when justified | A ruleset can block risky paths/extensions/sizes; content inspection needs a hook or CI scanner. |
 
-Do not enable a broad “PII regex” as a hard gate without measuring it against representative
-synthetic fixtures. It will either miss context-sensitive data or block ordinary numbers and
-documentation. Start it in report-only mode, add domain-specific recognizers (for example,
-patient or member identifier formats), define a false-positive process, and promote only
-high-confidence rules to blocking.
+Do not enable a broad content regex as a hard gate without measuring it against representative
+fixtures. Start advisory rules in report-only mode, define a false-positive process, and promote
+only high-confidence rules to blocking.
 
-For text-heavy or sensitive projects, consider running [Microsoft Presidio](https://microsoft.github.io/presidio/)
-locally or in an approved isolated runner; it supports predefined and custom PII recognizers
-but explicitly cannot guarantee complete detection. For healthcare/FHIR projects, also evaluate
-[phi-scan](https://pypi.org/project/phi-scan/) as a local-first PHI/PII scanner: it can scan a
-Git diff and produce CI-friendly output. Pin and test it against synthetic representative data
-before relying on it—its PyPI release is currently marked alpha. For medical projects, use
-domain-approved recognizers and include OCR/image/PDF handling if those files are
-permitted—otherwise block those file types outright. Do not send repository contents to an
-external DLP, AI review, or GitHub App without confirming data residency, retention, access
-controls, contractual terms, and any required BAA/DPA.
-
-Per-commit and per-PR gates only see the current diff. For Sensitive and Regulated tiers, also
-schedule a periodic **repo-wide, full-history PII/PHI audit** (analogous to the scheduled
-credential history scan above)—the working tree and every reachable commit, not just recent
-changes. There is no official GitHub "PII audit" product; GitHub-native scanning covers
-credentials, not personal data. Use a local-first tool such as [Octopii](https://github.com/redhuntlabs/Octopii)
-(OCR + NLP + regex over images, PDFs, and documents) or a Presidio-based scan; run it offline
-against a local checkout and treat findings as triage for human review. Do not route a regulated
-repo's contents through a SaaS repo scanner without the data-residency and BAA/DPA review above.
-This audit runs periodically, not at bootstrap—see [`prompts/maintenance-loop.md`](../prompts/maintenance-loop.md).
+Per-commit and per-PR gates only see the current diff. For confidential repositories, also
+schedule a periodic **repo-wide credential history scan** (for example TruffleHog against a
+local checkout). GitHub-native scanning covers credentials, not every business-confidential
+string. Run history scans offline and treat findings as triage for human review. See
+[`prompts/maintenance-loop.md`](../prompts/maintenance-loop.md).
 
 ### Recommended implementation contract
 
-Before wiring a sensitive-data workflow, write a small project-owned configuration that names:
+Before wiring optional path or export checks, write a small project-owned configuration that names:
 
 - prohibited file paths/extensions and size caps;
 - allowed fixture directories and why they are safe;
 - absolute-path patterns, portable replacements, and narrowly scoped examples;
-- PII/PHI rule IDs, confidence levels, and test cases (positive and negative);
 - exception owner, expiry, and review record; and
 - the CI job name that branch rules require.
 
-For standard/sensitive projects, the checker may scan only added/changed text where justified.
-For medical/regulated projects, scan all tracked files and do not exempt directories, tests,
-generated files, or unknown extensions. In every tier, redact matches from logs, exit non-zero
-for blocking rules, and have tests proving it catches a synthetic representative sample. A
-pre-commit hook is a convenience; a required PR check is the merge control.
+Redact matches from logs, exit non-zero for blocking rules, and have tests proving synthetic
+representative samples are caught. A pre-commit hook is a convenience; a required PR check is
+the merge control.
 
 ## 5. GitHub Apps and outside services
 
@@ -163,15 +131,14 @@ useful set, scope it to selected repositories, give it minimum permissions, revi
 retention/training/subprocessor terms, and periodically remove unused Apps. See the curated
 options in [`inventory/github-apps.md`](../inventory/github-apps.md).
 
-- **Start small:** Dependabot plus GitHub-native scanning is enough for many standard repos.
+- **Start small:** Dependabot plus GitHub-native scanning is enough for many public/internal repos.
 - **Add review quality deliberately:** CodeRabbit, DeepSource, or similar can improve review,
   but their PR/code access must be acceptable for the classification.
 - **Add unified security only when owned:** Snyk or Aikido can centralize SCA/SAST/container
   posture, but designate a team to triage and remediate findings before making their checks
   required.
-- **For regulated work:** prefer an approved internal/contracted DLP and runners over sending
-  source or candidate sensitive text to a convenience SaaS. Verify the service agreement and
-  organizational policy first; no template recommendation substitutes for that review.
+- **For confidential work:** prefer approved internal runners over sending source or credentials
+  to a convenience SaaS. Verify the service agreement and organizational policy first.
 
 ## 6. Rollout and recurring verification
 
@@ -186,7 +153,7 @@ options in [`inventory/github-apps.md`](../inventory/github-apps.md).
    bypasses, failed/renamed checks, CODEOWNERS, App access, alert backlog, false positives,
    and workflow permissions/retention.
 
-If sensitive data reaches the remote despite these gates: stop sharing it, revoke/rotate any
-credentials, restrict access, follow the organization's incident process, and only then plan
-history remediation. Rewriting Git history does not remove clones, caches, logs, artifacts,
-or third-party copies.
+If credentials or customer exports reach the remote despite these gates: stop sharing them,
+revoke/rotate any secrets, restrict access, follow the organization's incident process, and
+only then plan history remediation. Rewriting Git history does not remove clones, caches, logs,
+artifacts, or third-party copies.

@@ -1,6 +1,6 @@
 # Policies
 
-Last reviewed: 2026-08-11
+Last reviewed: 2026-08-23
 
 Durable, opt-in repo rules a project can adopt and enforce. Each policy states the rule,
 the rationale, sensible defaults, and how it is enforced (hook, CI, or convention).
@@ -18,9 +18,7 @@ in one place and let [`hooks/`](../hooks/) and [`ci/`](../ci/) enforce them.
 | [doc-freshness.md](doc-freshness.md) — `Last reviewed` markers & staleness windows | `hooks/scripts/check_doc_freshness.py` |
 | [commits-and-branches.md](commits-and-branches.md) — commit messages, branch naming, PR hygiene, advisory open-PR check | convention + `ci/scripts/check_open_prs.py` (+ optional daily workflow) |
 | [security-baseline.md](security-baseline.md) — secrets, deps, SAST expectations | hooks + CI (see `inventory/security-quality.md`) |
-| [sensitive-data-runtime-leaks.md](sensitive-data-runtime-leaks.md) — runtime/dev leaks into logs, temp files, caches, telemetry | convention + hooks + CI (guidance: `prompts/sensitive-data-leak-prevention.md`) |
-| [sensitive-data-scan-gates.md](sensitive-data-scan-gates.md) — protected `.gitignore` rules, forbidden tracked paths, heavy-scanner contract/ledger | `hooks/scripts/check_gitignore_protected.py`, `check_forbidden_paths.py`, `check_scan_contract.py` + CI |
-| [github-repository-hygiene.md](github-repository-hygiene.md) — default-branch rulesets, reviews/checks, GitHub security, and PII/PHI/path gates | GitHub settings + hooks + required CI |
+| [github-repository-hygiene.md](github-repository-hygiene.md) — default-branch rulesets, reviews/checks, GitHub security, secret/path gates | GitHub settings + hooks + required CI |
 | [github-actions-usage.md](github-actions-usage.md) — Actions minutes/storage stewardship | convention + `ci/scripts/check_gha_usage.py` |
 | [garbage-collection.md](garbage-collection.md) — dead code, stale TODOs, unused deps | CI + agent prompts |
 | [agent-tooling-contract.md](agent-tooling-contract.md) — one code-intelligence tool per role, `.agent-state/` untracked, per-tool smoke test | convention + `.gitignore` + smoke test (menu: `inventory/agent-tooling-efficiency.md`) |

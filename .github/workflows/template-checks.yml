@@ -52,8 +52,7 @@ jobs:
         with:
           files: >-
             .github/workflows/*.yml, ci/examples/ci.yml, ci/examples/codeql.yml,
-            ci/examples/open-prs-advisory.yml, ci/examples/security.yml,
-            ci/examples/strict-sensitive-data.yml
+            ci/examples/open-prs-advisory.yml, ci/examples/security.yml
 
       - name: Check shell scripts
         uses: ludeeus/action-shellcheck@2.0.0

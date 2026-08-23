@@ -15,7 +15,7 @@
 | Solo, private, early | **minimal** | Pre-commit only + one `ci / test` workflow on PR. No scheduled jobs. |
 | Small team, private | **standard** | `ci / test`, lint/type, `security / secret scan`. Dependabot weekly. Branch ruleset requiring those checks. |
 | Public or external contributors | **full** | Standard + CodeQL, `CODEOWNERS`, `SECURITY.md`, required review, least-privilege workflow permissions. |
-| Regulated data (from P0) | **full + gates** | Above, plus the required sensitive-data CI job from [`../../policies/sensitive-data-scan-gates.md`](../../policies/sensitive-data-scan-gates.md). Non-negotiable. |
+| Confidential data (from P0) | **full** | Above, plus required `security / secret scan` (gitleaks) and branch ruleset per [`../../policies/github-repository-hygiene.md`](../../policies/github-repository-hygiene.md). |
 | Tight Actions budget | any | Cut matrix breadth and scheduled runs first, not the security jobs. Estimate before wiring: [`../../policies/github-actions-usage.md`](../../policies/github-actions-usage.md). |
 
 **Decide the check *names* now** (e.g. `ci / test`, `security / secret scan`) so the branch

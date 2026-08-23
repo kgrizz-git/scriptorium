@@ -48,7 +48,7 @@ writing, and product workflows. Maintained alongside Cursor's `.claude/` directo
 | `researcher` | Research tasks with structured notes and bibliography suggestions; `readonly` mode | Literature or technical research tasks |
 | `math-physics-deriver` | Line-by-line math/physics derivations with explicit notation, assumptions, and equation provenance | Scientific computing, physics, signal processing |
 | `math-physics-challenger` | Adversarially reviews derivations; challenges assumptions; returns accept/revision verdicts | Paired with deriver in quality-gate workflow |
-| `simulation-setup-runner` | Sets up and runs FDTD, FEM, Monte Carlo, radiation transport, and medical-physics simulations | Simulation-heavy projects |
+| `simulation-setup-runner` | Sets up and runs FDTD, FEM, Monte Carlo, and radiation-transport simulations | Simulation-heavy projects |
 | `simulation-verifier-interpreter` | V&V, uncertainty analysis, and interpretation for simulation outputs | Paired with setup-runner in quality-gate workflow |
 
 ### Installing an always-on rule
@@ -91,7 +91,7 @@ source repo). Any rule that must apply to every turn installs the same way:
 | `simulation-validation-and-interpretation` | Convergence evidence, uncertainty decomposition, benchmark checks, decision-grade interpretation |
 | `radiation-transport-simulation` | Monte Carlo + deterministic radiation transport workflows (EM/particle); setup, validation, UQ |
 | `hep-montecarlo-workflows` | HEP event generation (Pythia, MadGraph); diagram-guided validation; reproducibility |
-| `exploratory-data-analysis` | Data profiling, visualizations, summary stats; handles DICOM pixel arrays and scientific formats |
+| `exploratory-data-analysis` | Data profiling, visualizations, summary stats; handles scientific formats |
 | `statistical-analysis` | Statistical test selection, power analysis, effect sizes, result interpretation |
 | `scientific-visualization` | Plot generation standards for publications; matplotlib/seaborn/plotly; reproducibility |
 | `scientific-writing` | Academic prose standards; section structure; uncertainty language; citation placeholder protocol |
@@ -107,10 +107,6 @@ source repo). Any rule that must apply to every turn installs the same way:
 
 | Skill | What it provides |
 |---|---|
-| `pydicom` | DICOM read/write/anonymize; pixel extraction; transfer syntax handling; RT objects |
-| `imaging-data-commons` | NCI IDC dataset query (BigQuery) and download workflow |
-| `histolab` | Whole-slide image (WSI) analysis and tissue detection for pathology |
-| `pathml` | Pathology ML preprocessing pipeline |
 | `scanpy` | Single-cell RNA-seq analysis (Scanpy/AnnData ecosystem) |
 | `scvelo` | RNA velocity analysis with scVelo |
 | `neurokit2` | Physiological signal processing (ECG, EEG, EMG, EDA) |
@@ -123,7 +119,7 @@ source repo). Any rule that must apply to every turn installs the same way:
 
 | Skill | What it provides |
 |---|---|
-| `research-lookup` | Multi-source academic research query workflow (Semantic Scholar, arXiv, PubMed) |
+| `research-lookup` | Multi-source academic research query workflow (Semantic Scholar, arXiv) |
 | `markdown-mermaid-writing` | Markdown + Mermaid diagram authoring standards |
 | `latex-posters` | LaTeX poster authoring for academic conferences |
 | `pptx-posters` | PowerPoint/PPTX poster generation workflow |

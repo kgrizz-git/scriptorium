@@ -99,7 +99,7 @@ if ! skip_guard P3; then
     if [ -f CODEOWNERS ] || [ -f .github/CODEOWNERS ]; then
         pass "CODEOWNERS present"
     else
-        note "no CODEOWNERS (expected for full tier / regulated data)"
+        note "no CODEOWNERS (expected for full tier / confidential data)"
     fi
     if [ -f SECURITY.md ] || [ -f .github/SECURITY.md ]; then
         pass "SECURITY.md present"
@@ -175,23 +175,6 @@ phase "P7  Docs & gardening"
 if ! skip_guard P7; then
     [ -f CHANGELOG.md ] && pass "CHANGELOG.md present" || note "no CHANGELOG.md"
     [ -f README.md ] && pass "README.md present" || miss "no README.md"
-fi
-
-# ── PS — Sensitive data (only when classification is regulated) ──────────────
-phase "PS  Sensitive data (conditional)"
-if grep -qiE "^Data classification:.*regulated" .context/project-profile.md 2>/dev/null; then
-    echo "  classification = regulated — gates are REQUIRED:"
-    [ -f .phi-security-approvals.json ] \
-        && pass "approval inventory present (confirm a human authored it)" \
-        || miss "no .phi-security-approvals.json"
-    [ -f .gitignore-protected ] \
-        && pass ".gitignore-protected present" \
-        || miss "no .gitignore-protected"
-    [ -f .forbidden-paths ] \
-        && pass ".forbidden-paths present" \
-        || miss "no .forbidden-paths"
-else
-    note "classification is not 'regulated' — Phase S not applicable"
 fi
 
 # ── Summary ──────────────────────────────────────────────────────────────────

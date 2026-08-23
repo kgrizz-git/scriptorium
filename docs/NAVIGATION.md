@@ -1,6 +1,6 @@
 # Documentation Navigation
 
-Last reviewed: 2026-07-27
+Last reviewed: 2026-08-23
 
 Quick navigation guide for this template's documentation. Use this to find what you need without loading everything.
 
@@ -27,10 +27,10 @@ Quick navigation guide for this template's documentation. Use this to find what 
 2. Copy relevant workflows from [`ci/examples/`](../ci/examples/)
 3. Configure per [`policies/github-repository-hygiene.md`](../policies/github-repository-hygiene.md)
 
-### I'm working with sensitive data
-1. Read [`prompts/strict-phi-agent-guidance.md`](../prompts/strict-phi-agent-guidance.md) **before** starting
-2. Read [`inventory/medical-data-security.md`](../inventory/medical-data-security.md)
-3. Configure strict hooks per [`hooks/README.md`](../hooks/README.md)
+### I'm handling credentials or confidential data
+1. Read [`policies/github-repository-hygiene.md`](../policies/github-repository-hygiene.md) for data classification
+2. Enable gitleaks per [`hooks/README.md`](../hooks/README.md)
+3. Wire required secret-scan CI checks before merging to the default branch
 
 ## Documentation Map
 
@@ -41,7 +41,7 @@ Quick navigation guide for this template's documentation. Use this to find what 
 
 ### Getting Started
 - [`prompts/bootstrap-project.md`](../prompts/bootstrap-project.md) - New project initialization
-- [`prompts/bootstrap-checklist.md`](../prompts/bootstrap-checklist.md) - Tick-list version (phases P0–P8, PS)
+- [`prompts/bootstrap-checklist.md`](../prompts/bootstrap-checklist.md) - Tick-list version (phases P0–P8)
 - [`prompts/bootstrap/`](../prompts/bootstrap/) - Decision cards: ask → branch → produce → done when
 - [`templates/bootstrap-state.md`](../templates/bootstrap-state.md) - Phase status that survives a context reset
 - [`scripts/check-bootstrap.sh`](../scripts/check-bootstrap.sh) - Verify phases by repo evidence, not by claims
@@ -59,7 +59,7 @@ Quick navigation guide for this template's documentation. Use this to find what 
 - [`policies/plans-and-todos.md`](../policies/plans-and-todos.md) - Plan lifecycle and TODO limits
 - [`policies/changelog-conventions.md`](../policies/changelog-conventions.md) - Changelog format
 - [`policies/security-baseline.md`](../policies/security-baseline.md) - Security requirements
-- [`policies/github-repository-hygiene.md`](../policies/github-repository-hygiene.md) - GitHub setup
+- [`policies/github-repository-hygiene.md`](../policies/github-repository-hygiene.md) - GitHub setup and secret gates
 
 ### Hooks & Automation
 - [`hooks/README.md`](../hooks/README.md) - Pre-commit hooks and policy scripts
@@ -70,13 +70,6 @@ Quick navigation guide for this template's documentation. Use this to find what 
 - [`ci/README.md`](../ci/README.md) - CI selection guidance
 - [`ci/examples/`](../ci/examples/) - Example GitHub Actions workflows
 - [`policies/github-actions-usage.md`](../policies/github-actions-usage.md) - Actions minutes/storage
-
-### Sensitive Data Handling
-- [`prompts/strict-phi-agent-guidance.md`](../prompts/strict-phi-agent-guidance.md) - PII/PHI agent behavior
-- [`prompts/sensitive-data-leak-prevention.md`](../prompts/sensitive-data-leak-prevention.md) - Runtime leak prevention
-- [`inventory/medical-data-security.md`](../inventory/medical-data-security.md) - Medical data security
-- [`policies/sensitive-data-runtime-leaks.md`](../policies/sensitive-data-runtime-leaks.md) - Runtime leak rules
-- [`policies/sensitive-data-scan-gates.md`](../policies/sensitive-data-scan-gates.md) - Structural gates
 
 ### Templates & Artifacts
 - [`templates/README.md`](../templates/README.md) - Fill-in artifacts index
@@ -123,11 +116,11 @@ Quick navigation guide for this template's documentation. Use this to find what 
 - Slow checks → Scheduled CI or separate workflow
 - Agent reviews → Never gates, always advisory
 
-### Sensitive Data Classification
+### Data Classification
 → See [`policies/github-repository-hygiene.md`](../policies/github-repository-hygiene.md)
 - Public → Basic secret scanning
-- Confidential → + Sensitive data job
-- Regulated/PII/PHI → + Strict gates + approval inventory
+- Internal → Standard branch protection + secret scan
+- Confidential → Full hygiene tier + required secret-scan CI
 
 ## Search by Task
 
@@ -137,7 +130,7 @@ Quick navigation guide for this template's documentation. Use this to find what 
 | **Add pre-commit hooks** | `hooks/README.md` |
 | **Set up CI** | `ci/README.md` + `ci/examples/` |
 | **Write ADR** | `templates/adr.md` |
-| **Handle PII/PHI** | `prompts/strict-phi-agent-guidance.md` + `inventory/medical-data-security.md` |
+| **Protect secrets in git** | `hooks/README.md` + `policies/github-repository-hygiene.md` |
 | **Choose tools** | `inventory/README.md` (then specific inventory files) |
 | **Clean up completed work** | `prompts/cleanup-completed-work.md` |
 | **Add agent skills** | `inventory/catalog-skills-agents.md` |

@@ -1,6 +1,6 @@
 # Inventory
 
-Last reviewed: 2026-07-14
+Last reviewed: 2026-08-23
 
 A curated index of tools, skills, MCP servers, libraries, cloud services, and source
 repositories that may help an AI agent scaffold or improve a project.
@@ -46,14 +46,14 @@ links and renamed projects — evidence a tool needs re-evaluating.
 
 ### AI / ML building blocks
 - [rag.md](rag.md) — vector databases, RAG frameworks, embeddings, rerankers, document parsers, chunking, evaluation
-- [search-apis.md](search-apis.md) — free and paid web search APIs, academic search (Semantic Scholar, arXiv, PubMed), Jina Reader/Search
+- [search-apis.md](search-apis.md) — free and paid web search APIs, academic search (Semantic Scholar, arXiv), Jina Reader/Search
 - [knowledge-graph-code-mapping.md](knowledge-graph-code-mapping.md) — code knowledge graphs (sift-kg, GraphRAG), AI code wikis (DeepWiki, CodeWiki, repowise), symbol parsing, LLM context maps
 
 ### Domain libraries
 - [python.md](python.md) — Python project defaults, formatting, testing, type checking
-- [scientific-domain.md](scientific-domain.md) — medical imaging (pydicom, SimpleITK), EM/FDTD simulation (meep, openEMS, gprMax), general scientific stack
+- [scientific-domain.md](scientific-domain.md) — EM/FDTD simulation (meep, openEMS, gprMax), general scientific stack
 - [financial-modeling.md](financial-modeling.md) — market data (yfinance, FRED), quant libraries (QuantLib, PyPortfolioOpt, empyrical), backtesting (backtrader, vectorbt), modeling patterns
-- [medical-data-security.md](medical-data-security.md) — strict PII/PHI guard setup, human approval inventory, and medical-data scanning options
+- [virtual-books-flipbook.md](virtual-books-flipbook.md) — flipbooks, IIIF viewers, OCR, annotations/hotspots, Tauri shell (Scriptorium domain)
 
 ### Design & frontend
 - [frontend-design-ux.md](frontend-design-ux.md) — Claude Design, Google Stitch, Figma, Penpot, shadcn/ui, Radix UI, Open Props, Shopify Polaris, frontend tooling

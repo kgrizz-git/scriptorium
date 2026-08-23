@@ -128,7 +128,7 @@ https://deepwiki.com/
 
 Hosted AI wiki + chat over GitHub repos (Devin / Cognition indexing). Fast zero-config
 onboarding for public or non-sensitive code. Code leaves your infra for processing —
-usually a non-starter for regulated private repos.
+usually a non-starter for confidential private repos.
 
 ### deepwiki-open (OSS)
 https://github.com/AsyncFuncAI/deepwiki-open

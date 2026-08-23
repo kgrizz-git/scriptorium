@@ -1,13 +1,13 @@
 # Bootstrap Checklist (Guided Steps)
 
-Last reviewed: 2026-08-11
+Last reviewed: 2026-08-23
 
 A phase-by-phase companion to [`bootstrap-project.md`](bootstrap-project.md). That prompt is the
 narrative; this is the walk-through you tick off. Work top to bottom, but **interview before
 scaffolding** — do not create many files until the user has answered Phase 0. Each step links to
 the deep doc that owns the detail; do not duplicate it here.
 
-Phases have stable IDs (`P0`…`P8`, `PS`). Use the IDs everywhere — state file, handoffs,
+Phases have stable IDs (`P0`…`P8`). Use the IDs everywhere — state file, handoffs,
 commit messages — so "Phase 4" never becomes ambiguous.
 
 ## How to run this without losing your place
@@ -30,17 +30,16 @@ commit messages — so "Phase 4" never becomes ambiguous.
       Full question list: [`bootstrap-project.md`](bootstrap-project.md) §1.
 - [ ] Ask the **data question explicitly** — work
       [`bootstrap/card-data-classification.md`](bootstrap/card-data-classification.md): what data
-      can enter this repo (code, fixtures, screenshots, logs, exports)? Will it hold real PII, PHI,
-      clinical/FHIR/HL7/DICOM, financial, or other regulated/customer data — or is that prohibited
-      with synthetic-only fixtures?
+      can enter this repo (code, fixtures, screenshots, logs, exports)? Will it hold real
+      customer data, credentials, financial records, or other business-confidential material —
+      or is that prohibited with synthetic-only fixtures?
 - [ ] Ask whether subagents/parallel workers should be used for research, planning, or review.
 - [ ] Summarize answers back; list assumptions and open questions.
-- [ ] **If the data answer is yes/maybe/regulated → run PS** before writing code or wiring tools.
 
 ## P1 — Profile
 
 - [ ] Run [`project-init-profile.md`](project-init-profile.md); write `.context/project-profile.md`.
-- [ ] Set the **data classification** and hygiene tier (`standard` / `sensitive` / `regulated`) —
+- [ ] Set the **data classification** (`public` / `internal` / `confidential`) —
       when unknown, use the more protective tier.
 - [ ] Use the profile's "Relevant inventory" to decide which inventory files to load (not all of them).
 
@@ -67,39 +66,6 @@ Card: [`bootstrap/card-ci-tier.md`](bootstrap/card-ci-tier.md)
       ([`policies/github-actions-usage.md`](../policies/github-actions-usage.md)).
 - [ ] Decide what belongs in pre-commit vs CI vs agent-side ([`hooks/README.md`](../hooks/README.md)).
 - [ ] Write the required-check names into the state file for P3.
-
-## PS — Sensitive / private / PHI / PII data (conditional)
-
-Card: [`bootstrap/card-data-classification.md`](bootstrap/card-data-classification.md)
-
-Run only when P0 flags real or possible PII/PHI/regulated/customer data. Read
-[`prompts/strict-phi-agent-guidance.md`](strict-phi-agent-guidance.md),
-[`prompts/sensitive-data-leak-prevention.md`](sensitive-data-leak-prevention.md), and
-[`inventory/medical-data-security.md`](../inventory/medical-data-security.md) first. An **agent must
-not** author approvals or weaken any gate — a named human owns those.
-
-- [ ] **Keep data out of history:** have a human create `.phi-security-approvals.json`; enable the
-      strict `check-sensitive-data` and `check-commit-message-sensitive-data` hooks + required CI
-      ([`inventory/medical-data-security.md`](../inventory/medical-data-security.md)).
-- [ ] **Protect the ignore rules:** `cp hooks/gitignore-protected.example .gitignore-protected`;
-      list the data/export/log dirs that must stay ignored; enable `check-gitignore-protected`.
-- [ ] **Forbid tracking data dirs:** `cp hooks/forbidden-paths.example .forbidden-paths`; enable
-      `check-forbidden-paths`; add matching `.gitignore` rules and a push ruleset backstop.
-- [ ] **Heavy scanners? Add a scan contract:** if Presidio (text/image), OCR, dicom-phi-scan,
-      phi-scan, HoundDog (local), or a local SonarQube CE scan applies,
-      `cp hooks/scan-contract.json.example .scan-contract.json`, keep the scanners you adopt, run
-      each once, `record` it, and enable `check-scan-contract`. See
-      [`policies/sensitive-data-scan-gates.md`](../policies/sensitive-data-scan-gates.md).
-- [ ] **Runtime leak surface:** gitignore artifact dirs, ship a one-command `make clean-sensitive`,
-      add log-scanning tests, review telemetry/error-tracker egress
-      ([`policies/sensitive-data-runtime-leaks.md`](../policies/sensitive-data-runtime-leaks.md)).
-- [ ] **Document, image/OCR ingestion?** Inventory local OCR / local vision options to catch
-      burned-in text before ingestion ([`inventory/medical-data-security.md`](../inventory/medical-data-security.md)).
-- [ ] **Agent tooling must stay local** — no cloud indexing of regulated code or data. Carry this
-      constraint into P5.5.
-- [ ] **Schedule** a periodic repo-wide/full-history PII audit (e.g. Octopii, local only) via
-      [`maintenance-loop.md`](maintenance-loop.md); record the cadence in the profile.
-- [ ] `CODEOWNERS`-protect every control above (approvals, hooks, workflows, configs, fixtures).
 
 ## P4.5 — Environment
 

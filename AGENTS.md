@@ -31,8 +31,7 @@ Do not load everything. Start here, then open only what the task needs.
 | Adding/enforcing repo rules | [`policies/README.md`](policies/README.md) |
 | Wiring local checks | [`hooks/README.md`](hooks/README.md) |
 | Setting up CI | [`ci/README.md`](ci/README.md) |
-| Working with PII, PHI, medical/FHIR/HL7/DICOM, or regulated data | [`prompts/strict-phi-agent-guidance.md`](prompts/strict-phi-agent-guidance.md) **before editing or configuring tools** |
-| Making sure code doesn't leak sensitive data at runtime (logs, temp files, caches, test/CI output, telemetry) | [`prompts/sensitive-data-leak-prevention.md`](prompts/sensitive-data-leak-prevention.md) |
+| GitHub rulesets, secret scanning, and repo hygiene | [`policies/github-repository-hygiene.md`](policies/github-repository-hygiene.md) |
 | Checking Actions minutes / storage | [`ci/scripts/check_gha_usage.py`](ci/scripts/check_gha_usage.py), [`policies/github-actions-usage.md`](policies/github-actions-usage.md) |
 | Checking open PRs after push / daily | [`ci/scripts/check_open_prs.py`](ci/scripts/check_open_prs.py), [`policies/commits-and-branches.md`](policies/commits-and-branches.md) |
 | Writing a plan / design / review | [`templates/`](templates/) and [`prompts/`](prompts/) |
@@ -72,9 +71,6 @@ Do not load everything. Start here, then open only what the task needs.
 - `docs/` — navigation helpers and quick-reference guides.
 - `scripts/` — automation scripts (setup, health check, environment validation).
 - `plans/` — (when adopted) active implementation plans; archive completed ones under `plans/archive/`.
-- `hooks/scripts/check_sensitive_data.py` — opt-in strict medical-data gate; scans every tracked file and requires exact human approval for opaque files.
-- `hooks/scripts/check_gitignore_protected.py`, `check_forbidden_paths.py`, `check_scan_contract.py` — opt-in structural sensitive-data gates (see `policies/sensitive-data-scan-gates.md`).
-- `inventory/medical-data-security.md` — strict guard setup and medical-data scanner menu.
 - `.cursor/`, `.windsurf/` — editor rule sets (CodeGuard security rules).
 - `.devin/` — Devin CLI configuration and project-specific skills.
 - `.context/` — scratch only; never required reading, never committed.
@@ -89,9 +85,7 @@ Do not load everything. Start here, then open only what the task needs.
 | Secret scanning + lint hooks | [`hooks/README.md`](hooks/README.md), [`policies/security-baseline.md`](policies/security-baseline.md) |
 | GitHub Actions minutes/storage (estimate before expanding CI) | [`policies/github-actions-usage.md`](policies/github-actions-usage.md), [`ci/scripts/check_gha_usage.py`](ci/scripts/check_gha_usage.py) |
 | Open PRs after push (advisory, not a hook) | [`policies/commits-and-branches.md`](policies/commits-and-branches.md), [`ci/scripts/check_open_prs.py`](ci/scripts/check_open_prs.py) |
-| Strict PII/PHI controls, approval inventory, and agent behavior | [`prompts/strict-phi-agent-guidance.md`](prompts/strict-phi-agent-guidance.md), [`inventory/medical-data-security.md`](inventory/medical-data-security.md) |
-| Runtime/dev leak prevention (redaction, temp files, caches, telemetry, easy clearance) | [`prompts/sensitive-data-leak-prevention.md`](prompts/sensitive-data-leak-prevention.md) (how), [`policies/sensitive-data-runtime-leaks.md`](policies/sensitive-data-runtime-leaks.md) (rule + tiers) |
-| Structural sensitive-data gates (protected `.gitignore`, forbidden tracked paths, heavy-scanner contract/ledger) | [`policies/sensitive-data-scan-gates.md`](policies/sensitive-data-scan-gates.md) |
+| GitHub rulesets, data classification, secret/path hygiene | [`policies/github-repository-hygiene.md`](policies/github-repository-hygiene.md) |
 | Setup, health check, environment validation | [`scripts/setup.sh`](scripts/setup.sh), [`scripts/health-check.sh`](scripts/health-check.sh), [`scripts/validate-env.sh`](scripts/validate-env.sh) |
 | Bootstrap completeness (evidence, not claims) | [`scripts/check-bootstrap.sh`](scripts/check-bootstrap.sh) |
 | Agent tooling: one tool per role, `.agent-state/` untracked, smoke tests | [`policies/agent-tooling-contract.md`](policies/agent-tooling-contract.md) (rule), [`inventory/agent-tooling-efficiency.md`](inventory/agent-tooling-efficiency.md) (menu) |

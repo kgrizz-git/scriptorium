@@ -14,7 +14,7 @@ Runs after orchestration (P5), because tools attach to roles. Menu and rationale
    architecture, looking up third-party APIs, or reproducing browser bugs?
 4. Is code review recurring and structured, or ad-hoc?
 5. Does work move between agents/IDEs (Claude Code → Cursor → Codex) or stay in one?
-6. Any constraint against local indexing or external services (air-gapped, regulated)?
+6. Any constraint against local indexing or external services (air-gapped, confidential)?
 
 ## Branch
 
@@ -27,7 +27,7 @@ Runs after orchestration (P5), because tools attach to roles. Menu and rationale
 | Architecture/topology questions across code *and* docs | Graphify + NetworkX **or** TokenSave — pick one, they overlap. |
 | Recurring browser/UX debugging | chrome-devtools-mcp. MCP is right here: browser state is genuinely persistent. |
 | Work moves between agents or IDEs | Adopt [`../../templates/handoff.md`](../../templates/handoff.md). This applies to **every** project. |
-| Regulated data (from P0) | Local-only tools; no cloud indexing. Re-check what each tool transmits before installing. |
+| Confidential data or air-gapped constraint (from P0) | Local-only tools; no cloud indexing. Re-check what each tool transmits before installing. |
 | More than two tools look appealing | Install one. Measure. The overlap warning in the inventory file exists because loading four erases the savings. |
 
 ## Produce

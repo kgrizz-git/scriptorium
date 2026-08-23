@@ -75,12 +75,6 @@ https://api.semanticscholar.org
 Free, no key required. Searches 200M+ papers. Returns structured metadata, abstracts,
 citations, and open-access PDF links. Best free option for academic paper retrieval.
 
-### PubMed / NCBI APIs
-https://www.ncbi.nlm.nih.gov/home/develop/api/
-
-Free. Biomedical literature (MEDLINE). Use for medical, clinical, and life-science
-research agents.
-
 ### arXiv API
 https://info.arxiv.org/help/api/
 
@@ -128,7 +122,6 @@ web data extraction; not suitable for real-time agent queries.
 | Agent web research (general) | Tavily (easiest) or Jina Search (keyless) |
 | Technical / developer queries | Exa |
 | Academic paper lookup | Semantic Scholar API (free, no key) |
-| Medical / life science | PubMed API |
 | Preprints (CS, ML, physics) | arXiv API |
 | URL → clean text for RAG | Jina Reader (no key) |
 | Site crawl / JS-heavy pages | Firecrawl |

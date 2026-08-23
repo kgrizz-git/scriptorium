@@ -1,6 +1,6 @@
 # Template: Handoff Packet
 
-Last reviewed: 2026-08-11
+Last reviewed: 2026-08-23
 
 Write to `.context/handoff.md` (or paste as an issue/PR comment) before work moves between
 agents, IDEs, or sessions — Claude Code → Cursor → Codex → a human reviewer.
@@ -48,10 +48,8 @@ Branch: <branch>   Base: <base>
 - Record decisions *with reasons*. A rejected option without a reason gets re-litigated.
 - Separate **verified** from **assumed**. This is the field that most often prevents a
   downstream error.
-- Never paste secrets, tokens, or real PII/PHI — the packet is likely to be copied into a
-  chat, an issue, or another tool. Under a `regulated` classification, apply
-  [`../prompts/sensitive-data-leak-prevention.md`](../prompts/sensitive-data-leak-prevention.md)
-  to this file too.
+- Never paste secrets, tokens, or credentials — the packet is likely to be copied into a
+  chat, an issue, or another tool.
 - Delete it once the work lands. A stale handoff is worse than none — see
   [`../policies/plans-and-todos.md`](../policies/plans-and-todos.md).
 

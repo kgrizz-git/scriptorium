@@ -7,6 +7,17 @@ See [`policies/changelog-conventions.md`](policies/changelog-conventions.md).
 The format follows [Keep a Changelog](https://keepachangelog.com/), and this project
 uses [Semantic Versioning](https://semver.org/).
 
+## [0.1.1] - 2026-08-23
+
+### Added
+- Domain inventory for virtual books / flipbooks / OCR / annotations
+  (`inventory/virtual-books-flipbook.md`).
+
+### Changed
+- Harness trimmed to standard secret hygiene only; unused domain-specific data-gate
+  prompts, policies, hooks, and CI examples removed. Project profile captured for
+  Scriptorium (Tauri-first virtual book app).
+
 ## [0.1.0] - 2026-08-23
 
 ### Added

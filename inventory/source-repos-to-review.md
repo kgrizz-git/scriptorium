@@ -31,10 +31,21 @@ template is still actionable without them.
 
 ## User-added sources
 
-Add entries here as they are identified:
+Scriptorium bootstrap (2026-08-23) — see also `inventory/virtual-books-flipbook.md`:
 
 ```text
-- <repo-url-or-path> — <why it may be useful>
+- https://github.com/Nodlik/StPageFlip — page-turn core (page-flip npm)
+- https://github.com/kokiddp/elk-flipbook — PDF flipbook + OCR search (pdf.js + StPageFlip + Tesseract)
+- https://github.com/Ethical-Tech-CoLab/read-as-book — PDF→images CLI + static flip viewer
+- https://github.com/micahchoo/Archie — curator studio → static annotated exhibit (OSD + Annotorious)
+- https://github.com/d-flood/triiiceratops — embeddable IIIF viewer + annotations
+- https://github.com/ashtree4711/mimir-iiif-explorer — IIIF book mode + ALTO/hOCR overlays
+- https://openseadragon.github.io/ — deep zoom
+- https://annotorious.github.io/ — region annotation UI
+- https://github.com/IIIF/awesome-iiif — IIIF ecosystem index
+- https://github.com/tesseract-ocr/tesseract — batch OCR
+- https://github.com/naptha/tesseract.js — in-browser OCR
+- https://tauri.app/ — lightweight desktop shell around a web UI
 ```
 
 ---

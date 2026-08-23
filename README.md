@@ -2,14 +2,16 @@
 
 Last reviewed: 2026-08-23
 
-Private project repository. Bootstrapped from
-[`kgrizz-git/project-seed-template`](https://github.com/kgrizz-git/project-seed-template)
-(harness: policies, hooks, CI examples, templates, and curated inventories).
+Tauri-first app for assembling scanned page folders into textured virtual books
+(page-turn reading, faithful page images, curator hotspots with lore popups) and
+browsing a multi-book library. Built for librarians and gallery directors (authors)
+and visitors/students (readers).
 
-**Next:** run [`prompts/bootstrap-project.md`](prompts/bootstrap-project.md) to interview,
-capture a project profile, and scaffold what this repo needs.
+Bootstrapped from [`kgrizz-git/project-seed-template`](https://github.com/kgrizz-git/project-seed-template).
+Private for now; public soon. Profile: `.context/project-profile.md` (local).
 
-**Returning sessions:** run [`prompts/new-agent-session.md`](prompts/new-agent-session.md).
+**Agent sessions:** [`prompts/new-agent-session.md`](prompts/new-agent-session.md).
+**Domain menu:** [`inventory/virtual-books-flipbook.md`](inventory/virtual-books-flipbook.md).
 
 ---
 
@@ -25,8 +27,7 @@ capture a project profile, and scaffold what this repo needs.
 | [`inventory/`](inventory/) | Curated menus of tools, skills, platforms, libraries, and references — load what you need |
 | [`plans/`](plans/) | Optional active plans + archive convention (see policies) |
 
-Full contents: see [`inventory/README.md`](inventory/README.md) for the tool/skill menu and [`AGENTS.md`](AGENTS.md) for agent navigation.
+Full contents: see [`inventory/README.md`](inventory/README.md) and [`AGENTS.md`](AGENTS.md).
 
-Changelogs: user-facing [`CHANGELOG.md`](CHANGELOG.md); developer/internal [`CHANGELOG.dev.md`](CHANGELOG.dev.md) — see [`policies/changelog-conventions.md`](policies/changelog-conventions.md).
-
-GitHub setup and sensitive-data controls: [`policies/github-repository-hygiene.md`](policies/github-repository-hygiene.md).
+Changelogs: [`CHANGELOG.md`](CHANGELOG.md) / [`CHANGELOG.dev.md`](CHANGELOG.dev.md).
+GitHub hygiene: [`policies/github-repository-hygiene.md`](policies/github-repository-hygiene.md).

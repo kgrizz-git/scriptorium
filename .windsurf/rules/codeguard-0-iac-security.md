@@ -38,7 +38,7 @@ When designing cloud infrastructure and writing Infrastructure as Code (IaC) in 
     - Enable encryption for inter-service communication within VPCs/VNETs.
     - Use encrypted protocols for remote access (SSH, HTTPS, secure RDP).
 - **ALWAYS** implement data classification and protection controls based on sensitivity levels.
-    - Apply stricter encryption and access controls for PII, PHI, financial data, and intellectual property.
+    - Apply stricter encryption and access controls for credentials, financial data, and intellectual property.
     - Use separate encryption keys for different data classification levels.
 - **ALWAYS** configure secure data retention and disposal policies.
     - Define data retention periods based on regulatory and business requirements.
