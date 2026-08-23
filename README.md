@@ -11,6 +11,7 @@ Bootstrapped from [`kgrizz-git/project-seed-template`](https://github.com/kgrizz
 Private for now; public soon. Profile: `.context/project-profile.md` (local).
 
 **Agent sessions:** [`prompts/new-agent-session.md`](prompts/new-agent-session.md).
+**Roadmap:** [`plans/2026-08-23-product-roadmap.md`](plans/2026-08-23-product-roadmap.md) · **Backlog:** [`to_do.md`](to_do.md).
 **Domain menu:** [`inventory/virtual-books-flipbook.md`](inventory/virtual-books-flipbook.md).
 
 ---
@@ -25,7 +26,7 @@ Private for now; public soon. Profile: `.context/project-profile.md` (local).
 | [`hooks/`](hooks/) | Pre-commit config + policy scripts (file size, TODO limits, secrets, lint) |
 | [`ci/`](ci/) | CI selection guidance and example GitHub Actions workflows |
 | [`inventory/`](inventory/) | Curated menus of tools, skills, platforms, libraries, and references — load what you need |
-| [`plans/`](plans/) | Optional active plans + archive convention (see policies) |
+| [`plans/`](plans/) | Product roadmap, active MVP plan, archived completed plans |
 
 Full contents: see [`inventory/README.md`](inventory/README.md) and [`AGENTS.md`](AGENTS.md).
 

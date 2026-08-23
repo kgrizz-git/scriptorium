@@ -10,6 +10,9 @@ uses [Semantic Versioning](https://semver.org/).
 ## [0.1.1] - 2026-08-23
 
 ### Added
+- Product roadmap (M0–M8): scan viewer, OCR-aware scans, text/hybrid modes, library,
+  authoring/hotspots, polish, platform/interop — [`plans/2026-08-23-product-roadmap.md`](plans/2026-08-23-product-roadmap.md).
+- Active MVP scaffold plan and root backlog [`to_do.md`](to_do.md).
 - Domain inventory for virtual books / flipbooks / OCR / annotations
   (`inventory/virtual-books-flipbook.md`).
 

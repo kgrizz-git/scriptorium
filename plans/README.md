@@ -1,11 +1,14 @@
 # Plans
 
-Last reviewed: 2026-07-11
+Last reviewed: 2026-08-23
 
 Optional folder for implementation plans. Adopt when the project uses plan-driven or
 multi-agent work. Conventions: [`policies/plans-and-todos.md`](../policies/plans-and-todos.md).
 Templates: [`templates/plan.md`](../templates/plan.md),
 [`templates/orchestration-state.md`](../templates/orchestration-state.md).
+
+**Scriptorium:** product roadmap [`2026-08-23-product-roadmap.md`](2026-08-23-product-roadmap.md);
+active MVP [`2026-08-23-mvp-scaffold.md`](2026-08-23-mvp-scaffold.md); living index [`to_do.md`](../to_do.md).
 
 ## Layout
 
