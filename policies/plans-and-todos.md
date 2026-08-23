@@ -1,6 +1,6 @@
 # Policy: Plans, TODOs, Archiving, and Completion
 
-Last reviewed: 2026-07-09
+Last reviewed: 2026-08-23
 Enforced by: convention + [`hooks/scripts/check_todo_limits.py`](../hooks/scripts/check_todo_limits.py)
 + [`prompts/todo-plan-audit.md`](../prompts/todo-plan-audit.md).
 
@@ -13,15 +13,18 @@ work, and a clear done/archive path so the repo does not accumulate zombie check
 
 | Path | Purpose |
 |---|---|
-| `plans/` | Implementation plans (`YYYY-MM-DD-slug.md` or stable names). Optional `orchestration-state.md` for multi-agent runs. |
-| `plans/archive/` | Completed or abandoned plans moved out of the active set (keep git history). |
-| `to_do.md` or `TODO.md` (repo root) | Short living backlog for the whole project — not a substitute for issues on large teams. |
-| `assessments/` | Timestamped reviews (security, QI, etc.); historical — do not rewrite in place. |
+| `plans/` | **Active** implementation plans (`YYYY-MM-DD-slug.md`) and the living roadmap. Optional `orchestration-state.md`. |
+| `plans/deferred/` | Intentionally postponed plans (still discoverable; link from `to_do.md`). |
+| `plans/archive/completed/` | Finished plans (`Status: complete`). |
+| `plans/archive/superseded/` | Replaced or abandoned plans (`Status: abandoned`). |
+| `to_do.md` or `TODO.md` (repo root) | Short living backlog — not a substitute for issues on large teams. |
+| `assessments/` | Timestamped **durable** reviews (security, QI) when explicitly kept in-repo — do not rewrite in place. |
+| `tmp/` (gitignored) | Scratch, spikes, and **plan reviews** by default. Do not commit; do not link from tracked docs. See [`tmp/README.md`](../tmp/README.md). |
 | `.context/` | Scratch only (gitignored). Never the source of truth for plans. |
 
 Use [`templates/plan.md`](../templates/plan.md) for new plans. Prefer GitHub/Linear issues
 for cross-team tracking; keep `to_do.md` for agent-visible, in-repo backlog when that
-helps the harness.
+helps the harness. Layout summary: [`plans/README.md`](../plans/README.md).
 
 ## Plan lifecycle
 
@@ -29,17 +32,19 @@ helps the harness.
 2. **approved** / **in-progress** — checklist drives work; mark `[x]` only when the item
    is fully done and verified (do not mark complete to “get past” a gate).
 3. **complete** — all required checklist items done; verification section satisfied;
-   status set to `complete`.
-4. **abandoned** — explicitly stopped; note why in the plan header.
+   status set to `complete`; **move to `plans/archive/completed/`**.
+4. **abandoned** — explicitly stopped; note why; **move to `plans/archive/superseded/`**.
+5. **deferred** — postponed on purpose; note why + target milestone if known;
+   **move to `plans/deferred/`** (or keep in place only if still under active negotiation —
+   prefer the folder so `plans/` stays executable).
 
 ### Marking plans done
 
-- Update `Status:` in the plan header to `complete` or `abandoned`.
-- Move the file to `plans/archive/` (or rename with a `DONE-` / `ARCHIVED-` prefix if you
-  prefer a flat `plans/` tree).
+- Update `Status:` in the plan header to `complete`, `abandoned`, or `deferred`.
+- Move the file to the matching folder above. Do **not** delete archived or deferred plans.
 - If `plans/orchestration-state.md` exists, set phase to `complete` / `blocked` and point
   “next action” at none / user.
-- Do **not** delete completed plans; archive them so agents can learn from prior work.
+- When superseding, leave a one-line pointer to the successor in the old plan’s header.
 
 ### Checklist honesty
 

@@ -34,7 +34,8 @@ For the *prompts* that instruct an agent to produce these outputs, see [`prompts
 - Keep the file name stable (e.g. `plans/2026-06-26-auth-refactor.md`) so it is linkable.
 - Date assessments; they become stale. If stored in `assessments/` or `plans/`, they're
   historical record — don't update in place, create a new one.
-- When a plan is complete or abandoned, move it to `plans/archive/` (see
+- When a plan is complete, move it to `plans/archive/completed/`; when abandoned/superseded,
+  to `plans/archive/superseded/`; when postponed, to `plans/deferred/` (see
   [`policies/plans-and-todos.md`](../policies/plans-and-todos.md)).
 - If a template grows beyond ~300 lines, it's trying to be a doc, not an assessment —
   split the supporting material into a linked doc.

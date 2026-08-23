@@ -65,8 +65,9 @@ Check for incomplete cleanup from previous work:
 # Check for completed items still in to_do.md
 grep -n "^\- \[x\]" to_do.md TODO.md 2>/dev/null || echo "No completed items found"
 
-# Check for completed plans not archived
-find plans/ -name "*.md" -type f ! -path "plans/archive/*" -exec grep -l "Status: complete\|Status: abandoned" {} \;
+# Check for completed / abandoned / deferred plans still in the active tree
+find plans/ -name "*.md" -type f ! -path "plans/archive/*" ! -path "plans/deferred/*" \
+  -exec grep -l "Status: complete\|Status: abandoned\|Status: deferred" {} \;
 
 # Check for old context files
 find .context/ -type f -mtime +7 -ls 2>/dev/null || echo "No old context files"
@@ -74,7 +75,9 @@ find .context/ -type f -mtime +7 -ls 2>/dev/null || echo "No old context files"
 
 For each issue found:
 - Completed items in `to_do.md` → Run [`prompts/cleanup-completed-work.md`](cleanup-completed-work.md)
-- Completed plans not archived → Move to `plans/archive/` and log completion
+- Completed plans → Move to `plans/archive/completed/` and log completion
+- Abandoned/superseded → Move to `plans/archive/superseded/`
+- Deferred → Move to `plans/deferred/` and link from `to_do.md`
 - Old `.context/` files → Delete or archive valuable content
 - Unlogged completions → Check git log vs changelogs, add missing entries
 
@@ -133,7 +136,7 @@ Update plan checkboxes to reflect current state.
 
 Verify that the cleanup audit from section 2.5 was completed:
 - Are completed items properly logged in changelogs?
-- Are completed plans archived to `plans/archive/`?
+- Are completed plans in `plans/archive/completed/` (superseded in `archive/superseded/`)?
 - Is `.context/` clean of old scratch files?
 - Are there any completion logging gaps that need remediation?
 
@@ -218,13 +221,13 @@ Summarize the session to the user:
 ## Maintenance loop report — YYYY-MM-DD
 
 ### Fixed now
-- 
+-
 
 ### Deferred (filed as TODO / issue)
-- 
+-
 
 ### No action needed
-- 
+-
 
 ### Next run recommended
 - (date or trigger)

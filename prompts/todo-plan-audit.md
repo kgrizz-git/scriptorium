@@ -38,7 +38,7 @@ For each completed item found (marked [x] in plans, or items that appear done):
   - User-visible → `CHANGELOG.md`
   - Internal → `CHANGELOG.dev.md`
   - Maintenance → `MAINTENANCE.md`
-- [ ] Was the related plan archived to `plans/archive/`?
+- [ ] Was the related plan moved to `plans/archive/completed/` (or `superseded/` / `deferred/` as appropriate)?
 - [ ] Are references/links preserved (commit hashes, issue numbers)?
 - [ ] Was scratch cleanup performed in `.context/`?
 
@@ -51,7 +51,7 @@ Write a markdown report with:
 - Open items grouped by area.
 - Items that appear stale, duplicated, or already completed.
 - Plan checkboxes that need updating, with evidence.
-- Plans that appear ready to move to `plans/archive/`.
+- Plans that appear ready to move to `plans/archive/completed/` (or `superseded/` / `deferred/`).
 - **Completion logging gaps** - items marked done but missing proper logging/archival.
 - Test-related TODOs or skipped/xfail tests that need explicit follow-up.
 - Blockers.

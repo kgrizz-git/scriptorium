@@ -42,7 +42,9 @@ After each worker returns:
 - Merge findings into one coherent implementation.
 - Prefer one owner for shared interfaces, schemas, migrations, and UX direction.
 - If two workers change the same file, inspect both changes manually before accepting.
-- Keep completed plans accurate; move complete/abandoned plans to `plans/archive/` only
+- Keep completed plans accurate; move complete plans to `plans/archive/completed/`,
+  abandoned/superseded to `plans/archive/superseded/`, deferred to `plans/deferred/` only
+  after status is updated (see [`../policies/plans-and-todos.md`](../policies/plans-and-todos.md)).
   after verification.
 
 ## Finish

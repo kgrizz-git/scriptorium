@@ -16,7 +16,7 @@ Run this when completing significant work or at session end to ensure proper log
 - [ ] Reference the source (plan, issue, or commit) for each logged item
 
 ### Plan archival
-- [ ] Move completed plans to `plans/archive/`
+- [ ] Move completed plans to `plans/archive/completed/` (superseded → `archive/superseded/`; deferred → `plans/deferred/`)
 - [ ] Update plan status to `complete` or `abandoned`
 - [ ] Update `orchestration-state.md` if present
 - [ ] Verify no active plans remain in main `plans/` directory
@@ -75,7 +75,7 @@ When committing cleanup, use a descriptive message:
 Cleanup: Log and archive completed work
 
 - Logged [X] completions in CHANGELOG.md/dev.md
-- Archived [Y] completed plans to plans/archive/
+- Archived [Y] completed plans to plans/archive/completed/
 - Cleaned up .context/ scratch files
 - Removed resolved TODOs from source
 ```

@@ -10,7 +10,7 @@ work that is too large or risky to leave as loose bullets.
 Read only the files needed to understand the backlog:
 
 - Root `to_do.md` / `TODO.md`, if present.
-- `plans/` and `plans/archive/`, if present.
+- `plans/` and `plans/archive/{completed,superseded}/`, `plans/deferred/`, if present.
 - Open roadmap or issue-summary docs.
 - Source TODOs only when they point to user-facing, risky, or cross-file work.
 

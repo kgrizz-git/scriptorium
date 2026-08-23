@@ -34,7 +34,7 @@ Do not load everything. Start here, then open only what the task needs.
 | GitHub rulesets, secret scanning, and repo hygiene | [`policies/github-repository-hygiene.md`](policies/github-repository-hygiene.md) |
 | Checking Actions minutes / storage | [`ci/scripts/check_gha_usage.py`](ci/scripts/check_gha_usage.py), [`policies/github-actions-usage.md`](policies/github-actions-usage.md) |
 | Checking open PRs after push / daily | [`ci/scripts/check_open_prs.py`](ci/scripts/check_open_prs.py), [`policies/commits-and-branches.md`](policies/commits-and-branches.md) |
-| Writing a plan / design / review | [`templates/`](templates/) and [`prompts/`](prompts/) |
+| Writing a plan / design / review | [`templates/`](templates/), [`plans/README.md`](plans/README.md), [`prompts/`](prompts/) |
 | Installing skills or subagents | [`inventory/catalog-skills-agents.md`](inventory/catalog-skills-agents.md) |
 | Choosing an orchestration approach | [`inventory/harness-engineering.md`](inventory/harness-engineering.md) |
 
@@ -49,8 +49,10 @@ Do not load everything. Start here, then open only what the task needs.
 7. **Protect remotes.** Push only to this project's `origin` (`kgrizz-git/scriptorium`),
    never to `project-seed-template`.
 8. **Clean up after completion.** Remove completed TODOs, log completions appropriately,
-   archive completed plans, and clean scratch files. See [`policies/plans-and-todos.md`](policies/plans-and-todos.md)
-   and [`prompts/cleanup-completed-work.md`](prompts/cleanup-completed-work.md).
+   archive completed plans under `plans/archive/completed/`, move superseded/abandoned plans
+   to `plans/archive/superseded/`, park postponed work in `plans/deferred/`, and clean scratch
+   files. See [`policies/plans-and-todos.md`](policies/plans-and-todos.md),
+   [`plans/README.md`](plans/README.md), and [`prompts/cleanup-completed-work.md`](prompts/cleanup-completed-work.md).
 9. **Recommendations stand on their own.** A reader without access to any external source
    should still be able to act on what a file says. Referencing private or personal repos is
    encouraged — cite them by `repo → path` and mark them private; an agent that *does* have
@@ -70,17 +72,22 @@ Do not load everything. Start here, then open only what the task needs.
 - `inventory/` — curated indexes of tools, skills, MCP servers, references (install-on-demand).
 - `docs/` — navigation helpers and quick-reference guides.
 - `scripts/` — automation scripts (setup, health check, environment validation).
-- `plans/` — (when adopted) active implementation plans; archive completed ones under `plans/archive/`.
+- `plans/` — **active** implementation plans and the living roadmap. Layout:
+  - `plans/deferred/` — postponed plans (not abandoned)
+  - `plans/archive/completed/` — finished plans
+  - `plans/archive/superseded/` — replaced or abandoned plans
+  See [`plans/README.md`](plans/README.md) and [`policies/plans-and-todos.md`](policies/plans-and-todos.md).
 - `.cursor/`, `.windsurf/` — editor rule sets (CodeGuard security rules).
 - `.devin/` — Devin CLI configuration and project-specific skills.
 - `.context/` — scratch only; never required reading, never committed.
+- `assessments/` — timestamped **durable** reviews (security, QI) when the user asks to keep them in-repo; do not rewrite in place. **Plan reviews default to gitignored `tmp/` and must not be linked from tracked docs** (see [`tmp/README.md`](tmp/README.md)).
 
 ## Conventions (changelog, plans, sizes)
 
 | Topic | Where documented |
 |---|---|
 | Public vs developer changelogs + SemVer | [`policies/changelog-conventions.md`](policies/changelog-conventions.md) |
-| Plans lifecycle, marking done, archiving, `to_do` caps | [`policies/plans-and-todos.md`](policies/plans-and-todos.md) |
+| Plans lifecycle, marking done, completed / superseded / deferred folders | [`policies/plans-and-todos.md`](policies/plans-and-todos.md), [`plans/README.md`](plans/README.md) |
 | Source/doc line caps (soft **600** / hard **1000**) | [`policies/file-size-and-counts.md`](policies/file-size-and-counts.md) |
 | Secret scanning + lint hooks | [`hooks/README.md`](hooks/README.md), [`policies/security-baseline.md`](policies/security-baseline.md) |
 | GitHub Actions minutes/storage (estimate before expanding CI) | [`policies/github-actions-usage.md`](policies/github-actions-usage.md), [`ci/scripts/check_gha_usage.py`](ci/scripts/check_gha_usage.py) |

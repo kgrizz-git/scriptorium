@@ -9,8 +9,10 @@ Linked issue/PR: n/a
 ## Goal
 
 Single source of truth for **all** planned product phases and features. Immediate work lives in
-[`2026-08-23-mvp-scaffold.md`](2026-08-23-mvp-scaffold.md). Later milestones stay here and in
-[`to_do.md`](../to_do.md) until promoted to an active plan.
+[`2026-08-23-m0-tauri-foundation.md`](2026-08-23-m0-tauri-foundation.md) then
+[`2026-08-23-m1-scan-viewer.md`](2026-08-23-m1-scan-viewer.md). Later milestones stay here and in
+[`to_do.md`](../to_do.md) until promoted. Combined draft:
+[`archive/superseded/2026-08-23-mvp-scaffold.md`](archive/superseded/2026-08-23-mvp-scaffold.md).
 
 ## Rendering model (long-term)
 
@@ -35,14 +37,9 @@ Three layers, not a single rendering choice:
 
 ### M0 — Harness & scaffold (in progress)
 
-**Active plan:** [`2026-08-23-mvp-scaffold.md`](2026-08-23-mvp-scaffold.md)
-
-- [x] CI fast lane + Semgrep security workflow ([`docs/ci-and-hooks.md`](../docs/ci-and-hooks.md))
-- [x] Pre-commit: line count, complexity (ruff), secrets, lint; **pre-push: basedpyright**
-- [ ] Complete remaining bootstrap P4.5–P7 (env, agent contract, maintenance cadence)
-- [ ] Tauri 2 + Vite + TypeScript UI shell (React default unless changed)
-- [ ] Book package format v1 on disk (`meta.json`, `pages/`, schema reserves `renderMode`, `ocr/`)
-- [ ] Minimal docs: README run instructions
+**Active plans:** [`2026-08-23-m0-tauri-foundation.md`](2026-08-23-m0-tauri-foundation.md) then
+[`2026-08-23-m1-scan-viewer.md`](2026-08-23-m1-scan-viewer.md). Later milestones stay here and in
+[`to_do.md`](../to_do.md) until promoted.
 
 ### M0.5 — Harness follow-ups (after Tauri scaffold / when app code exists)
 
@@ -60,7 +57,7 @@ Promote items into an active plan when starting them. Tracked in [`to_do.md`](..
 
 ### M1 — Scan viewer (MVP core)
 
-**Target:** one book from a folder of scans; page-turn; faithful page images.
+**Active plan:** [`2026-08-23-m1-scan-viewer.md`](2026-08-23-m1-scan-viewer.md) (after M0 foundation)
 
 - [ ] Tauri command: pick folder → natural sort → copy/link into book package
 - [ ] StPageFlip (or `react-pageflip`) viewer over page images

@@ -64,7 +64,8 @@ How will we know this is done and correct?
 When this plan is complete, follow this workflow:
 
 1. **Update plan status** to `complete` or `abandoned`
-2. **Move this file to `plans/archive/`** (preserve git history)
+2. **Move this file** to `plans/archive/completed/` (or `plans/archive/superseded/` if abandoned;
+   `plans/deferred/` if postponed). See [`../plans/README.md`](../plans/README.md).
 3. **Log completion** in appropriate changelog:
    - User-visible changes → `CHANGELOG.md`
    - Internal/harness changes → `CHANGELOG.dev.md`
