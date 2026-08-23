@@ -1,0 +1,24 @@
+[project]
+name = "scriptorium"
+version = "0.1.2"
+description = "Virtual book reader — harness + application (Tauri scaffold pending)"
+readme = "README.md"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+
+[tool.coverage.run]
+source = ["hooks/scripts", "ci/scripts"]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+fail_under = 0
+show_missing = true
+skip_empty = true
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+]

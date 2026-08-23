@@ -1,0 +1,149 @@
+# ci.yml — fast-lane required checks for Scriptorium.
+# Target: under ~5 minutes on a cold runner.
+# Slow lane (Semgrep schedule): .github/workflows/security.yml
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  policy:
+    name: Policy (file size, docs, backlog)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: File size & counts (all tracked files)
+        run: |
+          git ls-files -z | xargs -0 python hooks/scripts/check_file_size.py
+
+      - name: Living backlog size
+        run: python hooks/scripts/check_todo_limits.py to_do.md
+
+      - name: Internal documentation links
+        run: python ci/scripts/check_doc_links.py --internal-only --strict
+
+      - name: Doc freshness (advisory on PR)
+        if: github.event_name == 'pull_request'
+        env:
+          POLICY_WARN_AS_ERROR: "0"
+        run: |
+          git ls-files '*.md' | xargs -r python hooks/scripts/check_doc_freshness.py || true
+
+  lint:
+    name: Lint & format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Ruff lint (incl. complexity)
+        run: |
+          pip install ruff==0.11.13
+          ruff check .
+
+      - name: Ruff format check
+        run: ruff format --check .
+
+      - name: Shellcheck
+        uses: ludeeus/action-shellcheck@2.0.0
+        with:
+          scandir: "hooks/scripts scripts"
+          severity: warning
+
+      - name: Markdownlint (maintained docs)
+        run: >-
+          npx --yes markdownlint-cli2@0.23.0
+          "AGENTS.md" "README.md" "CHANGELOG.md" "CHANGELOG.dev.md" "to_do.md"
+          "ci/**/*.md" "hooks/**/*.md" "inventory/**/*.md" "policies/**/*.md"
+          "prompts/**/*.md" "templates/**/*.md" "plans/**/*.md" "docs/**/*.md"
+
+      - name: Actionlint
+        uses: raven-actions/actionlint@v2
+        with:
+          files: .github/workflows/*.yml
+
+      - name: Python policy scripts compile
+        run: python -m compileall -q hooks/scripts ci/scripts tests
+
+  typecheck:
+    name: Type check (Python)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: basedpyright
+        run: |
+          pip install basedpyright==1.29.4
+          basedpyright
+
+  test:
+    name: Tests & coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: pytest + coverage gate
+        run: |
+          pip install pytest pytest-cov
+          pytest --cov --cov-report=term-missing --cov-report=xml
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml
+          path: coverage.xml
+          retention-days: 14
+
+  secrets:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: gitleaks detect (full history)
+        env:
+          GITLEAKS_VERSION: 8.24.3
+          GITLEAKS_SHA256: 9991e0b2903da4c8f6122b5c3186448b927a5da4deef1fe45271c3793f4ee29c
+        run: |
+          set -euo pipefail
+          tarball="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -sSfL -o "/tmp/${tarball}" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${tarball}"
+          echo "${GITLEAKS_SHA256}  /tmp/${tarball}" | sha256sum -c -
+          mkdir -p /tmp/gitleaks && tar xzf "/tmp/${tarball}" -C /tmp/gitleaks gitleaks
+          /tmp/gitleaks/gitleaks detect --redact --no-banner --exit-code 1 --verbose

@@ -7,6 +7,19 @@ See [`policies/changelog-conventions.md`](policies/changelog-conventions.md).
 The format follows [Keep a Changelog](https://keepachangelog.com/), and this project
 uses [Semantic Versioning](https://semver.org/).
 
+## [0.1.2] - 2026-08-23
+
+### Added
+- CI fast lane (`.github/workflows/ci.yml`): policy, lint/complexity, basedpyright, pytest coverage, gitleaks.
+- Security slow lane (`.github/workflows/security.yml`): Semgrep on PRs, TruffleHog weekly.
+- Pre-push **basedpyright** typecheck; install with `--hook-type pre-push`.
+- Roadmap **M0.5** harness follow-ups (TS/Rust CI, coverage gates, CodeQL/Dependabot).
+- `docs/ci-and-hooks.md`, `pyproject.toml`, `pyrightconfig.json`, gitignored `tmp/`.
+
+### Changed
+- Ruff enforces complexity (`C901`, branches, statements) per file-size policy.
+- `VERSION` → 0.1.2.
+
 ## [0.1.1] - 2026-08-23
 
 ### Added

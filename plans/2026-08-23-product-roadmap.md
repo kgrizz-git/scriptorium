@@ -37,10 +37,26 @@ Three layers, not a single rendering choice:
 
 **Active plan:** [`2026-08-23-mvp-scaffold.md`](2026-08-23-mvp-scaffold.md)
 
-- [ ] Complete bootstrap P3–P7 (hooks, CI, env, agent contract)
+- [x] CI fast lane + Semgrep security workflow ([`docs/ci-and-hooks.md`](../docs/ci-and-hooks.md))
+- [x] Pre-commit: line count, complexity (ruff), secrets, lint; **pre-push: basedpyright**
+- [ ] Complete remaining bootstrap P4.5–P7 (env, agent contract, maintenance cadence)
 - [ ] Tauri 2 + Vite + TypeScript UI shell (React default unless changed)
 - [ ] Book package format v1 on disk (`meta.json`, `pages/`, schema reserves `renderMode`, `ocr/`)
 - [ ] Minimal docs: README run instructions
+
+### M0.5 — Harness follow-ups (after Tauri scaffold / when app code exists)
+
+Promote items into an active plan when starting them. Tracked in [`to_do.md`](../to_do.md).
+
+- [ ] Extend CI + pre-commit/pre-push for **TypeScript**: `pnpm lint`, `tsc --noEmit` (pre-push + CI)
+- [ ] Extend CI + hooks for **Rust/Tauri**: `cargo fmt --check`, `cargo clippy`, `cargo test`, `cargo check`
+- [ ] Frontend tests: Vitest (+ coverage report); raise coverage `fail_under` for app code
+- [ ] Rust tests + coverage (`cargo llvm-cov` or tarpaulin) when meaningful
+- [ ] Tighten Python harness coverage gate (`fail_under` > 0 once in-process tests cover scripts)
+- [ ] Optional: CodeQL workflow from `ci/examples/codeql.yml`
+- [ ] Optional: Dependabot (`ci/examples/dependabot.yml`) for npm / cargo / Actions
+- [ ] GitHub ruleset: mark CI + Semgrep jobs as **required** checks
+- [ ] `.envrc.example` + document `direnv allow`
 
 ### M1 — Scan viewer (MVP core)
 

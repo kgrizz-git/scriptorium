@@ -52,11 +52,13 @@ to_do.md             — backlog index (already exists)
 
 ### Phase A — Repo harness (bootstrap P3–P7)
 
-- [ ] GitHub hygiene: document standard tier in profile / README
-- [ ] Root `.pre-commit-config.yaml` aligned with `hooks/`; `pre-commit install`
-- [ ] CI workflow: frontend lint/typecheck + `cargo check`
-- [ ] `.envrc.example` + `.python-version` if Python OCR tooling added later
-- [ ] Agent tooling contract in `AGENTS.md`; `.agent-state/` in `.gitignore`
+- [x] GitHub hygiene: document standard tier in profile / README
+- [x] Root `.pre-commit-config.yaml` aligned with `hooks/`; `pre-commit` + **pre-push** installed
+- [x] Pre-push basedpyright typecheck
+- [x] CI workflow: `.github/workflows/ci.yml` + `.github/workflows/security.yml`
+- [ ] `.envrc.example` + direnv (optional locally)
+- [ ] Agent tooling contract block pasted into `AGENTS.md` (if not already)
+- [ ] After Phase B: promote [roadmap M0.5](2026-08-23-product-roadmap.md#m05--harness-follow-ups-after-tauri-scaffold--when-app-code-exists) (TS/Rust CI, coverage gates)
 
 ### Phase B — Tauri + Vite scaffold
 

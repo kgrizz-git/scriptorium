@@ -39,13 +39,13 @@ import subprocess
 import sys
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
-from typing import Any
+from typing import Any, NoReturn
 from urllib.parse import quote
 
 API_VERSION = "2022-11-28"
 
 
-def die(msg: str, code: int = 1) -> None:
+def die(msg: str, code: int = 1) -> NoReturn:
     print(f"[gha-usage] ERROR: {msg}", file=sys.stderr)
     sys.exit(code)
 
@@ -105,7 +105,9 @@ def resolve_viewer_login() -> str | None:
     code, data, err = gh_api("user", jq=".login")
     if code == 0 and isinstance(data, str) and data:
         return data
-    warn(f"Could not resolve authenticated user login via /user ({err}). Account billing may be skipped.")
+    warn(
+        f"Could not resolve authenticated user login via /user ({err}). Account billing may be skipped."
+    )
     return None
 
 
@@ -127,10 +129,7 @@ def fetch_repo_run_timing(repo: str, days: int, limit: int) -> dict[str, Any]:
 
     since = iso_days_ago(days)
     # List completed runs; paginate via gh --paginate
-    path = (
-        f"repos/{owner}/{name}/actions/runs"
-        f"?per_page=100&status=completed&created=>{since}"
-    )
+    path = f"repos/{owner}/{name}/actions/runs?per_page=100&status=completed&created=>{since}"
     proc = run_gh(
         [
             "api",
@@ -239,7 +238,9 @@ def fetch_repo_run_timing(repo: str, days: int, limit: int) -> dict[str, Any]:
     }
 
 
-def fetch_account_usage(login: str, year: int | None, month: int | None, repository: str | None) -> dict[str, Any]:
+def fetch_account_usage(
+    login: str, year: int | None, month: int | None, repository: str | None
+) -> dict[str, Any]:
     """Best-effort account billing summary (enhanced billing platform)."""
     q: list[str] = []
     if year:
@@ -313,7 +314,10 @@ def fetch_account_usage(login: str, year: int | None, month: int | None, reposit
         "repository_filter": repository,
         "all_products": sorted(by_product.keys()),
         "actions_related": summarize("action") + summarize("Actions"),
-        "storage_related": summarize("storage") + summarize("Storage") + summarize("Packages") + summarize("Artifact"),
+        "storage_related": summarize("storage")
+        + summarize("Storage")
+        + summarize("Packages")
+        + summarize("Artifact"),
         "usageItems": items,
         "ui": "https://github.com/settings/billing",
     }
@@ -326,7 +330,9 @@ def print_repo_report(report: dict[str, Any]) -> None:
         print(f"  Error: {report['error']}")
         return
     print(f"  Runs considered:     {report.get('runs_considered')}")
-    print(f"  Timing API fetched:  {report.get('timing_fetched')} (failed: {report.get('timing_failed')})")
+    print(
+        f"  Timing API fetched:  {report.get('timing_fetched')} (failed: {report.get('timing_failed')})"
+    )
     print(f"  Total wall minutes:  {report.get('total_wall_minutes')}")
     print(f"  Total billable min:  {report.get('total_billable_minutes')}")
     wfs = report.get("workflows") or []
@@ -365,7 +371,9 @@ def print_account_report(report: dict[str, Any]) -> None:
                 f"net=${row.get('netAmount')}"
             )
     else:
-        print("  Actions-related lines: (none in this period — or labeled differently; see raw products)")
+        print(
+            "  Actions-related lines: (none in this period — or labeled differently; see raw products)"
+        )
     if storage:
         print("  Storage/Packages-related lines:")
         for row in storage:
@@ -380,15 +388,29 @@ def print_account_report(report: dict[str, Any]) -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--repo", metavar="OWNER/NAME", help="Repository to inspect (default: current gh repo)")
-    parser.add_argument("--account", metavar="LOGIN", help="User or org login for billing summary (default: viewer)")
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument(
+        "--repo", metavar="OWNER/NAME", help="Repository to inspect (default: current gh repo)"
+    )
+    parser.add_argument(
+        "--account", metavar="LOGIN", help="User or org login for billing summary (default: viewer)"
+    )
     parser.add_argument("--repo-only", action="store_true", help="Only print repo run timing")
-    parser.add_argument("--account-only", action="store_true", help="Only print account billing summary")
+    parser.add_argument(
+        "--account-only", action="store_true", help="Only print account billing summary"
+    )
     # Aliases matching the policy docs
-    parser.add_argument("--days", type=int, default=30, help="Lookback days for repo runs (default 30)")
-    parser.add_argument("--limit", type=int, default=50, help="Max completed runs to time (default 50)")
-    parser.add_argument("--year", type=int, default=None, help="Billing summary year (default: API default)")
+    parser.add_argument(
+        "--days", type=int, default=30, help="Lookback days for repo runs (default 30)"
+    )
+    parser.add_argument(
+        "--limit", type=int, default=50, help="Max completed runs to time (default 50)"
+    )
+    parser.add_argument(
+        "--year", type=int, default=None, help="Billing summary year (default: API default)"
+    )
     parser.add_argument("--month", type=int, default=None, help="Billing summary month 1-12")
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
     args = parser.parse_args()

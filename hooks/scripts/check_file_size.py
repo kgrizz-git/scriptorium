@@ -34,9 +34,28 @@ WARN_AS_ERROR = os.getenv("POLICY_WARN_AS_ERROR", "0") == "1"
 
 # ── Extension sets ────────────────────────────────────────────────────────────
 SOURCE_EXTS = {
-    ".py", ".js", ".ts", ".jsx", ".tsx", ".rs", ".go", ".java",
-    ".c", ".cpp", ".h", ".hpp", ".rb", ".php", ".swift", ".kt",
-    ".scala", ".cs", ".sh", ".bash", ".zsh", ".fish",
+    ".py",
+    ".js",
+    ".ts",
+    ".jsx",
+    ".tsx",
+    ".rs",
+    ".go",
+    ".java",
+    ".c",
+    ".cpp",
+    ".h",
+    ".hpp",
+    ".rb",
+    ".php",
+    ".swift",
+    ".kt",
+    ".scala",
+    ".cs",
+    ".sh",
+    ".bash",
+    ".zsh",
+    ".fish",
 }
 DOC_EXTS = {".md", ".rst", ".txt"}
 
@@ -52,7 +71,8 @@ IGNORE_FRAGMENTS = [
     "node_modules/",
     "__pycache__/",
     ".git/",
-    "migrations/",
+    "tmp/",
+    "backups/",
     "vendor/",
     "dist/",
     "build/",

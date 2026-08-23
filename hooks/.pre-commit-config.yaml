@@ -1,20 +1,22 @@
 # .pre-commit-config.yaml
 #
-# Copy this file to your project root and run:
-#   pip install pre-commit && pre-commit install
+# Install both hook types (commit + push):
+#   pip install pre-commit
+#   pre-commit install --hook-type pre-commit --hook-type pre-push
 #
 # Update hook revisions:
 #   pre-commit autoupdate
 #
-# Run manually against all files:
+# Run manually:
 #   pre-commit run --all-files
+#   pre-commit run --all-files --hook-stage pre-push
 #
-# See hooks/README.md for selection guidance and tier explanations.
-# Remove or comment out any block that does not apply to your project.
+# See hooks/README.md and docs/ci-and-hooks.md.
+
+default_stages: [pre-commit]
 
 repos:
   # ── Harness policy checks ──────────────────────────────────────────────────
-  # These enforce policies/ rules. Paths assume you've copied hooks/ to your repo.
   - repo: local
     hooks:
       - id: check-file-size
@@ -41,6 +43,17 @@ repos:
         pass_filenames: true
         description: "Warns/blocks oversized living backlog files (policies/plans-and-todos.md)."
 
+      # Typecheck on push (slower than lint; still catches errors before CI).
+      - id: basedpyright
+        name: "types: basedpyright"
+        entry: basedpyright
+        language: python
+        additional_dependencies: [basedpyright==1.29.4]
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+        description: "Python type check (pyrightconfig.json). Also runs in CI."
+
       # Optional: uncomment if your team uses gitignored backups/ before edits
       # - id: prune-backups
       #   name: "hygiene: prune old backups/"
@@ -50,8 +63,6 @@ repos:
       #   always_run: true
 
       # Optional: cleanup hygiene check for completed work artifacts
-      # Warns when completed items linger in to_do.md, plans aren't archived,
-      # .context/ has old files, or changelog entries are missing.
       # - id: check-cleanup-hygiene
       #   name: "hygiene: cleanup completed work"
       #   entry: python hooks/scripts/check_cleanup_hygiene.py
@@ -71,13 +82,13 @@ repos:
     rev: v5.0.0
     hooks:
       - id: check-added-large-files
-        args: [--maxkb=5120]          # 5 MB hard gate; mirrors policy
+        args: [--maxkb=5120]
         name: "size: large file gate"
       - id: detect-private-key
         name: "secrets: private key detect"
       - id: check-merge-conflict
       - id: check-yaml
-        args: [--unsafe]              # remove --unsafe if you don't use YAML anchors
+        args: [--unsafe]
       - id: check-toml
       - id: check-json
       - id: trailing-whitespace
@@ -86,7 +97,7 @@ repos:
       - id: mixed-line-ending
         args: [--fix=lf]
 
-  # ── Python (remove block if not a Python project) ──────────────────────────
+  # ── Python ─────────────────────────────────────────────────────────────────
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.11.13
     hooks:
@@ -109,32 +120,3 @@ repos:
     hooks:
       - id: shellcheck
         name: "shell: shellcheck"
-
-  # ── YAML / TOML formatting ─────────────────────────────────────────────────
-  # Uncomment if you want opinionated YAML formatting:
-  # - repo: https://github.com/google/yamlfmt
-  #   rev: v0.13.0
-  #   hooks:
-  #     - id: yamlfmt
-
-  # ── SAST: Semgrep (optional, requires semgrep installed) ───────────────────
-  # Runs OWASP Top 10 + language-specific rulesets. See inventory/security-quality.md.
-  # Uncomment and choose rulesets for your language:
-  # - repo: https://github.com/semgrep/semgrep
-  #   rev: v1.112.0
-  #   hooks:
-  #     - id: semgrep
-  #       name: "sast: semgrep"
-  #       args:
-  #         - --config=p/owasp-top-ten
-  #         - --config=p/python-security    # or p/javascript, p/typescript, p/golang
-  #         - --error                       # exit non-zero on findings
-  #       additional_dependencies: []
-
-  # ── IaC scanning (uncomment if using Terraform / Kubernetes / CloudFormation)
-  # - repo: https://github.com/bridgecrewio/checkov
-  #   rev: 3.2.445
-  #   hooks:
-  #     - id: checkov
-  #       name: "iac: checkov"
-  #       args: [--quiet]

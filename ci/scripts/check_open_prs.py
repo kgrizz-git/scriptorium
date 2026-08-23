@@ -208,9 +208,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.once_per_day and not args.force:
         if stamp_is_fresh(args.stamp_file, args.max_age_hours):
-            info(
-                f"skipped (stamp fresh < {args.max_age_hours:g}h): {args.stamp_file}"
-            )
+            info(f"skipped (stamp fresh < {args.max_age_hours:g}h): {args.stamp_file}")
             return 0
 
     ensure_gh()

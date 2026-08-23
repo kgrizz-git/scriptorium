@@ -12,6 +12,7 @@ Private for now; public soon. Profile: `.context/project-profile.md` (local).
 
 **Agent sessions:** [`prompts/new-agent-session.md`](prompts/new-agent-session.md).
 **Roadmap:** [`plans/2026-08-23-product-roadmap.md`](plans/2026-08-23-product-roadmap.md) · **Backlog:** [`to_do.md`](to_do.md).
+**CI & hooks:** [`docs/ci-and-hooks.md`](docs/ci-and-hooks.md).
 **Domain menu:** [`inventory/virtual-books-flipbook.md`](inventory/virtual-books-flipbook.md).
 
 ---

@@ -3,6 +3,20 @@
 Internal / developer-facing changes that do not belong in the public
 [`CHANGELOG.md`](CHANGELOG.md). See [`policies/changelog-conventions.md`](policies/changelog-conventions.md).
 
+## [0.1.2] - 2026-08-23
+
+### Added
+- `.github/workflows/ci.yml` (policy, ruff+complexity, basedpyright, pytest+coverage report, gitleaks).
+- `.github/workflows/security.yml` (Semgrep on PR; TruffleHog weekly advisory).
+- Pre-push hook: `basedpyright` (`stages: [pre-push]`); `default_stages: [pre-commit]`.
+- Roadmap M0.5 + `to_do.md` sections for post-Tauri CI/hooks follow-ups.
+- `docs/ci-and-hooks.md`, `pyproject.toml`, `pyrightconfig.json`, `tmp/README.md`.
+
+### Changed
+- Ruff complexity rules aligned with `policies/file-size-and-counts.md`.
+- Removed `template-checks.yml` (superseded by `ci.yml`).
+- Formatted four legacy Python scripts for `ruff format --check`.
+
 ## [0.1.1] - 2026-08-23
 
 ### Added

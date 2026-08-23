@@ -10,9 +10,13 @@ directory is an **example** — copy it to your project root to activate it.
 ```bash
 pip install pre-commit
 cp hooks/.pre-commit-config.yaml .pre-commit-config.yaml  # if not already at root
-pre-commit install          # wire into git
-pre-commit run --all-files  # first-run check
+pre-commit install --hook-type pre-commit --hook-type pre-push
+pre-commit run --all-files
+pre-commit run --all-files --hook-stage pre-push   # basedpyright
 ```
+
+See [`docs/ci-and-hooks.md`](../docs/ci-and-hooks.md) for the full matrix (commit vs push vs CI)
+and follow-up stages after the Tauri app lands (M0.5).
 
 ## Files
 
@@ -31,12 +35,12 @@ The example config already includes (leave them on unless the project cannot use
 
 | Hook | Role |
 |---|---|
-| **gitleaks** | Secret scanning (hard gate) |
+| **gitleaks** | Secret scanning (hard gate, pre-commit) |
 | **detect-private-key** | Private key detect (pre-commit-hooks) |
-| **ruff** + **ruff-format** | Python lint/format |
+| **ruff** + **ruff-format** | Python lint/format + complexity |
+| **basedpyright** | Python type check (**pre-push** stage) |
 | **markdownlint** | Docs lint |
 | **shellcheck** | Shell lint |
-| Semgrep / Checkov | Commented optional SAST / IaC blocks |
 
 See [`policies/security-baseline.md`](../policies/security-baseline.md),
 [`inventory/security-quality.md`](../inventory/security-quality.md), and

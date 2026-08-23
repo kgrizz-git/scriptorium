@@ -203,7 +203,8 @@ terraform.rc
 *.log
 *.log.*
 logs/
-tmp/
+tmp/*
+!tmp/README.md
 temp/
 
 # ── Pre-commit ───────────────────────────────────────────────────────────────

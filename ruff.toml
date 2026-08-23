@@ -16,6 +16,7 @@ extend-exclude = [
     ".context",
     "notes_and_ideas",
     "worktrees",
+    "tmp",
 ]
 
 [lint]
@@ -23,8 +24,23 @@ select = [
     "E4",  # pycodestyle: imports
     "E7",  # pycodestyle: statement errors
     "E9",  # pycodestyle: runtime/syntax errors
-    "F",   # pyflakes: unused imports/variables, undefined names, f-string bugs
+    "F",   # pyflakes
+    "C901",   # cyclomatic complexity (see mccabe max below)
+    "PLR0912", # too many branches
+    "PLR0915", # too many statements
 ]
+
+[lint.mccabe]
+# policies/file-size-and-counts.md hard cap
+max-complexity = 15
+
+[lint.pylint]
+max-branches = 15
+max-statements = 100
+
+# Inherited template CLI scripts with justified complexity (do not add new entries casually).
+[lint.per-file-ignores]
+"ci/scripts/check_gha_usage.py" = ["C901", "PLR0912", "PLR0915"]
 
 [format]
 # `ruff format` is available locally via pre-commit but is NOT a CI gate: 11 of 14 existing
