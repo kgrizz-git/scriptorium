@@ -1,0 +1,15 @@
+# Changelog
+
+All notable **user-facing** changes are documented here.
+Developer-only detail lives in [`CHANGELOG.dev.md`](CHANGELOG.dev.md).
+See [`policies/changelog-conventions.md`](policies/changelog-conventions.md).
+
+The format follows [Keep a Changelog](https://keepachangelog.com/), and this project
+uses [Semantic Versioning](https://semver.org/).
+
+## [0.1.0] - 2026-08-23
+
+### Added
+- Initialized **Scriptorium** from `kgrizz-git/project-seed-template` (harness baseline:
+  prompts, policies, hooks, CI examples, inventories). Private GitHub remote created;
+  full project bootstrap still pending.
