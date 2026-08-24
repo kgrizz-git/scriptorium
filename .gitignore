@@ -40,7 +40,6 @@ dmypy.json
 .pyright/
 .ruff_cache/
 .pytype/
-pyrightconfig.json
 cython_debug/
 
 # testing

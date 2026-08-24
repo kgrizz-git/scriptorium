@@ -1,0 +1,8 @@
+{
+  "include": ["hooks/scripts", "ci/scripts", "tests"],
+  "exclude": ["**/__pycache__", ".venv", "venv", "tmp", ".context"],
+  "typeCheckingMode": "basic",
+  "pythonVersion": "3.12",
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false
+}
