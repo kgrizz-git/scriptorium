@@ -11,6 +11,8 @@ Internal / developer-facing changes that do not belong in the public
 - Semgrep (`security.yml`) scans the whole repo. Path skips are in `.semgrepignore`
   (`scaffolds/`, `ci/examples/`, scratch dirs). Live `.github/` workflows are included and
   SHA-pinned; Dependabot has an explicit 7-day `cooldown` so Semgrep’s Dependabot rule passes.
+- Changelog routing: user-visible security → `CHANGELOG.md`; CI/SAST harness →
+  `CHANGELOG.dev.md`; operational maintenance only → `MAINTENANCE.md` (no double-logging).
 
 ## [0.1.2] - 2026-08-23
 

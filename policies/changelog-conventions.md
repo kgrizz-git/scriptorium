@@ -1,6 +1,6 @@
 # Policy: Changelog Conventions (Public + Developer)
 
-Last reviewed: 2026-07-09
+Last reviewed: 2026-08-24
 Enforced by: convention + release hygiene (orchestrator / humans). See also
 [`VERSION`](../VERSION) and root [`CHANGELOG.md`](../CHANGELOG.md).
 
@@ -32,11 +32,19 @@ when you ship to others.
 **Developer `CHANGELOG.dev.md`** (or a `### Internal` subsection if you keep one file)
 
 - New or expanded tests, fixtures, coverage gates
-- CI workflow / pre-commit / policy-hook changes
+- CI workflow / pre-commit / policy-hook changes (including SAST/secret-scan tooling)
 - Inventory and prompt/template updates with no product behavior change
 - Pure refactors, renames, doc freshness, agent stub files
 
-Never put secrets, tokens, or private URLs in either changelog.
+**Security and maintenance (pick one destination; never both)**
+
+| Kind of work | Log in |
+|---|---|
+| User-visible security fix or posture change (affects callers, UX, or shipped product) | Public `CHANGELOG.md` under `### Security` (or Fixed/Changed as appropriate) |
+| Harness/CI security tooling with no product behavior change | `CHANGELOG.dev.md` |
+| Operational maintenance (infra upkeep, non-release secret/cert rotation, recurring ops hygiene) | `MAINTENANCE.md` (create if needed) |
+
+Never put secrets, tokens, or private URLs in either changelog or `MAINTENANCE.md`.
 
 ## SemVer impact
 
@@ -87,11 +95,13 @@ Example developer entry:
 
 1. Log every meaningful completion exactly once. Skip changelog or maintenance entries only for
    truly trivial edits, such as a typo or formatting-only change.
-2. When product behavior changes, update the **public** changelog under `Unreleased`; bump
-   `VERSION` when that work is released.
+2. When product behavior changes (including user-visible security fixes), update the **public**
+   changelog under `Unreleased`; bump `VERSION` when that work is released.
 3. When only harness/inventory/tests/CI change, update **developer** changelog (or
    Internal section); use `Unreleased` until you cut a release, then bump PATCH if appropriate.
-4. Use `MAINTENANCE.md` for meaningful operational maintenance or security work rather than
-   duplicating it in a changelog.
+4. Use `MAINTENANCE.md` only for operational maintenance (infra upkeep, non-release rotations,
+   recurring ops hygiene). Do **not** route user-visible security patches or CI/SAST harness
+   work there — those belong in `CHANGELOG.md` or `CHANGELOG.dev.md` per the table above.
+   Never log the same completion in both a changelog and `MAINTENANCE.md`.
 5. Do not invent user-facing bullets for internal work.
 6. Link PRs/issues when helpful; keep bullets scannable (one idea each).
