@@ -34,15 +34,17 @@ Do not mark items complete unless the evidence is concrete.
 For each completed item found (marked [x] in plans, or items that appear done):
 
 - [ ] Was it removed from `to_do.md`?
-- [ ] Was it logged in the appropriate changelog?
+- [ ] Is every meaningful completion logged once in the appropriate durable log?
   - User-visible → `CHANGELOG.md`
-  - Internal → `CHANGELOG.dev.md`
-  - Maintenance → `MAINTENANCE.md`
+  - Internal/harness, planning, or documentation → `CHANGELOG.dev.md`
+  - Maintenance/security → `MAINTENANCE.md`
+  - Plan, issue, or commit only → truly trivial edits
 - [ ] Was the related plan moved to `plans/archive/completed/` (or `superseded/` / `deferred/` as appropriate)?
 - [ ] Are references/links preserved (commit hashes, issue numbers)?
 - [ ] Was scratch cleanup performed in `.context/`?
 
-Flag items that are marked complete but missing logging steps. These should be remediated by running [`prompts/cleanup-completed-work.md`](cleanup-completed-work.md).
+Flag items that are marked complete but lack an appropriate archival or completion-log entry.
+These should be remediated by running [`prompts/cleanup-completed-work.md`](cleanup-completed-work.md).
 
 ## Output
 

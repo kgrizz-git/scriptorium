@@ -38,7 +38,7 @@ When you create, complete, defer, or supersede a plan, update [`to_do.md`](../to
 | Event | `to_do.md` action |
 |---|---|
 | New active plan | Add **Active plans** row; add to **Next Up** when ready to execute |
-| Plan complete / superseded | Remove from **Next Up** and **Active**; optional **Recently done** line |
+| Plan complete / superseded | Remove from **Next Up** and **Active**; archive the plan and log durable impact appropriately |
 | Plan deferred | Remove from **Next Up** / **Active**; link from **Icebox** or `deferred/` |
 | Session start | Read **Next Up** first; open linked plan for checklist detail |
 

@@ -85,7 +85,8 @@ existing PR over opening a duplicate. This must never block the session. See
 
 Before starting new work, check for cleanup from previous sessions:
 
-- **Completed items in `to_do.md`**: Are there items marked complete outside **Recently done**?
+- **Completed items in `to_do.md`**: Are any items marked complete? `to_do.md` is an active
+  queue, not a completion log.
 - **Next Up drift**: Does **Next Up** still list 3–5 plan pointers matching **Active plans**?
 - **Completed plans not archived**: Are there plans in `plans/` with status `complete` or `abandoned`?
 - **Cluttered `.context/`**: Are there scratch files older than 7 days that should be cleaned up?

@@ -49,7 +49,9 @@ Do not load everything. Start here, then open only what the task needs.
 6. **Temporary stays temporary.** Put scratch plans/research in `.context/` (gitignored).
 7. **Protect remotes.** Push only to this project's `origin` (`kgrizz-git/scriptorium`),
    never to `project-seed-template`.
-8. **Clean up after completion.** Remove completed TODOs, log completions appropriately,
+8. **Clean up after completion.** Remove completed TODOs from the active queue (do not use
+   `to_do.md` as history), log every meaningful completion once in the appropriate durable log,
+   and skip logging only truly trivial edits,
    archive completed plans under `plans/archive/completed/`, move superseded/abandoned plans
    to `plans/archive/superseded/`, park postponed work in `plans/deferred/`, and clean scratch
    files. See [`policies/plans-and-todos.md`](policies/plans-and-todos.md),

@@ -62,7 +62,7 @@ Review each one: resolve it, file a proper issue, or delete if obsolete.
 Check for incomplete cleanup from previous work:
 
 ```bash
-# Check for completed items still in to_do.md (outside Recently done)
+# Check for completed items still in to_do.md
 grep -n "^\- \[x\]" to_do.md TODO.md 2>/dev/null || echo "No completed items found"
 
 # Advisory backlog ↔ plans sync

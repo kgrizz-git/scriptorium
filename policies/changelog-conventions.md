@@ -40,7 +40,12 @@ Never put secrets, tokens, or private URLs in either changelog.
 
 ## SemVer impact
 
-Bump [`VERSION`](../VERSION) with the public changelog:
+Use an `## [Unreleased]` section at the top of each applicable changelog for work that has
+landed but is not released. When cutting a release, move those bullets into a dated version
+section and bump [`VERSION`](../VERSION) in the same change. Do not bump the version merely for
+an ordinary commit.
+
+Choose the release bump from the public impact:
 
 | Bump | When |
 |---|---|
@@ -80,8 +85,13 @@ Example developer entry:
 
 ## Agent rules
 
-1. When product behavior changes, update **public** changelog + `VERSION` in the same PR.
-2. When only harness/inventory/tests/CI change, update **developer** changelog (or
-   Internal section); bump PATCH if you cut a release.
-3. Do not invent user-facing bullets for internal work.
-4. Link PRs/issues when helpful; keep bullets scannable (one idea each).
+1. Log every meaningful completion exactly once. Skip changelog or maintenance entries only for
+   truly trivial edits, such as a typo or formatting-only change.
+2. When product behavior changes, update the **public** changelog under `Unreleased`; bump
+   `VERSION` when that work is released.
+3. When only harness/inventory/tests/CI change, update **developer** changelog (or
+   Internal section); use `Unreleased` until you cut a release, then bump PATCH if appropriate.
+4. Use `MAINTENANCE.md` for meaningful operational maintenance or security work rather than
+   duplicating it in a changelog.
+5. Do not invent user-facing bullets for internal work.
+6. Link PRs/issues when helpful; keep bullets scannable (one idea each).
