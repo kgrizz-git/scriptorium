@@ -21,7 +21,7 @@ jobs:
     name: Policy (file size, docs, backlog)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v5
         with:
@@ -51,7 +51,7 @@ jobs:
     name: Lint & format
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v5
         with:
@@ -92,7 +92,7 @@ jobs:
     name: Type check (Python)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v5
         with:
@@ -109,7 +109,7 @@ jobs:
     name: Tests & coverage
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v5
         with:
@@ -134,7 +134,7 @@ jobs:
     name: Secret scan (gitleaks)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
