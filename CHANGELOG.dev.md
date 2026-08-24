@@ -20,6 +20,8 @@ Internal / developer-facing changes that do not belong in the public
   checksum re-verify; natural-sort tie-break; named perf machine/corpus/fps; `lastReadPage` by
   book id; spike candidate shortlist; roadmap schema synced to M0; Rust required-check name in
   `docs/ci-and-hooks.md`.
+- Backlog system: `to_do.md` **Next Up** / **Active** / **Icebox** sections; policy + agent
+  guidance; advisory `check_todo_plan_sync.py` hook (CI + optional pre-commit).
 
 ## [0.1.1] - 2026-08-23
 

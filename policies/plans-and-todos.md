@@ -2,6 +2,7 @@
 
 Last reviewed: 2026-08-23
 Enforced by: convention + [`hooks/scripts/check_todo_limits.py`](../hooks/scripts/check_todo_limits.py)
++ [`hooks/scripts/check_todo_plan_sync.py`](../hooks/scripts/check_todo_plan_sync.py)
 + [`prompts/todo-plan-audit.md`](../prompts/todo-plan-audit.md).
 
 ## Why
@@ -55,13 +56,54 @@ helps the harness. Layout summary: [`plans/README.md`](../plans/README.md).
 
 ## Living `to_do` / `TODO` file
 
-- Keep it short: prioritized bullets or a tiny table, not a novel.
+The root backlog is an **index + queue**, not a second copy of plan checklists.
+
+### Sections (required shape)
+
+| Section | Purpose | Rules |
+|---|---|---|
+| **`## Next Up`** | Default agent work queue | **3–5** pointer lines only; each links to a `plans/` file (or is labeled **unplanned**). No full checklists. |
+| **`## Active plans`** | One row per active plan | Every `plans/*.md` except `README.md` and `orchestration-state.md` gets exactly one entry. Roadmap may live here as “living” horizon. |
+| **`## Unplanned / small`** | Rare one-session work | Empty is fine. Graduate to a plan if work exceeds ~one session. |
+| **`## Icebox`** | Deferred / someday | Pointers only. Prefer `plans/deferred/` for real designs. Soft cap **~20** lines. |
+| **`## Recently done`** | Short memory | Max **~10** items; use `[x]` here only, not in Next Up / Active. |
+
+**Next Up ⊆ Active** in spirit: Next Up is the ordered subset agents should execute; do not
+maintain a parallel task universe in the roadmap or plan bodies.
+
+### Agent rules
+
+1. **Start at Next Up.** If empty, stale, or contradictory, stop and fix `to_do.md` or ask the
+   user — do not invent work from the roadmap alone.
+2. **Creating a plan** → add an **Active plans** row and, when ready to execute, a **Next Up**
+   pointer in the same change.
+3. **Completing / deferring / superseding a plan** → remove or update its Next Up and Active
+   entries in the same change; move the plan file per lifecycle above; link deferred work from
+   **Icebox** or `plans/deferred/`.
+4. **Detail lives in plans.** Do not duplicate plan phase checklists into `to_do.md`.
+5. **Plan reviews** stay in gitignored `tmp/` — never link them from `to_do.md`.
+
+### Size and hygiene
+
+- Keep it short: prioritized pointers, not a novel.
 - Soft line cap: **150** (warn). Hard cap: **300** (block) — see hook env vars.
-- Each item should be actionable; link to a `plans/` file or issue when the work is large.
-- Prune done items into a short "Recently done" section (max ~10) or delete them after
-  they land in the changelog / git history.
+- Prune done items into **Recently done** (max ~10) or delete after they land in changelog /
+  git history.
 - Stale `TODO`/`FIXME` in **source** are audited via [`prompts/todo-plan-audit.md`](../prompts/todo-plan-audit.md)
   and [`policies/garbage-collection.md`](garbage-collection.md) — not the line-cap hook.
+
+### Automated sync (advisory)
+
+[`hooks/scripts/check_todo_plan_sync.py`](../hooks/scripts/check_todo_plan_sync.py) warns when:
+
+- Next Up count is outside **3–5** (when the section exists and active plans remain)
+- An active plan file is not linked from `to_do.md`
+- `to_do.md` links to a missing plan path
+- Archived/deferred plans appear in Next Up or Active
+- A Next Up line has no `plans/` link (unless labeled unplanned)
+- Icebox exceeds the soft cap
+
+Runs in CI (advisory). Optional locally via pre-commit.
 
 ## TODO completion workflow
 

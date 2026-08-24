@@ -21,24 +21,61 @@ def run(script: str, *args: str) -> subprocess.CompletedProcess[str]:
 
 
 class TodoLimitsTests(unittest.TestCase):
-    def tearDown(self) -> None:
-        backlog = ROOT / "to_do.md"
-        if backlog.exists():
-            backlog.unlink()
-
     def test_todo_limits_soft_warn(self) -> None:
-        backlog = ROOT / "to_do.md"
-        backlog.write_text("\n".join(str(i) for i in range(160)) + "\n", encoding="utf-8")
-        result = run("check_todo_limits.py", str(backlog))
-        self.assertEqual(result.returncode, 0)
-        self.assertIn("WARN", result.stderr)
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            backlog = Path(tmp) / "to_do.md"
+            backlog.write_text("\n".join(str(i) for i in range(160)) + "\n", encoding="utf-8")
+            result = run("check_todo_limits.py", str(backlog))
+            self.assertEqual(result.returncode, 0)
+            self.assertIn("WARN", result.stderr)
 
     def test_todo_limits_hard_error(self) -> None:
-        backlog = ROOT / "to_do.md"
-        backlog.write_text("\n".join(str(i) for i in range(310)) + "\n", encoding="utf-8")
-        result = run("check_todo_limits.py", str(backlog))
-        self.assertEqual(result.returncode, 1)
-        self.assertIn("ERROR", result.stderr)
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            backlog = Path(tmp) / "to_do.md"
+            backlog.write_text("\n".join(str(i) for i in range(310)) + "\n", encoding="utf-8")
+            result = run("check_todo_limits.py", str(backlog))
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("ERROR", result.stderr)
+
+
+class TodoPlanSyncTests(unittest.TestCase):
+    def test_sync_passes_on_repo_backlog(self) -> None:
+        result = run("check_todo_plan_sync.py", "to_do.md")
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+
+    def test_sync_warns_on_missing_active_plan_link(self) -> None:
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            plans = root / "plans"
+            plans.mkdir()
+            (plans / "2026-01-01-only.md").write_text("# only\nStatus: draft\n", encoding="utf-8")
+            (plans / "2026-01-01-orphan.md").write_text(
+                "# orphan\nStatus: draft\n", encoding="utf-8"
+            )
+            (root / "to_do.md").write_text(
+                "# backlog\n\n## Next Up (keep 3-5)\n\n"
+                "1. [Only one](plans/2026-01-01-only.md)\n\n"
+                "## Active plans\n\n| Plan | Status | Note |\n"
+                "| [Only](plans/2026-01-01-only.md) | draft | x |\n",
+                encoding="utf-8",
+            )
+            cmd = [
+                sys.executable,
+                str(ROOT / "hooks" / "scripts" / "check_todo_plan_sync.py"),
+                "to_do.md",
+                "--repo-root",
+                str(root),
+            ]
+            result = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, msg=result.stderr)
+            self.assertIn("active plan not linked", result.stderr)
+            self.assertIn("2026-01-01-orphan.md", result.stderr)
 
 
 class FileSizeTests(unittest.TestCase):

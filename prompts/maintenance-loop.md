@@ -62,8 +62,11 @@ Review each one: resolve it, file a proper issue, or delete if obsolete.
 Check for incomplete cleanup from previous work:
 
 ```bash
-# Check for completed items still in to_do.md
+# Check for completed items still in to_do.md (outside Recently done)
 grep -n "^\- \[x\]" to_do.md TODO.md 2>/dev/null || echo "No completed items found"
+
+# Advisory backlog ↔ plans sync
+python hooks/scripts/check_todo_plan_sync.py to_do.md || true
 
 # Check for completed / abandoned / deferred plans still in the active tree
 find plans/ -name "*.md" -type f ! -path "plans/archive/*" ! -path "plans/deferred/*" \

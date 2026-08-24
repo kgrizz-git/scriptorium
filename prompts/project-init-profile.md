@@ -90,16 +90,16 @@ Template version: (read from VERSION)
 
 ## Identity
 
-Project name: 
+Project name:
 Purpose: (one sentence)
 Primary type: software | research | rag-knowledge | data-pipeline | design | agentic | mixed
-Secondary type (if mixed): 
-Domain: 
+Secondary type (if mixed):
+Domain:
 
 ## Stack
 
-Languages: 
-Primary frameworks: 
+Languages:
+Primary frameworks:
 Runtime: (Python 3.x / Node 22 / etc.)
 Deployment target: local | cloud-api | serverless | edge | cli | mobile | other
 Package manager: uv | pip | poetry | npm | pnpm | cargo | other
@@ -140,12 +140,12 @@ Last indexed: (date or never)
 
 ## Architecture notes
 
-- 
-- 
+-
+-
 
 ## Open questions
 
-- 
+-
 ```
 
 ---

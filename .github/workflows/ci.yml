@@ -34,6 +34,9 @@ jobs:
       - name: Living backlog size
         run: python hooks/scripts/check_todo_limits.py to_do.md
 
+      - name: Backlog ↔ plans sync (advisory)
+        run: python hooks/scripts/check_todo_plan_sync.py to_do.md || true
+
       - name: Internal documentation links
         run: python ci/scripts/check_doc_links.py --internal-only --strict
 

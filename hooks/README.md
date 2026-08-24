@@ -26,6 +26,7 @@ and follow-up stages after the Tauri app lands (M0.5).
 | `scripts/check_file_size.py` | Enforces [`policies/file-size-and-counts.md`](../policies/file-size-and-counts.md) (soft **600** / hard **1000** lines) |
 | `scripts/check_doc_freshness.py` | Enforces [`policies/doc-freshness.md`](../policies/doc-freshness.md) |
 | `scripts/check_todo_limits.py` | Enforces living backlog size ([`policies/plans-and-todos.md`](../policies/plans-and-todos.md); soft **150** / hard **300**) |
+| `scripts/check_todo_plan_sync.py` | Advisory sync: Next Up count (3–5), active plan links, broken/archive refs, Icebox soft cap |
 | `scripts/check_cleanup_hygiene.py` | Optional hygiene check: warns when completed items linger in `to_do.md`, plans aren't archived, `.context/` has old files, or changelog entries are missing |
 | `scripts/prune_backups.sh` | Optional: delete `backups/` dirs older than last N commits |
 
@@ -86,6 +87,11 @@ POLICY_WARN_AS_ERROR=0          # set to 1 to treat soft warnings as errors
 # check_todo_limits.py
 POLICY_TODO_SOFT_LINE_CAP=150
 POLICY_TODO_HARD_LINE_CAP=300
+
+# check_todo_plan_sync.py
+POLICY_NEXT_UP_MIN=3
+POLICY_NEXT_UP_MAX=5
+POLICY_ICEBOX_SOFT_CAP=20
 
 # check_doc_freshness.py
 POLICY_FRESHNESS_WARN_DAYS=180  # warn after this many days

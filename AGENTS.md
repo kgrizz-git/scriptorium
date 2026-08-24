@@ -35,6 +35,7 @@ Do not load everything. Start here, then open only what the task needs.
 | Checking Actions minutes / storage | [`ci/scripts/check_gha_usage.py`](ci/scripts/check_gha_usage.py), [`policies/github-actions-usage.md`](policies/github-actions-usage.md) |
 | Checking open PRs after push / daily | [`ci/scripts/check_open_prs.py`](ci/scripts/check_open_prs.py), [`policies/commits-and-branches.md`](policies/commits-and-branches.md) |
 | Writing a plan / design / review | [`templates/`](templates/), [`plans/README.md`](plans/README.md), [`prompts/`](prompts/) |
+| Picking what to work on next | [`to_do.md`](to_do.md) (**Next Up** first), [`policies/plans-and-todos.md`](policies/plans-and-todos.md) |
 | Installing skills or subagents | [`inventory/catalog-skills-agents.md`](inventory/catalog-skills-agents.md) |
 | Choosing an orchestration approach | [`inventory/harness-engineering.md`](inventory/harness-engineering.md) |
 
@@ -53,11 +54,15 @@ Do not load everything. Start here, then open only what the task needs.
    to `plans/archive/superseded/`, park postponed work in `plans/deferred/`, and clean scratch
    files. See [`policies/plans-and-todos.md`](policies/plans-and-todos.md),
    [`plans/README.md`](plans/README.md), and [`prompts/cleanup-completed-work.md`](prompts/cleanup-completed-work.md).
-9. **Recommendations stand on their own.** A reader without access to any external source
+9. **Backlog discipline.** [`to_do.md`](to_do.md) is the agent-visible queue: start at **Next Up**
+   (3–5 plan pointers, not checklists). Every active `plans/*.md` file has an **Active plans**
+   row; completing or archiving a plan updates `to_do.md` in the same change. Detail stays in
+   plans; Icebox holds deferred/someday pointers.
+10. **Recommendations stand on their own.** A reader without access to any external source
    should still be able to act on what a file says. Referencing private or personal repos is
    encouraged — cite them by `repo → path` and mark them private; an agent that *does* have
    access should go read them. Just don't let the advice become unusable without them.
-10. **Progress is written down, not remembered.** Multi-phase work records state in `.context/`
+11. **Progress is written down, not remembered.** Multi-phase work records state in `.context/`
     as it goes. A session that ends mid-task leaves a `Next action`, not a gap.
 
 ## Repo map
@@ -88,6 +93,7 @@ Do not load everything. Start here, then open only what the task needs.
 |---|---|
 | Public vs developer changelogs + SemVer | [`policies/changelog-conventions.md`](policies/changelog-conventions.md) |
 | Plans lifecycle, marking done, completed / superseded / deferred folders | [`policies/plans-and-todos.md`](policies/plans-and-todos.md), [`plans/README.md`](plans/README.md) |
+| Backlog queue (`Next Up`, Active, Icebox) | [`to_do.md`](to_do.md), [`policies/plans-and-todos.md`](policies/plans-and-todos.md) |
 | Source/doc line caps (soft **600** / hard **1000**) | [`policies/file-size-and-counts.md`](policies/file-size-and-counts.md) |
 | Secret scanning + lint hooks | [`hooks/README.md`](hooks/README.md), [`policies/security-baseline.md`](policies/security-baseline.md) |
 | GitHub Actions minutes/storage (estimate before expanding CI) | [`policies/github-actions-usage.md`](policies/github-actions-usage.md), [`ci/scripts/check_gha_usage.py`](ci/scripts/check_gha_usage.py) |

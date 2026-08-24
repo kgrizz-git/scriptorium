@@ -13,7 +13,7 @@ in one place and let [`hooks/`](../hooks/) and [`ci/`](../ci/) enforce them.
 | Policy | Enforced by |
 |---|---|
 | [file-size-and-counts.md](file-size-and-counts.md) — file/function size & per-dir file counts | `hooks/scripts/check_file_size.py` |
-| [plans-and-todos.md](plans-and-todos.md) — plans lifecycle, archiving, living `to_do` caps | `hooks/scripts/check_todo_limits.py` + convention |
+| [plans-and-todos.md](plans-and-todos.md) — plans lifecycle, Next Up / Active / Icebox, living `to_do` caps | `check_todo_limits.py`, `check_todo_plan_sync.py` (advisory) + convention |
 | [changelog-conventions.md](changelog-conventions.md) — public vs developer changelogs + SemVer | convention / release hygiene |
 | [doc-freshness.md](doc-freshness.md) — `Last reviewed` markers & staleness windows | `hooks/scripts/check_doc_freshness.py` |
 | [commits-and-branches.md](commits-and-branches.md) — commit messages, branch naming, PR hygiene, advisory open-PR check | convention + `ci/scripts/check_open_prs.py` (+ optional daily workflow) |

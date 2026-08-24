@@ -6,7 +6,7 @@ describe("Worker", () => {
     const request = new Request("https://example.com/");
     const env = { ENVIRONMENT: "test" };
     const response = await worker.fetch(request, env);
-    
+
     expect(response.status).toBe(200);
     const data = await response.json();
     expect(data.message).toBe("Hello from Cloudflare Workers!");
@@ -16,7 +16,7 @@ describe("Worker", () => {
     const request = new Request("https://example.com/health");
     const env = { ENVIRONMENT: "test" };
     const response = await worker.fetch(request, env);
-    
+
     expect(response.status).toBe(200);
     const data = await response.json();
     expect(data.status).toBe("healthy");
@@ -26,7 +26,7 @@ describe("Worker", () => {
     const request = new Request("https://example.com/unknown");
     const env = { ENVIRONMENT: "test" };
     const response = await worker.fetch(request, env);
-    
+
     expect(response.status).toBe(404);
   });
 });

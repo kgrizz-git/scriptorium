@@ -70,7 +70,7 @@ When this plan is complete, follow this workflow:
    - User-visible changes → `CHANGELOG.md`
    - Internal/harness changes → `CHANGELOG.dev.md`
    - Maintenance/security → `MAINTENANCE.md`
-4. **Remove related items from `to_do.md`**
+4. **Remove related items from `to_do.md`** (**Next Up** and **Active plans**; optional **Recently done** line)
 5. **Clean up `.context/` scratch files** (archive or delete)
 6. **Update `orchestration-state.md`** if present (set phase to `complete`/`blocked`)
 7. **Reference the completion** with links to related commits/PRs

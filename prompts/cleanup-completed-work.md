@@ -5,9 +5,9 @@ Run this when completing significant work or at session end to ensure proper log
 ## Checklist
 
 ### TODO cleanup
-- [ ] Remove completed items from `to_do.md`
-- [ ] Move items to "Recently done" section (max 10) if useful for reference
-- [ ] Verify no completed items remain in main TODO list
+- [ ] Remove completed items from **Next Up** and **Active plans** in `to_do.md`
+- [ ] Move items to **Recently done** (max 10) if useful for reference
+- [ ] Verify no completed `[x]` items remain outside **Recently done**
 
 ### Completion logging
 - [ ] Log user-visible changes in `CHANGELOG.md`
@@ -33,6 +33,7 @@ Run this when completing significant work or at session end to ensure proper log
 
 ### Verification
 - [ ] Run `python hooks/scripts/check_todo_limits.py` to verify cleanup
+- [ ] Run `python hooks/scripts/check_todo_plan_sync.py` (advisory) for Next Up / Active drift
 - [ ] Run `python hooks/scripts/check_file_size.py` to check for bloat
 - [ ] Verify git status shows only intended changes
 

@@ -7,7 +7,9 @@ Last reviewed: 2026-08-23
 | Check | Pre-commit | Pre-push | CI fast (`ci.yml`) | CI slow (`security.yml`) |
 |---|---|---|---|---|
 | **File line count** | ✅ `check-file-size` | — | ✅ all tracked files | — |
-| **Complexity** | ✅ ruff `C901` / PLR | — | ✅ same | — |
+| **Living backlog size** | ✅ `check-todo-limits` | — | ✅ `to_do.md` | — |
+| **Backlog ↔ plans sync** | ✅ `check-todo-plan-sync` (advisory) | — | ✅ advisory (allowed to fail) | — |
+| **Complexity** | ✅ ruff `C901` and `PLR0912` | — | ✅ same | — |
 | **Secrets** | ✅ gitleaks + private-key | — | ✅ gitleaks full history | TruffleHog weekly (advisory) |
 | **Lint** | ✅ ruff, markdownlint, shellcheck | — | ✅ same + actionlint | — |
 | **Type check (Python)** | — | ✅ basedpyright | ✅ basedpyright | — |

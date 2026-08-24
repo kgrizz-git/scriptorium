@@ -39,20 +39,20 @@ Checklist: prompts/bootstrap-checklist.md
 
 <!-- One line per decision that a later phase or a future session depends on. -->
 
-- Data classification: 
-- Approval owner (if confidential): 
-- Required CI check names (P4 → consumed by P3): 
-- Orchestration tier: 
-- Agent tooling adopted / rejected: 
+- Data classification:
+- Approval owner (if confidential):
+- Required CI check names (P4 → consumed by P3):
+- Orchestration tier:
+- Agent tooling adopted / rejected:
 
 ## Open questions
 
-- 
+-
 
 ## Next action
 
 <!-- The single next step, so a resumed session starts here instead of re-deriving. -->
-- 
+-
 ```
 
 ---

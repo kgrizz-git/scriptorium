@@ -47,10 +47,13 @@ bash scripts/check-bootstrap.sh
 
 ## Step 2: Check for active work
 
+Read [`to_do.md`](../to_do.md) **Next Up** section first (3–5 plan pointers). Open linked plans
+for checklist detail.
+
 Check for a plans folder. If `plans/orchestration-state.md` exists, read it.
 
 Report: is there an active plan, open task, or in-flight branch?
-- If yes: summarize the next action and ask if the user wants to continue it.
+- If yes: summarize the next **Next Up** item and ask if the user wants to continue it.
 - If no: proceed to step 3.
 
 Also run:
@@ -82,7 +85,8 @@ existing PR over opening a duplicate. This must never block the session. See
 
 Before starting new work, check for cleanup from previous sessions:
 
-- **Completed items in `to_do.md`**: Are there items marked complete that should be removed or logged?
+- **Completed items in `to_do.md`**: Are there items marked complete outside **Recently done**?
+- **Next Up drift**: Does **Next Up** still list 3–5 plan pointers matching **Active plans**?
 - **Completed plans not archived**: Are there plans in `plans/` with status `complete` or `abandoned`?
 - **Cluttered `.context/`**: Are there scratch files older than 7 days that should be cleaned up?
 - **Unlogged completions**: Check recent commits vs changelogs for missing completion entries.

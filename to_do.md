@@ -2,36 +2,41 @@
 
 Last reviewed: 2026-08-23
 
-**Active plans (in order):**
-1. [`plans/2026-08-23-m0-tauri-foundation.md`](plans/2026-08-23-m0-tauri-foundation.md)
-2. [`plans/2026-08-23-pre-m1-flipbook-spike.md`](plans/2026-08-23-pre-m1-flipbook-spike.md) — blocks M1
-3. [`plans/2026-08-23-m1-scan-viewer.md`](plans/2026-08-23-m1-scan-viewer.md)
+Agents: start at **Next Up** (3–5 pointer lines). Detail lives in linked plans, not here.
+Policy: [`policies/plans-and-todos.md`](policies/plans-and-todos.md).
 
-**Roadmap:** [`plans/2026-08-23-product-roadmap.md`](plans/2026-08-23-product-roadmap.md)
+## Next Up (keep 3–5; pointers only — not full checklists)
 
-## Now
+1. [M0 Tauri foundation](plans/2026-08-23-m0-tauri-foundation.md) — Phase 1 scaffold + data architecture
+2. [Pre-M1 flipbook spike](plans/2026-08-23-pre-m1-flipbook-spike.md) — ADR gates G1–G5 after M0 window exists
+3. [M1 scan viewer](plans/2026-08-23-m1-scan-viewer.md) — blocked on spike ADR; acceptance A1–A9
 
-- [ ] Execute M0 (revised): scaffold, data architecture, schema+JSON Schema, Rust CI, Cargo.lock
-- [ ] Execute pre-M1 flipbook spike + ADR (gates G1–G5)
-- [ ] Execute M1 after spike (binary acceptance A1–A9)
-- [ ] Second plan review (opencode ox-alpha-free) — notes in `tmp/` only, do not link
+## Active plans
 
-## Next after app exists (M0.5)
+| Plan | Status | Note |
+|---|---|---|
+| [Product roadmap](plans/2026-08-23-product-roadmap.md) | living | M0–M8 horizon; not a task queue |
+| [M0 Tauri foundation](plans/2026-08-23-m0-tauri-foundation.md) | draft | Scaffold, schema v1, Rust CI, Cargo.lock |
+| [Pre-M1 flipbook spike](plans/2026-08-23-pre-m1-flipbook-spike.md) | draft | Blocks M1 |
+| [M1 scan viewer](plans/2026-08-23-m1-scan-viewer.md) | draft | First product slice after M0 + spike |
 
-- [ ] TS lint pre-push; Vitest coverage gates
-- [ ] Rust coverage when useful; Python harness fail_under when in-process tests exist
-- [ ] Dependabot before public; CodeQL optional; GitHub required checks
+## Unplanned / small
 
-## Later product
+_(none — use this section only for work that fits in one session and does not warrant a plan.)_
 
-| Milestone | Summary |
-|---|---|
-| **M2** | OCR on scans — search, select/copy |
-| **M3–M4** | Text mode / hybrid |
-| **M5–M6** | Library / authoring hotspots |
-| **M7–M8** | Polish, web/PWA, IIIF |
+## Icebox
 
-## Recently done
+Pointers only — promote via [`prompts/backlog-to-plans.md`](prompts/backlog-to-plans.md) or move to
+[`plans/deferred/`](plans/deferred/) when a real plan exists.
+
+- **M0.5 harness follow-ups** — TS lint pre-push, Vitest coverage gates, Dependabot/CodeQL →
+  [roadmap M0.5](plans/2026-08-23-product-roadmap.md#m05--harness-follow-ups-after-tauri-scaffold--when-app-code-exists)
+- **Later product (M2–M8)** — OCR, text/hybrid modes, library, hotspots, polish, web/IIIF →
+  [roadmap](plans/2026-08-23-product-roadmap.md)
+
+## Recently done (≤10)
 
 - [x] Plan folder layout + AGENTS guidance; mvp-scaffold → archive/superseded
 - [x] Revise M0/M1 + add pre-M1 spike from agreed Hy3 findings
+- [x] Fold ox-alpha plan review into M0/M1/spike/roadmap (notes in gitignored `tmp/`)
+- [x] Backlog system: Next Up / Active / Icebox + advisory sync hook

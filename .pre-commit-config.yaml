@@ -43,6 +43,15 @@ repos:
         pass_filenames: true
         description: "Warns/blocks oversized living backlog files (policies/plans-and-todos.md)."
 
+      - id: check-todo-plan-sync
+        name: "policy: to_do ↔ plans sync"
+        entry: python hooks/scripts/check_todo_plan_sync.py
+        language: python
+        files: '(^|/)(to_do|TODO|todo|TO_DO|backlog)\.md$|^plans/.*\.md$'
+        pass_filenames: false
+        always_run: false
+        description: "Advisory: Next Up count, active plan links, stale archive refs (policies/plans-and-todos.md)."
+
       # Typecheck on push (slower than lint; still catches errors before CI).
       - id: basedpyright
         name: "types: basedpyright"

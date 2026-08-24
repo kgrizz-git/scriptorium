@@ -28,14 +28,29 @@ Do **not** delete archived plans. Move them; do not rewrite history in place.
 | [`2026-08-23-m1-scan-viewer.md`](2026-08-23-m1-scan-viewer.md) | First product milestone (after M0 + spike) |
 
 Superseded: [`archive/superseded/2026-08-23-mvp-scaffold.md`](archive/superseded/2026-08-23-mvp-scaffold.md).
-Backlog index: [`to_do.md`](../to_do.md).
+Backlog index: [`to_do.md`](../to_do.md) — **Next Up** (3–5 pointers) → **Active plans** → **Icebox**.
+
+## Backlog sync (agents)
+
+When you create, complete, defer, or supersede a plan, update [`to_do.md`](../to_do.md) in the
+**same change**:
+
+| Event | `to_do.md` action |
+|---|---|
+| New active plan | Add **Active plans** row; add to **Next Up** when ready to execute |
+| Plan complete / superseded | Remove from **Next Up** and **Active**; optional **Recently done** line |
+| Plan deferred | Remove from **Next Up** / **Active**; link from **Icebox** or `deferred/` |
+| Session start | Read **Next Up** first; open linked plan for checklist detail |
+
+Do not duplicate plan checklists into `to_do.md`. Policy:
+[`policies/plans-and-todos.md`](../policies/plans-and-todos.md).
 
 ## Lifecycle (agents)
 
-1. New work → `plans/YYYY-MM-DD-slug.md` with `Status: draft`.
-2. On approval → `approved` / `in-progress`.
-3. On finish → `complete`, move to `archive/completed/`.
-4. On replace/stop → `abandoned` (note why), move to `archive/superseded/`.
-5. On postpone → `deferred` (or keep Status and move to `deferred/`), link from `to_do.md`.
+1. New work → `plans/YYYY-MM-DD-slug.md` with `Status: draft`; add row to `to_do.md` **Active plans**.
+2. On approval → `approved` / `in-progress`; add to **Next Up** when executing (keep 3–5 items).
+3. On finish → `complete`, move to `archive/completed/`; remove from **Next Up** / **Active**.
+4. On replace/stop → `abandoned` (note why), move to `archive/superseded/`; update `to_do.md`.
+5. On postpone → `deferred`, move to `deferred/`; link from **Icebox** in `to_do.md`.
 
 Mark checklist items `[x]` only when verified. See policy for TODO/changelog cleanup.
