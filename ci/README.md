@@ -6,7 +6,7 @@ Guidance for selecting, structuring, and gating CI checks. Example workflows liv
 `ci/examples/` — copy the ones you need to `.github/workflows/` to activate them.
 
 This repository also ships a small required-check candidate at
-[`.github/workflows/template-checks.yml`](../.github/workflows/template-checks.yml). It validates
+[`.github/workflows/ci.yml`](../.github/workflows/ci.yml). It validates
 the template's maintained Markdown, workflow examples, and hook scripts; it is not an
 application test, type-check, coverage, or dependency-audit workflow.
 
