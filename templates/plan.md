@@ -66,10 +66,11 @@ When this plan is complete, follow this workflow:
 1. **Update plan status** to `complete` or `abandoned`
 2. **Move this file** to `plans/archive/completed/` (or `plans/archive/superseded/` if abandoned;
    `plans/deferred/` if postponed). See [`../plans/README.md`](../plans/README.md).
-3. **Log every meaningful completion once** (skip only truly trivial edits):
-   - User-visible changes → `CHANGELOG.md`
-   - Internal/harness changes → `CHANGELOG.dev.md`
-   - Maintenance/security → `MAINTENANCE.md`
+3. **Log every meaningful completion once** (skip only truly trivial edits; public impact
+   first — see [`../policies/changelog-conventions.md`](../policies/changelog-conventions.md)):
+   - User-visible changes (incl. caller-facing security) → `CHANGELOG.md`
+   - Internal/harness/CI tooling → `CHANGELOG.dev.md`
+   - Operational maintenance → `MAINTENANCE.md`
 4. **Remove related items from `to_do.md`** (**Next Up** and **Active plans**); it is not a
    completion-history file.
 5. **Clean up `.context/` scratch files** (archive or delete)

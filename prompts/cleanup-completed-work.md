@@ -9,8 +9,9 @@ Run this when completing significant work or at session end to ensure proper log
 - [ ] Verify no completed `[x]` items remain in `to_do.md`; it is an active queue, not history
 
 ### Completion logging
-- [ ] Log every meaningful completion once: `CHANGELOG.md` (user-visible), `CHANGELOG.dev.md`
-  (internal/harness, planning, or documentation), or `MAINTENANCE.md` (maintenance/security)
+- [ ] Log every meaningful completion once: `CHANGELOG.md` (user-visible, incl. caller-facing
+  security), `CHANGELOG.dev.md` (internal/harness/CI tooling, planning, or documentation), or
+  `MAINTENANCE.md` (operational maintenance only — not product security releases)
 - [ ] Use plan/issue/commit only for a truly trivial edit (such as a typo or formatting-only
   change)
 - [ ] Reference the source (plan, issue, or commit) for each log entry
@@ -42,9 +43,9 @@ Run this when completing significant work or at session end to ensure proper log
 Use this tree to decide where to log completed work:
 
 ```
-User-visible impact?
+User-visible impact? (features, UX, caller-facing security)
 ├─ Yes → CHANGELOG.md + VERSION bump if appropriate
-└─ No → Maintenance/security work?
+└─ No → Operational maintenance? (infra, non-release rotations, ops hygiene)
     ├─ Yes → MAINTENANCE.md
     └─ No → Meaningful internal, documentation, planning, or harness work?
         ├─ Yes → CHANGELOG.dev.md
@@ -54,8 +55,10 @@ User-visible impact?
 ### Examples
 
 **User-visible feature:** "Added user authentication" → `CHANGELOG.md`
+**Caller-facing security fix:** "Patched session fixation in login" → `CHANGELOG.md` (`### Security`)
+**CI/SAST harness:** "Pinned Actions SHAs; Semgrep exclude scaffolds" → `CHANGELOG.dev.md`
 **Internal tooling:** "Updated pre-commit hooks" → `CHANGELOG.dev.md`
-**Security fix:** "Rotated API keys" → `CHANGELOG.md` (if user-facing) or `MAINTENANCE.md` (if internal)
+**Operational security maintenance:** "Rotated staging API keys (no product release)" → `MAINTENANCE.md`
 **Documentation:** "Updated API docs" → `CHANGELOG.dev.md`
 **Bug fix:** "Fixed login redirect loop" → `CHANGELOG.md`
 

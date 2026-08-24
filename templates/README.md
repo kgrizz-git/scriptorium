@@ -1,6 +1,6 @@
 # Templates
 
-Last reviewed: 2026-08-11
+Last reviewed: 2026-08-24
 
 Fill-in artifact forms. Use these when you need a structured output document — a plan to
 review and approve, a completed assessment to store, an ADR to record a decision.
@@ -22,6 +22,7 @@ For the *prompts* that instruct an agent to produce these outputs, see [`prompts
 | [release-checklist.md](release-checklist.md) | Preparing a versioned release, tag, deployment, or handoff |
 | [bug-review.md](bug-review.md) | Documenting a bug investigation and its fix |
 | [incident-review.md](incident-review.md) | Reviewing a production incident, outage, data issue, or user-impacting event |
+| [maintenance-log.md](maintenance-log.md) | Seed for root `MAINTENANCE.md` — operational maintenance only (not changelogs) |
 | [security-review.md](security-review.md) | Scoped security assessment of code, config, or a change |
 | [safety-review.md](safety-review.md) | Assessing AI/ML model behavior, outputs, or deployment safety |
 | [qi-assessment.md](qi-assessment.md) | Quality improvement scan — prioritized findings without refactoring |

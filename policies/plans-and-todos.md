@@ -1,6 +1,6 @@
 # Policy: Plans, TODOs, Archiving, and Completion
 
-Last reviewed: 2026-08-23
+Last reviewed: 2026-08-24
 Enforced by: convention + [`hooks/scripts/check_todo_limits.py`](../hooks/scripts/check_todo_limits.py)
 + [`hooks/scripts/check_todo_plan_sync.py`](../hooks/scripts/check_todo_plan_sync.py)
 + [`prompts/todo-plan-audit.md`](../prompts/todo-plan-audit.md).
@@ -110,10 +110,12 @@ Runs in CI (advisory). Optional locally via pre-commit.
 When marking a TODO item complete:
 
 1. **Remove it from `to_do.md`**. The file is an actionable queue, not a completion log.
-2. **Log every meaningful completion once** based on work type:
-   - **User-visible changes** → Add to `CHANGELOG.md` (public)
-   - **Internal/harness changes** → Add to `CHANGELOG.dev.md`
-   - **Maintenance/cleanup** → Add to `MAINTENANCE.md` (create if needed)
+2. **Log every meaningful completion once** based on work type (public impact first; see
+   [`changelog-conventions.md`](changelog-conventions.md)):
+   - **User-visible changes** (incl. caller-facing security) → `CHANGELOG.md` (public)
+   - **Internal/harness changes** (incl. CI/SAST tooling) → `CHANGELOG.dev.md`
+   - **Operational maintenance** (infra upkeep, non-release rotations, ops hygiene) →
+     `MAINTENANCE.md` (create if needed)
    - Skip logging only for a truly trivial edit (for example, a typo or formatting-only change);
      the plan, issue, or commit is then sufficient.
 3. **Reference the source** - link to plan, issue, or commit when a changelog or maintenance
@@ -124,9 +126,9 @@ When marking a TODO item complete:
 ### Completion logging decision tree
 
 ```
-User-visible impact?
+User-visible impact? (features, UX, caller-facing security)
 ├─ Yes → CHANGELOG.md + VERSION bump if appropriate
-└─ No → Maintenance/security work?
+└─ No → Operational maintenance? (infra, non-release rotations, ops hygiene)
     ├─ Yes → MAINTENANCE.md
     └─ No → Meaningful internal, documentation, planning, or harness work?
         ├─ Yes → CHANGELOG.dev.md

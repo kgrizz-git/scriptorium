@@ -35,9 +35,9 @@ For each completed item found (marked [x] in plans, or items that appear done):
 
 - [ ] Was it removed from `to_do.md`?
 - [ ] Is every meaningful completion logged once in the appropriate durable log?
-  - User-visible → `CHANGELOG.md`
-  - Internal/harness, planning, or documentation → `CHANGELOG.dev.md`
-  - Maintenance/security → `MAINTENANCE.md`
+  - User-visible (incl. caller-facing security) → `CHANGELOG.md`
+  - Internal/harness/CI tooling, planning, or documentation → `CHANGELOG.dev.md`
+  - Operational maintenance only → `MAINTENANCE.md`
   - Plan, issue, or commit only → truly trivial edits
 - [ ] Was the related plan moved to `plans/archive/completed/` (or `superseded/` / `deferred/` as appropriate)?
 - [ ] Are references/links preserved (commit hashes, issue numbers)?
