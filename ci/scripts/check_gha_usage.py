@@ -439,6 +439,7 @@ def main() -> int:
 
     if do_account:
         login = args.account or resolve_viewer_login()
+        repo_filter: str | None = None
         if not login:
             partial = True
             out["account_report"] = {

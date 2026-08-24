@@ -42,14 +42,14 @@ import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, NoReturn
 
 DEFAULT_STAMP = Path(".context") / "open-prs-check.stamp"
 DEFAULT_MAX_AGE_HOURS = 24
 API_VERSION = "2022-11-28"
 
 
-def die(msg: str, code: int = 1) -> None:
+def die(msg: str, code: int = 1) -> NoReturn:
     print(f"[open-prs] ERROR: {msg}", file=sys.stderr)
     sys.exit(code)
 
