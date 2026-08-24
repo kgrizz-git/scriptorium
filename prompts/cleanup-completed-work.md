@@ -6,14 +6,14 @@ Run this when completing significant work or at session end to ensure proper log
 
 ### TODO cleanup
 - [ ] Remove completed items from **Next Up** and **Active plans** in `to_do.md`
-- [ ] Move items to **Recently done** (max 10) if useful for reference
-- [ ] Verify no completed `[x]` items remain outside **Recently done**
+- [ ] Verify no completed `[x]` items remain in `to_do.md`; it is an active queue, not history
 
 ### Completion logging
-- [ ] Log user-visible changes in `CHANGELOG.md`
-- [ ] Log internal/harness changes in `CHANGELOG.dev.md`
-- [ ] Log maintenance/security work in `MAINTENANCE.md` (create if needed)
-- [ ] Reference the source (plan, issue, or commit) for each logged item
+- [ ] Log every meaningful completion once: `CHANGELOG.md` (user-visible), `CHANGELOG.dev.md`
+  (internal/harness, planning, or documentation), or `MAINTENANCE.md` (maintenance/security)
+- [ ] Use plan/issue/commit only for a truly trivial edit (such as a typo or formatting-only
+  change)
+- [ ] Reference the source (plan, issue, or commit) for each log entry
 
 ### Plan archival
 - [ ] Move completed plans to `plans/archive/completed/` (superseded → `archive/superseded/`; deferred → `plans/deferred/`)
@@ -44,11 +44,11 @@ Use this tree to decide where to log completed work:
 ```
 User-visible impact?
 ├─ Yes → CHANGELOG.md + VERSION bump if appropriate
-└─ No → Internal-only?
-    ├─ Yes → CHANGELOG.dev.md
-    └─ No → Maintenance/security?
-        ├─ Yes → MAINTENANCE.md
-        └─ No → Document only → No changelog needed
+└─ No → Maintenance/security work?
+    ├─ Yes → MAINTENANCE.md
+    └─ No → Meaningful internal, documentation, planning, or harness work?
+        ├─ Yes → CHANGELOG.dev.md
+        └─ No → Truly trivial edit → plan, issue, or commit only
 ```
 
 ### Examples
@@ -61,7 +61,7 @@ User-visible impact?
 
 ## Before declaring cleanup complete
 
-- [ ] All completed work is properly logged
+- [ ] Every meaningful completion is logged once in the appropriate durable log
 - [ ] No orphaned TODO items remain
 - [ ] Plans are archived with correct status
 - [ ] Scratch files are cleaned up

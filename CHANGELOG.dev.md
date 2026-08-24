@@ -3,6 +3,15 @@
 Internal / developer-facing changes that do not belong in the public
 [`CHANGELOG.md`](CHANGELOG.md). See [`policies/changelog-conventions.md`](policies/changelog-conventions.md).
 
+## [Unreleased]
+
+### Changed
+- `to_do.md` is now strictly actionable: completed work is removed rather than retained in a
+  `Recently done` section, and every meaningful completion is logged once.
+- Semgrep (`security.yml`) scans the whole repo. Path skips are in `.semgrepignore`
+  (`scaffolds/`, `ci/examples/`, scratch dirs). Live `.github/` workflows are included and
+  SHA-pinned; Dependabot has an explicit 7-day `cooldown` so Semgrep’s Dependabot rule passes.
+
 ## [0.1.2] - 2026-08-23
 
 ### Added

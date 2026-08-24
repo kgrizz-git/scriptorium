@@ -66,7 +66,6 @@ The root backlog is an **index + queue**, not a second copy of plan checklists.
 | **`## Active plans`** | One row per active plan | Every `plans/*.md` except `README.md` and `orchestration-state.md` gets exactly one entry. Roadmap may live here as “living” horizon. |
 | **`## Unplanned / small`** | Rare one-session work | Empty is fine. Graduate to a plan if work exceeds ~one session. |
 | **`## Icebox`** | Deferred / someday | Pointers only. Prefer `plans/deferred/` for real designs. Soft cap **~20** lines. |
-| **`## Recently done`** | Short memory | Max **~10** items; use `[x]` here only, not in Next Up / Active. |
 
 **Next Up ⊆ Active** in spirit: Next Up is the ordered subset agents should execute; do not
 maintain a parallel task universe in the roadmap or plan bodies.
@@ -79,7 +78,7 @@ maintain a parallel task universe in the roadmap or plan bodies.
    pointer in the same change.
 3. **Completing / deferring / superseding a plan** → remove or update its Next Up and Active
    entries in the same change; move the plan file per lifecycle above; link deferred work from
-   **Icebox** or `plans/deferred/`.
+   **Icebox** or `plans/deferred/`. Do not retain completed work in `to_do.md` as history.
 4. **Detail lives in plans.** Do not duplicate plan phase checklists into `to_do.md`.
 5. **Plan reviews** stay in gitignored `tmp/` — never link them from `to_do.md`.
 
@@ -87,8 +86,9 @@ maintain a parallel task universe in the roadmap or plan bodies.
 
 - Keep it short: prioritized pointers, not a novel.
 - Soft line cap: **150** (warn). Hard cap: **300** (block) — see hook env vars.
-- Prune done items into **Recently done** (max ~10) or delete after they land in changelog /
-  git history.
+- Delete done items from `to_do.md` after their completion is logged. Log every meaningful
+  completion once; an archived plan, issue, or commit alone is sufficient only for a truly
+  trivial edit.
 - Stale `TODO`/`FIXME` in **source** are audited via [`prompts/todo-plan-audit.md`](../prompts/todo-plan-audit.md)
   and [`policies/garbage-collection.md`](garbage-collection.md) — not the line-cap hook.
 
@@ -109,24 +109,28 @@ Runs in CI (advisory). Optional locally via pre-commit.
 
 When marking a TODO item complete:
 
-1. **Remove it from `to_do.md`** (or move to "Recently done" section, max 10 items)
-2. **Log the completion** based on work type:
+1. **Remove it from `to_do.md`**. The file is an actionable queue, not a completion log.
+2. **Log every meaningful completion once** based on work type:
    - **User-visible changes** → Add to `CHANGELOG.md` (public)
    - **Internal/harness changes** → Add to `CHANGELOG.dev.md`
    - **Maintenance/cleanup** → Add to `MAINTENANCE.md` (create if needed)
-3. **Reference the source** - link to plan, issue, or commit that completed it
-4. **Archive related artifacts** - move scratch notes from `.context/` to deletion
+   - Skip logging only for a truly trivial edit (for example, a typo or formatting-only change);
+     the plan, issue, or commit is then sufficient.
+3. **Reference the source** - link to plan, issue, or commit when a changelog or maintenance
+   entry is created.
+4. **Archive related artifacts** - archive a completed plan; delete stale `.context/` scratch
+   notes or promote valuable findings to durable documentation.
 
 ### Completion logging decision tree
 
 ```
 User-visible impact?
 ├─ Yes → CHANGELOG.md + VERSION bump if appropriate
-└─ No → Internal-only?
-    ├─ Yes → CHANGELOG.dev.md
-    └─ No → Maintenance/security?
-        ├─ Yes → MAINTENANCE.md
-        └─ No → Document only → No changelog needed
+└─ No → Maintenance/security work?
+    ├─ Yes → MAINTENANCE.md
+    └─ No → Meaningful internal, documentation, planning, or harness work?
+        ├─ Yes → CHANGELOG.dev.md
+        └─ No → Truly trivial edit → plan, issue, or commit only
 ```
 
 Use [`prompts/cleanup-completed-work.md`](../prompts/cleanup-completed-work.md) for systematic cleanup.

@@ -33,10 +33,3 @@ Pointers only — promote via [`prompts/backlog-to-plans.md`](prompts/backlog-to
   [roadmap M0.5](plans/2026-08-23-product-roadmap.md#m05--harness-follow-ups-after-tauri-scaffold--when-app-code-exists)
 - **Later product (M2–M8)** — OCR, text/hybrid modes, library, hotspots, polish, web/IIIF →
   [roadmap](plans/2026-08-23-product-roadmap.md)
-
-## Recently done (≤10)
-
-- [x] Plan folder layout + AGENTS guidance; mvp-scaffold → archive/superseded
-- [x] Revise M0/M1 + add pre-M1 spike from agreed Hy3 findings
-- [x] Fold ox-alpha plan review into M0/M1/spike/roadmap (notes in gitignored `tmp/`)
-- [x] Backlog system: Next Up / Active / Icebox + advisory sync hook

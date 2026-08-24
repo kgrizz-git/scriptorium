@@ -1,0 +1,30 @@
+# Semgrep path ignores (gitignore syntax).
+#
+# A repo-root .semgrepignore replaces Semgrep's built-in defaults, which skip
+# tests/. We want tests/ and future app source scanned; we skip templates,
+# scratch, and generated trees. Live .github/ workflows are scanned (SHA-pinned).
+
+# VCS / generated (Semgrep defaults minus test/ and tests/)
+.git/
+.svn/
+.hg/
+build/
+vendor/
+dist/
+*.min.js
+.env/
+.tox/
+node_modules/
+.npm/
+.yarn/
+.venv/
+target/
+
+# Scratch (also gitignored)
+tmp/
+.context/
+backups/
+
+# Example templates, not product code
+scaffolds/
+ci/examples/
