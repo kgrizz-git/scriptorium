@@ -1,6 +1,6 @@
 # CI Guidance
 
-Last reviewed: 2026-08-23
+Last reviewed: 2026-08-24
 
 Guidance for selecting, structuring, and gating CI checks. Example workflows live in
 `ci/examples/` — copy the ones you need to `.github/workflows/` to activate them.
@@ -51,8 +51,9 @@ the PR lane and make them required default-branch checks. See
    workflow times in half.
 4. **Least-privilege tokens.** Set `permissions:` explicitly at the workflow and job
    level; default to `contents: read`.
-5. **Pin action versions.** Use `uses: actions/checkout@v4` with a SHA comment for
-   high-value steps; prevents supply-chain drift.
+5. **Pin action versions.** Pin every `uses:` to a full 40-character commit SHA with a
+   trailing version comment (`uses: actions/checkout@<sha> # v4.4.0`) so Dependabot can
+   still bump them. Mutable tags (`@v4`, `@main`) fail the Semgrep gate.
 6. **Dependabot for Actions.** Enable `package-ecosystem: github-actions` in
    `dependabot.yml` so action versions stay current.
 7. **Estimate minutes/storage** when changing triggers, schedules, matrices, runners,

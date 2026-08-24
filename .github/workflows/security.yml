@@ -1,5 +1,6 @@
 # security.yml — slow-lane SAST and deep secret history scan.
 # Semgrep gates PRs; TruffleHog runs weekly (advisory).
+# Action refs are pinned to full commit SHAs; trailing comments keep Dependabot updates working.
 
 name: Security
 
@@ -21,8 +22,9 @@ jobs:
     container:
       image: semgrep/semgrep
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
+      # Scan the repo; path skips live in .semgrepignore (templates + scratch).
       - name: OWASP + Python + JavaScript rulesets
         run: |
           semgrep scan \
@@ -30,21 +32,18 @@ jobs:
             --config=p/python \
             --config=p/javascript \
             --error \
-            --exclude='tmp/' \
-            --exclude='.context/' \
-            --exclude='backups/' \
-            hooks/scripts ci/scripts tests scaffolds
+            .
 
   trufflehog:
     name: Secret history — TruffleHog
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
 
-      - uses: trufflesecurity/trufflehog@main
+      - uses: trufflesecurity/trufflehog@bcfcf73aaf4759d4dadc2783177c245a02792318 # v3.97.0
         with:
           path: ./
           base: ${{ github.event.repository.default_branch }}
