@@ -1,6 +1,12 @@
 # Maintenance Log
 
-This file tracks maintenance activities, security updates, and operational tasks that don't belong in the public changelog.
+Last reviewed: 2026-08-24
+
+Copy to repo-root `MAINTENANCE.md` when needed. Tracks **operational** maintenance only
+(infra upkeep, non-release rotations, recurring ops hygiene). Completion logging rules:
+[`../policies/changelog-conventions.md`](../policies/changelog-conventions.md).
+
+Do not put secrets, tokens, or private URLs here.
 
 ## [YYYY-MM-DD] - Session Type
 
@@ -16,9 +22,9 @@ This file tracks maintenance activities, security updates, and operational tasks
 - [issue description] - [severity] - [planned action/timeline]
 - [issue description] - [severity] - [planned action/timeline]
 
-### Security Notes
-- [security-related maintenance] - [context] (ref: [commit/issue])
-- [security-related maintenance] - [context] (ref: [commit/issue])
+### Operational security
+- [non-release rotation, cert renewal, access audit, etc.] - [context] (ref: [commit/issue])
+- [task] - [context] (ref: [commit/issue])
 
 ### Infrastructure/Tools
 - [infrastructure change] - [impact] (ref: [commit/issue])
@@ -32,24 +38,26 @@ This file tracks maintenance activities, security updates, and operational tasks
 
 ## Usage Guidelines
 
-### When to use this log
-- Security updates and patches that don't affect user-facing behavior
-- Infrastructure changes, tool updates, and dependency maintenance
-- Performance tuning and optimization work
-- Backup/restore testing and verification
-- Compliance and audit activities
-- Internal process improvements
+Log each meaningful completion **once**. Public impact first.
 
-### When to use CHANGELOG.dev.md instead
-- Changes to the agent harness, prompts, or skills
-- Updates to CI/CD workflows and hooks
+### When to use this log (`MAINTENANCE.md`)
+- Infra upkeep and environment/ops changes with no product release
+- Non-release secret/cert rotation or access hygiene (no secret values in the log)
+- Backup/restore testing and verification
+- Compliance/audit ops tasks and recurring process hygiene
+- Performance tuning that is ops-only (not a user-visible product change)
+
+### When to use `CHANGELOG.dev.md` instead
+- Agent harness, prompts, policies, or skills
+- CI/CD workflows, hooks, SAST/secret-scan tooling (e.g. Semgrep, Action SHA pins)
 - Documentation-only changes
 - Test coverage improvements
 - Code refactoring with no user impact
 
-### When to use CHANGELOG.md instead
+### When to use `CHANGELOG.md` instead
 - User-visible features and changes
 - Bug fixes that affect users
+- Caller-facing security fixes or product security posture (`### Security`)
 - Breaking changes or migration requirements
 - Performance improvements users notice
 
