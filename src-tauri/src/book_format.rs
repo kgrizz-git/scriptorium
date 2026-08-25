@@ -3,8 +3,14 @@
 //! Mirrors [`docs/book-format.schema.json`]. Serde handles wire shape; call
 //! [`BookMeta::validate`] after deserialize so cross-field rules the schema
 //! cannot express (e.g. `lastReadPage` vs `pages.length`) are enforced.
+//!
+//! Unknown JSON keys are rejected at deserialize time (`deny_unknown_fields`).
 
 use serde::{Deserialize, Serialize};
+
+/// Book `id` slug pattern — must stay in lockstep with
+/// `docs/book-format.schema.json` `properties.id.pattern` and Python `BOOK_ID_RE`.
+pub const BOOK_ID_PATTERN: &str = r"^[a-z0-9][a-z0-9._-]{0,63}$";
 
 /// How a book renders. Default is `Scan`.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -105,7 +111,7 @@ impl std::error::Error for BookMetaError {}
 
 /// One page entry in `meta.json`.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PageEntry {
     pub index: u32,
     pub file: String,
@@ -147,7 +153,7 @@ impl PageEntry {
 
 /// Top-level `meta.json` document.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct BookMeta {
     pub format_version: u32,
     pub id: String,
@@ -180,6 +186,7 @@ impl BookMeta {
                 width: 1200,
                 height: 1600,
                 byte_size: 245_760,
+                // Shape-only digest for structural tests — not the hash of a real 1200×1600 image.
                 sha256: "b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c".into(),
                 page_label: None,
                 storage: StorageMode::Copied,
@@ -446,24 +453,174 @@ mod tests {
     }
 
     #[test]
-    fn validate_rejects_page_index_mismatch() {
+    fn book_id_pattern_matches_schema() {
+        let schema = load_schema();
+        let pattern = schema["properties"]["id"]["pattern"]
+            .as_str()
+            .expect("schema id.pattern must be a string");
+        assert_eq!(
+            pattern, BOOK_ID_PATTERN,
+            "Rust BOOK_ID_PATTERN must match docs/book-format.schema.json"
+        );
+    }
+
+    #[test]
+    fn deserialize_rejects_unknown_top_level_field() {
+        let mut json = serde_json::to_value(BookMeta::sample()).unwrap();
+        json.as_object_mut()
+            .unwrap()
+            .insert("unknownField".into(), serde_json::json!(1));
+        assert!(
+            serde_json::from_value::<BookMeta>(json).is_err(),
+            "unknown top-level keys must fail deserialize"
+        );
+    }
+
+    #[test]
+    fn deserialize_rejects_unknown_page_field() {
+        let mut json = serde_json::to_value(BookMeta::sample()).unwrap();
+        json["pages"][0]["extra"] = serde_json::json!("nope");
+        assert!(
+            serde_json::from_value::<BookMeta>(json).is_err(),
+            "unknown page keys must fail deserialize"
+        );
+    }
+
+    #[test]
+    fn validate_rejects_unsupported_format_version() {
         let mut book = BookMeta::sample();
-        book.pages.push(PageEntry {
-            index: 0, // should be 1
+        book.format_version = 2;
+        match book.validate() {
+            Err(BookMetaError::UnsupportedFormatVersion(2)) => {}
+            other => panic!("expected UnsupportedFormatVersion(2), got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn validate_rejects_empty_pages() {
+        let mut book = BookMeta::sample();
+        book.pages.clear();
+        match book.validate() {
+            Err(BookMetaError::EmptyPages) => {}
+            other => panic!("expected EmptyPages, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn validate_page_file_rejects_unsafe_paths() {
+        let cases = [
+            ("", "empty path"),
+            ("/etc/passwd", "absolute path"),
+            (r"pages\000.jpg", "backslash"),
+            ("a//b", "empty segment"),
+            ("pages/..", "parent segment"),
+            ("pages/foo bar.jpg", "space"),
+            ("pages/foo:bar.jpg", "colon"),
+            ("pages/über.jpg", "non-ascii"),
+        ];
+        for (file, label) in cases {
+            match validate_page_file(0, file) {
+                Err(BookMetaError::InvalidPageFile { .. }) => {}
+                other => panic!("{label} path {file:?} should fail, got {other:?}"),
+            }
+        }
+    }
+
+    #[test]
+    fn validate_page_file_rejects_null_byte() {
+        let file = format!("pages/{}\0.jpg", 'a');
+        match validate_page_file(0, &file) {
+            Err(BookMetaError::InvalidPageFile { reason, .. }) => {
+                assert!(reason.contains("null byte"), "reason: {reason}");
+            }
+            other => panic!("expected InvalidPageFile for null byte, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn validate_accepts_wrong_sha256_shape_only() {
+        let mut book = BookMeta::sample();
+        book.pages[0].sha256 =
+            "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb".into();
+        book.pages[0]
+            .validate()
+            .expect("PageEntry only checks sha256 shape, not file bytes");
+        book.validate()
+            .expect("BookMeta::validate does not verify sha256 against files (M1 load_book must)");
+    }
+
+    #[test]
+    fn validate_rejects_page_index_mismatch_cases() {
+        let good_sha = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+
+        let mut ok = BookMeta::sample();
+        ok.pages.push(PageEntry {
+            index: 1,
             file: "pages/001.jpg".into(),
             width: 100,
             height: 100,
             byte_size: 10,
-            sha256: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa".into(),
+            sha256: good_sha.into(),
             page_label: None,
             storage: StorageMode::Copied,
         });
-        match book.validate() {
+        ok.validate().expect("contiguous indexes 0,1 must pass");
+
+        let mut dupes = BookMeta::sample();
+        dupes.pages.push(PageEntry {
+            index: 0,
+            file: "pages/001.jpg".into(),
+            width: 100,
+            height: 100,
+            byte_size: 10,
+            sha256: good_sha.into(),
+            page_label: None,
+            storage: StorageMode::Copied,
+        });
+        match dupes.validate() {
             Err(BookMetaError::PageIndexMismatch {
                 position: 1,
                 index: 0,
             }) => {}
-            other => panic!("expected PageIndexMismatch, got {other:?}"),
+            other => panic!("duplicate indexes should fail at position 1, got {other:?}"),
+        }
+
+        let mut gap = BookMeta::sample();
+        gap.pages.push(PageEntry {
+            index: 2,
+            file: "pages/002.jpg".into(),
+            width: 100,
+            height: 100,
+            byte_size: 10,
+            sha256: good_sha.into(),
+            page_label: None,
+            storage: StorageMode::Copied,
+        });
+        match gap.validate() {
+            Err(BookMetaError::PageIndexMismatch {
+                position: 1,
+                index: 2,
+            }) => {}
+            other => panic!("gap at index 2 should fail at position 1, got {other:?}"),
+        }
+
+        let mut huge = BookMeta::sample();
+        huge.pages.push(PageEntry {
+            index: u32::MAX,
+            file: "pages/huge.jpg".into(),
+            width: 100,
+            height: 100,
+            byte_size: 10,
+            sha256: good_sha.into(),
+            page_label: None,
+            storage: StorageMode::Copied,
+        });
+        match huge.validate() {
+            Err(BookMetaError::PageIndexMismatch {
+                position: 1,
+                index,
+            }) if index == u32::MAX => {}
+            other => panic!("huge index at position 1 should fail, got {other:?}"),
         }
     }
 

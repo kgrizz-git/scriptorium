@@ -31,6 +31,7 @@ FIXTURES_ROOT = Path("tmp/fixtures")
 PAGE_WIDTH = 800
 PAGE_HEIGHT = 1100
 BOOK_ID_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{0,63}$")
+# Must match docs/book-format.schema.json properties.id.pattern (see tests).
 
 
 def _crc32(data: bytes) -> int:

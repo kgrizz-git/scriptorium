@@ -73,7 +73,7 @@ Promote when starting. Tracked in [`to_do.md`](../to_do.md).
 - [ ] Page-turn reader per ADR (not assumed StPageFlip)
 - [ ] Persist last-read page; Open… inspect-and-branch
 - [ ] Perf budget + error taxonomy tests
-- [ ] Close remaining M0 senior-review format/load items (**S4**, **S6**–**S8**, **S12**) — see follow-ups section below
+- [ ] Close remaining M0 senior-review format/load items (**S4**, **S7**, **S12**, **A10–A13**) — see follow-ups section below
 
 **Out of scope for M1:** library shelf, authoring, OCR, hotspots, web deploy.
 

@@ -17,7 +17,7 @@ wins on types, this doc wins on rules and intent.
 ├── meta.json          # required — see fields below
 ├── pages/             # required — page images, relative paths stored in meta.json
 ├── ocr/               # reserved — may be empty; text layer lands here in M2+
-└── annotations.json   # reserved — empty form is `[]` (canonical); `{}` accepted for back-compat
+└── annotations.json   # reserved — empty form is `[]` (canonical); `{}` tolerated on read, never written
 ```
 
 **Portability:** everything inside the package is addressed with **relative paths**.

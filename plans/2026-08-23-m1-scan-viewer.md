@@ -62,6 +62,10 @@ folder pickers.
 | A7 | Open… on an existing package directory loads without re-copy | Manual script |
 | A8 | Unsupported `formatVersion` → `SchemaVersionUnsupported` message | `cargo test` |
 | A9 | Perf budget (below) holds on the **named reference class** against the **pinned gate corpus** | Manual timed run; record results in PR |
+| A10 | Mutating one page byte causes `ChecksumMismatch` on load (negative checksum test) | `cargo test` |
+| A11 | Ingest rejects `id` that case-folds equal to an existing book directory on case-insensitive FS | `cargo test` |
+| A12 | Resolved page path canonicalizes under package root (prefix assertion after `join`) | `cargo test` |
+| A13 | Webview CSP is **not** `null` before Phase 2 commands + asset protocol ship | Review `tauri.conf.json` + manual |
 
 ### Error taxonomy (Rust enum → user message)
 
@@ -70,7 +74,7 @@ folder pickers.
 | `EmptyFolder` | No files | Folder has no files |
 | `NoSupportedImages` | No jpg/jpeg/png/webp | No supported images found |
 | `UnreadableFile` | I/O error on a page | Which file failed |
-| `DestinationExists` | Target book path exists | Refuse overwrite |
+| `DestinationExists` | Target book path exists (incl. case-insensitive `id` collision on macOS/Windows) | Refuse overwrite |
 | `DuplicatePageStem` | Two sources map to same stem (incl. case-insensitive) | Duplicate page names |
 | `InsufficientDiskSpace` | Pre-flight fail | Need more free space |
 | `SchemaVersionUnsupported` | Unknown/newer formatVersion | Unsupported book version |
@@ -119,9 +123,11 @@ If targets fail without lazy/windowed loading, **implement windowed page load in
 ## Tauri asset-protocol checklist (required before reader Phase)
 
 - [ ] `app.security.assetProtocol.enable: true`
+- [ ] **Replace `security.csp: null`** with an explicit CSP before Phase 2 (see A13)
 - [ ] `assetProtocol.scope.allow` covers app-data `books/**` (app-wide scope ≠ fs capability)
 - [ ] CSP allows `img-src` (and media if needed) for `asset:` and `https://asset.localhost`
 - [ ] `convertFileSrc` only given **absolute** paths (Rust resolves relative → absolute)
+- [ ] After `package_root.join(file)`, canonicalize and assert result is under `package_root` (A12)
 - [ ] macOS: account for `/var` → `/private/var` canonicalization in scopes
 - [ ] Windows: verify `https://asset.localhost` form
 - [ ] Persisted-scope plugin **not** required for app-data default; revisit if library root changes
@@ -152,13 +158,16 @@ scripts/generate-fixture-book.*  — small + large corpora → tmp/
 - [ ] Per-page width/height/sha256/byteSize written
 - [ ] load_book + schema validation
 - [ ] lastReadPage read/write keyed by book **`id`**; flush API for window close
-- [ ] load_book re-verifies per-page sha256
+- [ ] load_book re-verifies per-page sha256 (negative test: A10)
+- [ ] load_book canonical path prefix check (A12)
+- [ ] Ingest case-insensitive `id` collision check (A11)
 - [ ] Orphan temp-dir sweep + DuplicatePageStem tests
 - [ ] All error taxonomy variants tested with `tempfile`
 - [ ] Schema bind: Rust sample serialize ↔ `docs/book-format.schema.json`
 
 ### Phase 2 — Commands + UI
 
+- [ ] Replace `security.csp: null` with production CSP (A13) before exposing commands/asset URLs
 - [ ] Commands + capabilities for dialog + app-data fs + asset scope
 - [ ] Open… inspect-and-branch + confirm before ingest copy
 - [ ] Map errors to dialogs/toasts
@@ -196,28 +205,36 @@ scripts/generate-fixture-book.*  — small + large corpora → tmp/
 | Large books OOM | med | high | Budget A9; windowed load if needed |
 | Schema drift TS/Rust | med | med | JSON Schema + Rust serialize-and-validate test (M0/M1) |
 
-## Follow-ups from M0 senior review (2026-08-25)
+## Follow-ups from M0 senior reviews (2026-08-25)
 
-Before-M1 items (**S1**, **S2**, **S3**, **S5**) landed on the M0 branch. Remaining findings
-to address during M1 (ingest/load) or earlier harness work:
+Before-M1 items (**S1**, **S2**, **S3**, **S5**) landed on the M0 branch. Critical re-review
+(**#3**) added **A10–A13** (checksum negative test, case-fold `id`, path prefix, CSP). M0 branch
+also landed **S6** (`deny_unknown_fields`), expanded negative/index tests, slug lockstep tests,
+and **D2** annotations wording.
+
+Remaining findings to address during M1 (ingest/load) or harness work:
 
 | ID | Item | Home |
 |---|---|---|
 | S4 | Decide: enforce RFC 3339 for `createdAt`/`updatedAt` in `BookMeta::validate`, or drop the ISO claim from docs | M1 ingest validation |
-| S6 | Decide `#[serde(deny_unknown_fields)]` vs forward-compat leniency; document choice | M1 load path |
 | S7 | Fixture round-trip Rust test: unique tempdir + document `python3` dependency | M1 or next Rust touch |
-| S8 | Table-driven negative tests for `validate_page_file` / empty pages / unsupported version | M1 |
+| S8 | ~~Table-driven negative tests~~ — largely done on M0 branch; extend if new variants appear | M1 |
 | S12 | Drop redundant `cargo check` after clippy+test (or comment why); clear stale pages on fixture regenerate | M1 / next CI touch |
+| C3 | `load_book` must verify page bytes vs `sha256` — pinned as **A10** | M1 Phase 1 |
+| SEC2 | Case-insensitive `id` directory collision — pinned as **A11** | M1 Phase 1 |
+| SEC3 | Canonical path must stay under package root — pinned as **A12** | M1 Phase 1 |
+| SEC4 | `csp: null` must be replaced — pinned as **A13** | M1 Phase 2 |
 
 Harness/docs (not M1 product):
 
 | ID | Item | Home |
 |---|---|---|
 | S9 | Archived M0 plan checklist still unticked; roadmap “app-data library root” is a decision, not delivered code | M0.5 / docs hygiene |
-| S10 | Stale pyproject description, README hedge, annotations `{}` “back-compat” wording | M0.5 |
+| S10 | README hedge; centralize or test slug regex triplication (Rust/Python/schema lockstep tests now exist) | M0.5 |
 | S11 | `tsc -b` for project references; ESLint/Prettier for TS | [roadmap M0.5](2026-08-23-product-roadmap.md#m05--harness-follow-ups-after-tauri-scaffold--when-app-code-exists) |
 
-Source: `tmp/2026-08-25-m0-tauri-foundation-senior-review.md` (gitignored).
+Sources: `tmp/2026-08-25-m0-tauri-foundation-senior-review.md`,
+`tmp/2026-08-25-m0-tauri-foundation-critical-senior-review.md` (gitignored).
 
 ## Completion steps
 

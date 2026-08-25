@@ -134,6 +134,15 @@ class FixtureBookTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 gen.build_book_package(Path(tmp) / "x", "x", page_count=0, seed=1)
 
+    def test_book_id_pattern_matches_schema(self) -> None:
+        schema = json.loads((ROOT / "docs" / "book-format.schema.json").read_text())
+        pattern = schema["properties"]["id"]["pattern"]
+        self.assertEqual(
+            gen.BOOK_ID_RE.pattern,
+            pattern,
+            "Python BOOK_ID_RE must match docs/book-format.schema.json",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
