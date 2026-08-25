@@ -5,7 +5,7 @@ Last reviewed: 2026-08-25
 Normative spec for a Scriptorium **book package** (formatVersion 1). A package is a
 self-contained directory that the app can open, verify, and re-locate on disk without
 dangling references. The locked decisions here come from the
-[M0 foundation plan](../plans/2026-08-23-m0-tauri-foundation.md); this doc is the
+[M0 foundation plan](../plans/archive/completed/2026-08-23-m0-tauri-foundation.md); this doc is the
 human-readable source of truth. Field *types* are normative in
 [`book-format.schema.json`](book-format.schema.json) — when the two disagree, the schema
 wins on types, this doc wins on rules and intent.

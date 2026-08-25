@@ -6,7 +6,7 @@ Author: bootstrap session (revised after Hy3 + ox-alpha plan reviews)
 Status: draft
 Linked issue/PR: n/a
 Depends on:
-- [`2026-08-23-m0-tauri-foundation.md`](2026-08-23-m0-tauri-foundation.md) **complete**
+- [`archive/completed/2026-08-23-m0-tauri-foundation.md`](archive/completed/2026-08-23-m0-tauri-foundation.md) **complete**
 - [`2026-08-23-pre-m1-flipbook-spike.md`](2026-08-23-pre-m1-flipbook-spike.md) **complete** (ADR gates G1–G5)
 Follows: product roadmap M1
 
@@ -204,6 +204,6 @@ scripts/generate-fixture-book.*  — small + large corpora → tmp/
 
 ## Related
 
-- [`2026-08-23-m0-tauri-foundation.md`](2026-08-23-m0-tauri-foundation.md)
+- [`archive/completed/2026-08-23-m0-tauri-foundation.md`](archive/completed/2026-08-23-m0-tauri-foundation.md)
 - [`2026-08-23-pre-m1-flipbook-spike.md`](2026-08-23-pre-m1-flipbook-spike.md)
 - [`2026-08-23-product-roadmap.md`](2026-08-23-product-roadmap.md)
