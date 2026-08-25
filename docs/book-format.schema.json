@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scriptorium.local/book-format.schema.json",
+  "title": "Scriptorium book package meta.json",
+  "description": "Schema v1 for a Scriptorium book package meta.json. See docs/book-format.md for rules and intent.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "formatVersion",
+    "id",
+    "title",
+    "createdAt",
+    "updatedAt",
+    "renderMode",
+    "lastReadPage",
+    "rights",
+    "attribution",
+    "pages"
+  ],
+  "properties": {
+    "formatVersion": {
+      "description": "Schema version; must be 1 for this spec.",
+      "const": 1
+    },
+    "id": {
+      "description": "Stable book identifier.",
+      "type": "string"
+    },
+    "title": {
+      "description": "Display title.",
+      "type": "string"
+    },
+    "createdAt": {
+      "description": "Creation timestamp (ISO 8601).",
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "description": "Last-update timestamp (ISO 8601).",
+      "type": "string",
+      "format": "date-time"
+    },
+    "renderMode": {
+      "description": "How the book renders. \"scan\" default; \"text\"/\"hybrid\" reserved.",
+      "type": "string",
+      "enum": ["scan", "text", "hybrid"],
+      "default": "scan"
+    },
+    "lastReadPage": {
+      "description": "0-based index of the last-read page.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "rights": {
+      "description": "Rights statement (may be empty).",
+      "type": "string"
+    },
+    "attribution": {
+      "description": "Attribution statement (may be empty).",
+      "type": "string"
+    },
+    "pages": {
+      "description": "Page entries, in order.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/pageEntry"
+      }
+    }
+  },
+  "$defs": {
+    "pageEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "index",
+        "file",
+        "width",
+        "height",
+        "byteSize",
+        "sha256"
+      ],
+      "properties": {
+        "index": {
+          "description": "0-based position.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "file": {
+          "description": "Relative path under the package.",
+          "type": "string",
+          "minLength": 1
+        },
+        "width": {
+          "description": "Image width in px.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "height": {
+          "description": "Image height in px.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "byteSize": {
+          "description": "Bytes on disk.",
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "sha256": {
+          "description": "Hex digest of the page file.",
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "pageLabel": {
+          "description": "Optional human label.",
+          "type": "string"
+        },
+        "storage": {
+          "description": "How the page is stored. \"copied\" default; \"referenced\" reserved, not implemented in M1.",
+          "type": "string",
+          "enum": ["copied", "referenced"],
+          "default": "copied"
+        }
+      }
+    }
+  }
+}
