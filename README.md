@@ -29,6 +29,16 @@ Private for now; public soon. Profile: `.context/project-profile.md` (local).
 - **direnv (optional)** — `cp .envrc.example .envrc && direnv allow` to auto-load
   project env vars. `.envrc.example` documents the available variables.
 
+## Development
+
+```sh
+pnpm install
+pnpm tauri dev
+```
+
+Scaffold generated with `create-tauri-app@4.6.2` (template `react-ts`, pnpm).
+Tauri 2 + Vite 7 + React 19 + TypeScript 5.8. Node pinned to v24 (`engines` / `.nvmrc`).
+
 ## What's here and why
 
 | Directory | What it is |
