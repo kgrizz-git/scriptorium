@@ -6,7 +6,7 @@ in `scripts/` regenerate them on demand into gitignored `tmp/`.
 ## Fixture book
 
 `../scripts/generate-fixture-book.py` produces a deterministic, schema-valid
-Scriporium book package under `tmp/fixtures/fixture-book/`:
+Scriptorium book package under `tmp/fixtures/fixture-book/`:
 
 ```
 tmp/fixtures/fixture-book/

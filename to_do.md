@@ -1,6 +1,6 @@
 # Scriptorium backlog
 
-Last reviewed: 2026-08-23
+Last reviewed: 2026-08-25
 
 Agents: start at **Next Up** (3–5 pointer lines). Detail lives in linked plans, not here.
 Policy: [`policies/plans-and-todos.md`](policies/plans-and-todos.md).

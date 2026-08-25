@@ -1,3 +1,9 @@
+//! Book package `meta.json` types (formatVersion 1).
+//!
+//! Mirrors [`docs/book-format.schema.json`]. Serde handles wire shape; call
+//! [`BookMeta::validate`] after deserialize so cross-field rules the schema
+//! cannot express (e.g. `lastReadPage` vs `pages.length`) are enforced.
+
 use serde::{Deserialize, Serialize};
 
 /// How a book renders. Default is `Scan`.
@@ -19,6 +25,68 @@ pub enum StorageMode {
     Referenced,
 }
 
+/// Validation failure for a book package `meta.json` document.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum BookMetaError {
+    /// `formatVersion` is not the supported major version.
+    UnsupportedFormatVersion(u32),
+    /// `pages` must contain at least one entry.
+    EmptyPages,
+    /// `lastReadPage` is not a valid 0-based index into `pages`.
+    LastReadPageOutOfRange {
+        last_read_page: u32,
+        page_count: usize,
+    },
+    /// A page `file` path is absolute, traverses, or uses disallowed characters.
+    InvalidPageFile {
+        index: u32,
+        file: String,
+        reason: String,
+    },
+    /// Image dimensions must be at least 1×1.
+    DegenerateImageSize { index: u32, width: u32, height: u32 },
+    /// `sha256` must be 64 lowercase hex characters.
+    InvalidSha256 { index: u32, sha256: String },
+}
+
+impl std::fmt::Display for BookMetaError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::UnsupportedFormatVersion(v) => {
+                write!(f, "unsupported formatVersion {v} (expected 1)")
+            }
+            Self::EmptyPages => write!(f, "pages must be non-empty"),
+            Self::LastReadPageOutOfRange {
+                last_read_page,
+                page_count,
+            } => write!(
+                f,
+                "lastReadPage {last_read_page} out of range for {page_count} page(s)"
+            ),
+            Self::InvalidPageFile {
+                index,
+                file,
+                reason,
+            } => {
+                write!(f, "pages[{index}].file {file:?} invalid: {reason}")
+            }
+            Self::DegenerateImageSize {
+                index,
+                width,
+                height,
+            } => write!(f, "pages[{index}] has degenerate size {width}×{height}"),
+            Self::InvalidSha256 { index, sha256 } => {
+                write!(
+                    f,
+                    "pages[{index}].sha256 {sha256:?} is not 64 lowercase hex"
+                )
+            }
+        }
+    }
+}
+
+impl std::error::Error for BookMetaError {}
+
 /// One page entry in `meta.json`.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -33,6 +101,27 @@ pub struct PageEntry {
     pub page_label: Option<String>,
     #[serde(default)]
     pub storage: StorageMode,
+}
+
+impl PageEntry {
+    /// Validate path safety, dimensions, and checksum shape for this page.
+    pub fn validate(&self) -> Result<(), BookMetaError> {
+        validate_page_file(self.index, &self.file)?;
+        if self.width < 1 || self.height < 1 {
+            return Err(BookMetaError::DegenerateImageSize {
+                index: self.index,
+                width: self.width,
+                height: self.height,
+            });
+        }
+        if !is_lowercase_hex_sha256(&self.sha256) {
+            return Err(BookMetaError::InvalidSha256 {
+                index: self.index,
+                sha256: self.sha256.clone(),
+            });
+        }
+        Ok(())
+    }
 }
 
 /// Top-level `meta.json` document.
@@ -76,6 +165,66 @@ impl BookMeta {
             }],
         }
     }
+
+    /// Enforce rules the JSON Schema cannot express alone.
+    ///
+    /// Callers that load packages MUST run this (or clamp `last_read_page`)
+    /// before trusting the document. Out-of-range `lastReadPage` is rejected
+    /// here; UI loaders may alternatively clamp to `pages.len() - 1`.
+    pub fn validate(&self) -> Result<(), BookMetaError> {
+        if self.format_version != 1 {
+            return Err(BookMetaError::UnsupportedFormatVersion(self.format_version));
+        }
+        if self.pages.is_empty() {
+            return Err(BookMetaError::EmptyPages);
+        }
+        let page_count = self.pages.len();
+        if (self.last_read_page as usize) >= page_count {
+            return Err(BookMetaError::LastReadPageOutOfRange {
+                last_read_page: self.last_read_page,
+                page_count,
+            });
+        }
+        for page in &self.pages {
+            page.validate()?;
+        }
+        Ok(())
+    }
+}
+
+/// Reject absolute paths, `..` segments, backslashes, and null bytes.
+fn validate_page_file(index: u32, file: &str) -> Result<(), BookMetaError> {
+    let reason = if file.is_empty() {
+        Some("empty path")
+    } else if file.contains('\0') {
+        Some("contains null byte")
+    } else if file.starts_with('/') || file.starts_with('\\') {
+        Some("absolute path")
+    } else if file.contains('\\') {
+        Some("backslash not allowed; use forward slashes")
+    } else if file.split('/').any(|seg| seg == ".." || seg.is_empty()) {
+        Some("empty or .. path segment")
+    } else if !file
+        .chars()
+        .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '-' | '/'))
+    {
+        Some("disallowed characters")
+    } else {
+        None
+    };
+
+    match reason {
+        Some(reason) => Err(BookMetaError::InvalidPageFile {
+            index,
+            file: file.to_string(),
+            reason: reason.to_string(),
+        }),
+        None => Ok(()),
+    }
+}
+
+fn is_lowercase_hex_sha256(s: &str) -> bool {
+    s.len() == 64 && s.chars().all(|c| matches!(c, '0'..='9' | 'a'..='f'))
 }
 
 #[cfg(test)]
@@ -100,6 +249,7 @@ mod tests {
     #[test]
     fn sample_serialization_matches_schema() {
         let book = BookMeta::sample();
+        book.validate().expect("sample must validate");
         let json = serde_json::to_value(&book).unwrap();
         let schema = load_schema();
         let validator = compile_schema(&schema);
@@ -138,13 +288,110 @@ mod tests {
     fn schema_rejects_missing_required_field() {
         let book = BookMeta::sample();
         let mut json = serde_json::to_value(&book).unwrap();
-        // Remove a required top-level field.
         json.as_object_mut().unwrap().remove("title");
         let schema = load_schema();
         let validator = compile_schema(&schema);
         assert!(
             !validator.is_valid(&json),
             "schema should reject a missing required field"
+        );
+    }
+
+    #[test]
+    fn schema_rejects_zero_dimensions() {
+        let mut book = BookMeta::sample();
+        book.pages[0].width = 0;
+        let json = serde_json::to_value(&book).unwrap();
+        let validator = compile_schema(&load_schema());
+        assert!(!validator.is_valid(&json), "width 0 must fail schema");
+    }
+
+    #[test]
+    fn schema_rejects_path_traversal_file() {
+        let mut book = BookMeta::sample();
+        book.pages[0].file = "../etc/passwd".into();
+        let json = serde_json::to_value(&book).unwrap();
+        let validator = compile_schema(&load_schema());
+        assert!(!validator.is_valid(&json), "../ path must fail schema");
+        assert!(book.pages[0].validate().is_err());
+    }
+
+    #[test]
+    fn validate_rejects_last_read_page_out_of_range() {
+        let mut book = BookMeta::sample();
+        book.last_read_page = 999;
+        match book.validate() {
+            Err(BookMetaError::LastReadPageOutOfRange { .. }) => {}
+            other => panic!("expected LastReadPageOutOfRange, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn storage_referenced_deserializes() {
+        let json = serde_json::json!({
+            "formatVersion": 1,
+            "id": "ref-book",
+            "title": "Referenced",
+            "createdAt": "2026-08-24T00:00:00Z",
+            "updatedAt": "2026-08-24T00:00:00Z",
+            "renderMode": "scan",
+            "lastReadPage": 0,
+            "rights": "",
+            "attribution": "",
+            "pages": [{
+                "index": 0,
+                "file": "pages/000.png",
+                "width": 100,
+                "height": 100,
+                "byteSize": 12,
+                "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "storage": "referenced"
+            }]
+        });
+        let book: BookMeta = serde_json::from_value(json).expect("deserialize");
+        assert_eq!(book.pages[0].storage, StorageMode::Referenced);
+        book.validate().expect("referenced storage is schema-valid");
+        let validator = compile_schema(&load_schema());
+        assert!(validator.is_valid(&serde_json::to_value(&book).unwrap()));
+    }
+
+    #[test]
+    fn fixture_generator_meta_round_trips_through_rust_types() {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
+        let out = root.join("tmp/fixtures/rust-roundtrip-book");
+        let _ = std::fs::remove_dir_all(&out);
+        std::fs::create_dir_all(&out).expect("create out dir");
+
+        let status = std::process::Command::new("python3")
+            .arg(root.join("scripts/generate-fixture-book.py"))
+            .arg("--pages")
+            .arg("2")
+            .arg("--seed")
+            .arg("7")
+            .arg("--out")
+            .arg(&out)
+            .current_dir(&root)
+            .status()
+            .expect("spawn fixture generator");
+        assert!(status.success(), "fixture generator failed: {status}");
+
+        let meta_path = out.join("meta.json");
+        let meta_str = std::fs::read_to_string(&meta_path).expect("read meta.json");
+        let book: BookMeta = serde_json::from_str(&meta_str).expect("deserialize fixture meta");
+        book.validate()
+            .expect("fixture must pass BookMeta::validate");
+
+        let re_serialized = serde_json::to_value(&book).expect("re-serialize");
+        let original: Value = serde_json::from_str(&meta_str).expect("parse original JSON");
+        assert_eq!(
+            re_serialized, original,
+            "Rust round-trip must preserve fixture meta.json"
+        );
+
+        let validator = compile_schema(&load_schema());
+        assert!(
+            validator.is_valid(&re_serialized),
+            "round-tripped meta must match schema"
         );
     }
 }

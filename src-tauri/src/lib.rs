@@ -1,15 +1,13 @@
-// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-pub mod book_format;
+//! Scriptorium Tauri library entry.
+//!
+//! Hosts the desktop app runtime and shared Rust modules (book format types).
+//! Tauri commands for ingest/load land in later milestones; M0 ships types only.
 
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
+pub mod book_format;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

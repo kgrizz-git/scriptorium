@@ -1,14 +1,14 @@
 # Scriptorium book package format
 
-Last reviewed: 2026-08-24
+Last reviewed: 2026-08-25
 
 Normative spec for a Scriptorium **book package** (formatVersion 1). A package is a
 self-contained directory that the app can open, verify, and re-locate on disk without
 dangling references. The locked decisions here come from the
 [M0 foundation plan](../plans/2026-08-23-m0-tauri-foundation.md); this doc is the
 human-readable source of truth. Field *types* are normative in
-[`book-format.schema.json`](book-format.schema.json) (added in the next chunk) — when the
-two disagree, the schema wins on types, this doc wins on rules and intent.
+[`book-format.schema.json`](book-format.schema.json) — when the two disagree, the schema
+wins on types, this doc wins on rules and intent.
 
 ## Package layout
 
@@ -17,12 +17,15 @@ two disagree, the schema wins on types, this doc wins on rules and intent.
 ├── meta.json          # required — see fields below
 ├── pages/             # required — page images, relative paths stored in meta.json
 ├── ocr/               # reserved — may be empty; text layer lands here in M2+
-└── annotations.json   # reserved — may be `[]` or `{}`; curator hotspots in M2+
+└── annotations.json   # reserved — empty form is `[]` (canonical); `{}` accepted for back-compat
 ```
 
 **Portability:** everything inside the package is addressed with **relative paths**.
 `meta.json` MUST NOT contain absolute paths (no home directory, no root-anchored source
-path). A package directory can be moved or copied to another machine and still load.
+path). Page `file` values MUST be package-relative, use forward slashes only, and MUST NOT
+contain `..` segments or null bytes (enforced in the schema and in Rust
+`BookMeta::validate`). A package directory can be moved or copied to another machine and
+still load.
 
 ## meta.json fields (formatVersion 1)
 
@@ -34,19 +37,19 @@ path). A package directory can be moved or copied to another machine and still l
 | `createdAt` | string | yes | ISO 8601 |
 | `updatedAt` | string | yes | ISO 8601 |
 | `renderMode` | string | yes | `"scan"` default; `"text"` / `"hybrid"` reserved |
-| `lastReadPage` | number | yes | 0-based index |
+| `lastReadPage` | number | yes | 0-based index; loader MUST clamp or reject when `>= pages.length` |
 | `rights` | string | yes | may be empty |
 | `attribution` | string | yes | may be empty |
-| `pages[]` | array | yes | one entry per page, in order |
+| `pages[]` | array | yes | one entry per page, in order (`minItems: 1`) |
 
 `pages[]` item:
 
 | Field | Type | Required | Notes |
 |---|---|---|---|
 | `index` | number | yes | 0-based position |
-| `file` | string | yes | relative path under the package |
-| `width` | number | yes | image width in px |
-| `height` | number | yes | image height in px |
+| `file` | string | yes | relative path under the package (no `..`, no absolutes) |
+| `width` | number | yes | image width in px (`minimum: 1`) |
+| `height` | number | yes | image height in px (`minimum: 1`) |
 | `byteSize` | number | yes | bytes on disk |
 | `sha256` | string | yes | hex digest of the page file |
 | `pageLabel` | string | no | optional human label |
@@ -58,6 +61,17 @@ While `formatVersion` is `1`, changes to `meta.json` MUST be **additive only** �
 fields, don't rename or remove them, don't change the meaning of existing fields. A
 breaking change requires bumping `formatVersion` and a migration note describing how to
 upgrade a v1 package to the new version.
+
+## Loader validation
+
+After JSON Schema validation, loaders MUST run the Rust `BookMeta::validate` checks (or
+an equivalent):
+
+| Check | Behavior |
+|---|---|
+| `lastReadPage` | MUST be `< pages.length`. Prefer reject (`LastReadPageOutOfRange`); UI may clamp to `pages.length - 1` if recovering a corrupt bookmark. |
+| `pages[].file` | Reject absolute paths, `..` segments, backslashes, null bytes, empty segments. |
+| `pages[].width` / `height` | Reject values `< 1` (degenerate images). |
 
 ## Ingest rules
 

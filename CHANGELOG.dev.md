@@ -6,12 +6,18 @@ Internal / developer-facing changes that do not belong in the public
 ## [Unreleased]
 
 ### Added
+- Fixture-generator unit tests (`tests/test_generate_fixture_book.py`); Rust round-trip test that deserializes generator `meta.json` into `BookMeta`.
+- `BookMeta::validate` / `PageEntry::validate` for `lastReadPage` bounds, path safety, and non-zero dimensions.
 - CI jobs: `Rust (src-tauri)` (cargo fmt/clippy `-D warnings`/test/check, with cargo cache), `Type check (TypeScript)` (pnpm + tsc), `Audit (advisory)` (pnpm audit + cargo audit, continue-on-error).
 - `src-tauri/` scaffold (Tauri 2, Vite 7, React 19, TypeScript 5.8); pnpm v11 build-script approval via `pnpm-workspace.yaml`; Node 24 pinned (`engines` / `.nvmrc`).
 - `scripts/generate-fixture-book.py` — stdlib-only deterministic fixture generator (real PNGs, schema-valid meta.json); `tests/fixtures/README.md`.
 - Rust types in `src-tauri/src/book_format.rs` + schema-bind tests (jsonschema 0.51.0); `cargo fmt` clean.
 
 ### Changed
+- Book schema: `width`/`height` `minimum: 1`; `file` pattern rejects absolutes, `..`, backslashes, and null bytes.
+- `annotations.json` empty form canonicalized to `[]` (`{}` back-compat only).
+- Removed unused Tauri `greet` command; Cargo.toml `authors` set to `kgrizz-git`.
+- Doc freshness: bumped Last reviewed on AGENTS/README/`to_do`/NAVIGATION; README covers fixture generator + book format.
 - `.gitignore`: dropped `Cargo.lock` ignore (lockfile tracked); anchored `Icon?` to repo root (`/Icon?`) to stop swallowing `src-tauri/icons/` on case-insensitive macOS; added `src-tauri/gen/schemas/` and `.cargo-target/`.
 - `docs/ci-and-hooks.md`: added Rust, TS typecheck, and audit to the recommendation table and required-checks list.
 - M0 plan archived to [`plans/archive/completed/2026-08-23-m0-tauri-foundation.md`](plans/archive/completed/2026-08-23-m0-tauri-foundation.md); `to_do.md` updated to remove M0 from Next Up and Active.

@@ -12,6 +12,9 @@ uses [Semantic Versioning](https://semver.org/).
 ### Added
 - Tauri 2 desktop shell (Vite + React + TypeScript) at repo root; book package format v1 spec and JSON Schema ([`docs/book-format.md`](docs/book-format.md), [`docs/book-format.schema.json`](docs/book-format.schema.json)); Rust types + schema-bind test; deterministic fixture generator.
 
+### Changed
+- Book package schema tightened: page images must be at least 1×1; page `file` paths reject traversal/absolutes; loaders must clamp or reject out-of-range `lastReadPage` ([`docs/book-format.md`](docs/book-format.md)).
+
 ## [0.1.2] - 2026-08-23
 
 ### Added

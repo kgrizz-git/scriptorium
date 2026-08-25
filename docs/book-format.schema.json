@@ -47,7 +47,7 @@
       "default": "scan"
     },
     "lastReadPage": {
-      "description": "0-based index of the last-read page.",
+      "description": "0-based index of the last-read page. Loaders MUST clamp or reject when >= pages.length (cannot express cross-field bounds in plain JSON Schema).",
       "type": "integer",
       "minimum": 0
     },
@@ -87,19 +87,20 @@
           "minimum": 0
         },
         "file": {
-          "description": "Relative path under the package.",
+          "description": "Relative path under the package. No absolute paths, backslashes, null bytes, or .. segments.",
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "pattern": "^(?!\\.\\./)(?!.*/\\.\\./)(?!/)(?!.*\\\\)[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*$"
         },
         "width": {
           "description": "Image width in px.",
           "type": "integer",
-          "minimum": 0
+          "minimum": 1
         },
         "height": {
           "description": "Image height in px.",
           "type": "integer",
-          "minimum": 0
+          "minimum": 1
         },
         "byteSize": {
           "description": "Bytes on disk.",
