@@ -1,0 +1,5 @@
+# Pin the Rust toolchain so CI and local builds share a reviewed channel revision.
+# Bump intentionally; do not float on moving `stable` without a PR.
+[toolchain]
+channel = "1.96.0"
+components = ["clippy", "rustfmt"]

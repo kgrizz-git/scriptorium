@@ -14,8 +14,8 @@ Internal / developer-facing changes that do not belong in the public
 - Rust types in `src-tauri/src/book_format.rs` + schema-bind tests (jsonschema 0.51.0); `cargo fmt` clean.
 
 ### Changed
-- CI: install Tauri Linux system deps in `Rust (src-tauri)`; point `cargo audit` at `src-tauri/`; fix plan archive relative links broken by M0 move.
-- Book schema: `width`/`height` `minimum: 1`; `file` pattern rejects absolutes, `..`, backslashes, and null bytes.
+- CI: install Tauri Linux system deps in `Rust (src-tauri)`; point `cargo audit` at `src-tauri/`; fix plan archive relative links broken by M0 move; pin Rust via `rust-toolchain.toml` (`1.96.0`).
+- Book schema: `file` pattern rejects terminal `..` segments; integer fields capped at Rust `u32`/`u64` maxima; `width`/`height` `minimum: 1`.
 - `annotations.json` empty form canonicalized to `[]` (`{}` back-compat only).
 - Removed unused Tauri `greet` command; Cargo.toml `authors` set to `kgrizz-git`.
 - Doc freshness: bumped Last reviewed on AGENTS/README/`to_do`/NAVIGATION; README covers fixture generator + book format.

@@ -317,6 +317,36 @@ mod tests {
     }
 
     #[test]
+    fn schema_rejects_terminal_parent_segment() {
+        let validator = compile_schema(&load_schema());
+        for bad in ["..", "pages/.."] {
+            let mut book = BookMeta::sample();
+            book.pages[0].file = bad.into();
+            let json = serde_json::to_value(&book).unwrap();
+            assert!(
+                !validator.is_valid(&json),
+                "schema must reject terminal .. path {bad:?}"
+            );
+            assert!(
+                book.pages[0].validate().is_err(),
+                "Rust must reject terminal .. path {bad:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn schema_rejects_integer_above_u32() {
+        let book = BookMeta::sample();
+        let mut json = serde_json::to_value(&book).unwrap();
+        json["pages"][0]["width"] = serde_json::json!(4_294_967_296u64);
+        let validator = compile_schema(&load_schema());
+        assert!(
+            !validator.is_valid(&json),
+            "width above u32::MAX must fail schema"
+        );
+    }
+
+    #[test]
     fn validate_rejects_last_read_page_out_of_range() {
         let mut book = BookMeta::sample();
         book.last_read_page = 999;

@@ -181,7 +181,8 @@ jobs:
 
       - name: Install Rust toolchain
         run: |
-          rustup update stable && rustup default stable
+          # Respects rust-toolchain.toml (pinned channel + clippy/rustfmt).
+          rustup show
           rustup component add clippy rustfmt
 
       - uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
@@ -239,7 +240,9 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - name: Install Rust toolchain
-        run: rustup update stable && rustup default stable
+        run: |
+          # Respects rust-toolchain.toml (pinned channel).
+          rustup show
 
       - name: pnpm audit --prod
         run: |
