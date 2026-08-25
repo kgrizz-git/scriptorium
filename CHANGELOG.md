@@ -7,6 +7,11 @@ See [`policies/changelog-conventions.md`](policies/changelog-conventions.md).
 The format follows [Keep a Changelog](https://keepachangelog.com/), and this project
 uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- Tauri 2 desktop shell (Vite + React + TypeScript) at repo root; book package format v1 spec and JSON Schema ([`docs/book-format.md`](docs/book-format.md), [`docs/book-format.schema.json`](docs/book-format.schema.json)); Rust types + schema-bind test; deterministic fixture generator.
+
 ## [0.1.2] - 2026-08-23
 
 ### Added

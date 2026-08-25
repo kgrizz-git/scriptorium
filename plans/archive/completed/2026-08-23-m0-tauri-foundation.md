@@ -3,7 +3,7 @@
 Last reviewed: 2026-08-23
 Date: 2026-08-23
 Author: bootstrap session (revised after Hy3 + ox-alpha plan reviews)
-Status: draft
+Status: complete
 Linked issue/PR: n/a
 Depends on: harness CI/hooks already on `main`
 Blocks: [`2026-08-23-m1-scan-viewer.md`](2026-08-23-m1-scan-viewer.md)

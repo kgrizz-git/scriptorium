@@ -9,7 +9,7 @@ Linked issue/PR: n/a
 ## Goal
 
 Single source of truth for **all** planned product phases and features. Immediate work lives in
-[`2026-08-23-m0-tauri-foundation.md`](2026-08-23-m0-tauri-foundation.md) →
+[`archive/completed/2026-08-23-m0-tauri-foundation.md`](archive/completed/2026-08-23-m0-tauri-foundation.md) (M0 complete) →
 [`2026-08-23-pre-m1-flipbook-spike.md`](2026-08-23-pre-m1-flipbook-spike.md) →
 [`2026-08-23-m1-scan-viewer.md`](2026-08-23-m1-scan-viewer.md). Later milestones stay here and in
 [`to_do.md`](../to_do.md) until promoted. Combined draft:
@@ -36,14 +36,14 @@ Three layers, not a single rendering choice:
 
 ## Milestones
 
-### M0 — Harness & scaffold (in progress)
+### M0 — Harness & scaffold (complete)
 
-**Active plan:** [`2026-08-23-m0-tauri-foundation.md`](2026-08-23-m0-tauri-foundation.md)
+**Completed plan:** [`archive/completed/2026-08-23-m0-tauri-foundation.md`](archive/completed/2026-08-23-m0-tauri-foundation.md)
 
 - [x] CI fast lane + Semgrep + pre-push basedpyright
-- [ ] Tauri shell + app-data library root + book schema v1 + JSON Schema
-- [ ] Rust CI: fmt / clippy -D warnings / test / check; commit `Cargo.lock`
-- [ ] `.envrc.example`, agent tooling contract
+- [x] Tauri shell + app-data library root + book schema v1 + JSON Schema
+- [x] Rust CI: fmt / clippy -D warnings / test / check; commit `Cargo.lock`
+- [x] `.envrc.example`, agent tooling contract
 
 ### M0.25 — Flipbook spike (blocks M1)
 
@@ -135,7 +135,7 @@ Promote when starting. Tracked in [`to_do.md`](../to_do.md).
 ## Book package schema (evolving)
 
 **Source of truth:** authored in M0 as `docs/book-format.md` + `docs/book-format.schema.json`
-(see [`2026-08-23-m0-tauri-foundation.md`](2026-08-23-m0-tauri-foundation.md)). Do not treat this
+(see [`archive/completed/2026-08-23-m0-tauri-foundation.md`](archive/completed/2026-08-23-m0-tauri-foundation.md)). Do not treat this
 roadmap as schema authority.
 
 Until those files exist, schema **v1** minimum (aligned with M0):

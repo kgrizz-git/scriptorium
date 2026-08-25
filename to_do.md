@@ -7,16 +7,14 @@ Policy: [`policies/plans-and-todos.md`](policies/plans-and-todos.md).
 
 ## Next Up (keep 3–5; pointers only — not full checklists)
 
-1. [M0 Tauri foundation](plans/2026-08-23-m0-tauri-foundation.md) — Phase 1 scaffold + data architecture
-2. [Pre-M1 flipbook spike](plans/2026-08-23-pre-m1-flipbook-spike.md) — ADR gates G1–G5 after M0 window exists
-3. [M1 scan viewer](plans/2026-08-23-m1-scan-viewer.md) — blocked on spike ADR; acceptance A1–A9
+1. [Pre-M1 flipbook spike](plans/2026-08-23-pre-m1-flipbook-spike.md) — ADR gates G1–G5 after M0 window exists
+2. [M1 scan viewer](plans/2026-08-23-m1-scan-viewer.md) — blocked on spike ADR; acceptance A1–A9
 
 ## Active plans
 
 | Plan | Status | Note |
 |---|---|---|
 | [Product roadmap](plans/2026-08-23-product-roadmap.md) | living | M0–M8 horizon; not a task queue |
-| [M0 Tauri foundation](plans/2026-08-23-m0-tauri-foundation.md) | draft | Scaffold, schema v1, Rust CI, Cargo.lock |
 | [Pre-M1 flipbook spike](plans/2026-08-23-pre-m1-flipbook-spike.md) | draft | Blocks M1 |
 | [M1 scan viewer](plans/2026-08-23-m1-scan-viewer.md) | draft | First product slice after M0 + spike |
 
