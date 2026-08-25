@@ -39,6 +39,9 @@ Quick navigation guide for this template's documentation. Use this to find what 
 - [`README.md`](../README.md) - Project overview and directory map
 - [`inventory/README.md`](../inventory/README.md) - Tool/skill menu (not a checklist)
 
+### Domain
+- [`docs/book-format.md`](../docs/book-format.md) — book package format spec (formatVersion 1); schema + ingest rules
+
 ### Getting Started
 - [`prompts/bootstrap-project.md`](../prompts/bootstrap-project.md) - New project initialization
 - [`prompts/bootstrap-checklist.md`](../prompts/bootstrap-checklist.md) - Tick-list version (phases P0–P8)
