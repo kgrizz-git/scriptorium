@@ -67,6 +67,21 @@ Do not load everything. Start here, then open only what the task needs.
 11. **Progress is written down, not remembered.** Multi-phase work records state in `.context/`
     as it goes. A session that ends mid-task leaves a `Next action`, not a gap.
 
+## Agent tooling policy
+
+Rule lives in [`policies/agent-tooling-contract.md`](policies/agent-tooling-contract.md); this is a summary.
+
+- Search and read targeted files before requesting broad repository context.
+- Use **one** primary code-intelligence/indexing tool per role or task.
+- Prefer a CLI plus task-specific skill for batch work; use MCP only when persistent,
+  interactive state materially helps.
+- Record decisions, changed files, verification, and next steps in a handoff before
+  changing agents or IDEs.
+- Keep credentials, generated indexes, and local agent state out of version control
+  (`.agent-state/` is gitignored; rebuildable by definition).
+- Smoke-test a tool before adopting it: index a fixture, run one query, tear down
+  (see the contract for the shape).
+
 ## Repo map
 
 - `prompts/` — reusable prompts (bootstrap, refactor, docs audit, subagent workflow, reviews).

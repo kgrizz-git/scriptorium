@@ -17,6 +17,18 @@ Private for now; public soon. Profile: `.context/project-profile.md` (local).
 
 ---
 
+## Tauri prerequisites
+
+- **Rust** — install via [rustup](https://rustup.rs); `cargo` and `rustc` must be on `PATH`.
+- **Node LTS + pnpm** — Node LTS required (see `engines` / `.nvmrc` once scaffolded);
+  enable pnpm with `corepack enable` (preferred) or `npm i -g pnpm`.
+- **Webview** — the OS-native webview Tauri renders into:
+  - macOS: built-in WKWebView (no extra install)
+  - Linux: `webkit2gtk` (distro package, e.g. `libwebkit2gtk-4.1-dev`)
+  - Windows: WebView2 (ships with modern Windows; Evergreen bootstrapper otherwise)
+- **direnv (optional)** — `cp .envrc.example .envrc && direnv allow` to auto-load
+  project env vars. `.envrc.example` documents the available variables.
+
 ## What's here and why
 
 | Directory | What it is |

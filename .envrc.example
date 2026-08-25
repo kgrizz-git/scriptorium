@@ -1,0 +1,13 @@
+# ── Scriptorium / Tauri development ──────────────────────────────────────────
+# Copy to .envrc and run `direnv allow` to load automatically.
+# Nothing here is secret — this file is safe to commit.
+
+# Pin the Node major the project targets (engines field must match).
+# export NODE_VERSION=22
+
+# Fail the build on tooling drift (see scripts/validate-env.sh).
+# export FAIL_ON_ERROR=1
+
+# Direnv keeps Cargo's build cache on its default location. Override if your
+# disk layout demands it (e.g. a scratch volume).
+# export CARGO_TARGET_DIR=.cargo-target

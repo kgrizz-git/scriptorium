@@ -92,6 +92,7 @@ out/
 
 # ── Rust ─────────────────────────────────────────────────────────────────────
 target/
+.cargo-target/
 Cargo.lock          # keep for binaries; remove this line for libraries
 
 # ── Go ───────────────────────────────────────────────────────────────────────
