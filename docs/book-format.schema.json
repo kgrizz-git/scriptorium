@@ -23,8 +23,9 @@
       "const": 1
     },
     "id": {
-      "description": "Stable book identifier.",
-      "type": "string"
+      "description": "Stable book identifier and package directory name under the library root. Slug-style: lowercase letter/digit start, then lowercase alnum / . _ - (1–64 chars).",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
     },
     "title": {
       "description": "Display title.",

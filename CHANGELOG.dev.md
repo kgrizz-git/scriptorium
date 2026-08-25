@@ -14,8 +14,10 @@ Internal / developer-facing changes that do not belong in the public
 - Rust types in `src-tauri/src/book_format.rs` + schema-bind tests (jsonschema 0.51.0); `cargo fmt` clean.
 
 ### Changed
-- CI: install Tauri Linux system deps in `Rust (src-tauri)`; point `cargo audit` at `src-tauri/`; fix plan archive relative links broken by M0 move; pin Rust via `rust-toolchain.toml` (`1.96.0`).
-- Book schema: `file` pattern rejects terminal `..` segments; integer fields capped at Rust `u32`/`u64` maxima; `width`/`height` `minimum: 1`.
+- CI: install Tauri Linux system deps in `Rust (src-tauri)`; point `cargo audit` at `src-tauri/`; fix plan archive relative links broken by M0 move; pin Rust via `rust-toolchain.toml` (`1.96.0`); install `jsonschema` in the pytest job so schema conformance cannot silently skip (**S1**).
+- Book schema / Rust validate: `id` slug pattern (safe dirname) (**S5**); reject `byteSize: 0` (**S2**); enforce `pages[i].index == i` (**S3**); `file` pattern rejects terminal `..`; integer fields capped at Rust `u32`/`u64` maxima; `width`/`height` `minimum: 1`.
+- `pyproject.toml`: optional `[test]` extra includes `jsonschema`; description no longer says Tauri scaffold pending.
+- Deferred M0 senior-review items tracked: **S4/S6–S8/S12** → M1 plan; **S9–S11** → roadmap M0.5 / `to_do.md` icebox.
 - `annotations.json` empty form canonicalized to `[]` (`{}` back-compat only).
 - Removed unused Tauri `greet` command; Cargo.toml `authors` set to `kgrizz-git`.
 - Doc freshness: bumped Last reviewed on AGENTS/README/`to_do`/NAVIGATION; README covers fixture generator + book format.

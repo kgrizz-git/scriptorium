@@ -85,8 +85,12 @@ class FixtureBookTests(unittest.TestCase):
     def test_meta_validates_against_schema(self) -> None:
         try:
             import jsonschema
-        except ImportError:
-            self.skipTest("jsonschema not installed")
+        except ImportError as exc:  # pragma: no cover - CI installs jsonschema
+            self.fail(
+                "jsonschema is required for schema conformance tests; "
+                "install with `pip install jsonschema` or `pip install '.[test]'` "
+                f"(import failed: {exc})"
+            )
 
         schema = json.loads((ROOT / "docs" / "book-format.schema.json").read_text())
         with tempfile.TemporaryDirectory() as tmp:

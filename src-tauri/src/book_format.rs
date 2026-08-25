@@ -30,6 +30,8 @@ pub enum StorageMode {
 pub enum BookMetaError {
     /// `formatVersion` is not the supported major version.
     UnsupportedFormatVersion(u32),
+    /// `id` is empty, unsafe as a directory name, or fails the slug pattern.
+    InvalidBookId { id: String, reason: String },
     /// `pages` must contain at least one entry.
     EmptyPages,
     /// `lastReadPage` is not a valid 0-based index into `pages`.
@@ -37,6 +39,8 @@ pub enum BookMetaError {
         last_read_page: u32,
         page_count: usize,
     },
+    /// `pages[i].index` does not equal the array position `i`.
+    PageIndexMismatch { position: usize, index: u32 },
     /// A page `file` path is absolute, traverses, or uses disallowed characters.
     InvalidPageFile {
         index: u32,
@@ -45,6 +49,8 @@ pub enum BookMetaError {
     },
     /// Image dimensions must be at least 1×1.
     DegenerateImageSize { index: u32, width: u32, height: u32 },
+    /// `byteSize` must be greater than zero.
+    ZeroByteSize { index: u32 },
     /// `sha256` must be 64 lowercase hex characters.
     InvalidSha256 { index: u32, sha256: String },
 }
@@ -55,6 +61,9 @@ impl std::fmt::Display for BookMetaError {
             Self::UnsupportedFormatVersion(v) => {
                 write!(f, "unsupported formatVersion {v} (expected 1)")
             }
+            Self::InvalidBookId { id, reason } => {
+                write!(f, "id {id:?} invalid: {reason}")
+            }
             Self::EmptyPages => write!(f, "pages must be non-empty"),
             Self::LastReadPageOutOfRange {
                 last_read_page,
@@ -62,6 +71,10 @@ impl std::fmt::Display for BookMetaError {
             } => write!(
                 f,
                 "lastReadPage {last_read_page} out of range for {page_count} page(s)"
+            ),
+            Self::PageIndexMismatch { position, index } => write!(
+                f,
+                "pages[{position}].index is {index}, expected {position}"
             ),
             Self::InvalidPageFile {
                 index,
@@ -75,6 +88,9 @@ impl std::fmt::Display for BookMetaError {
                 width,
                 height,
             } => write!(f, "pages[{index}] has degenerate size {width}×{height}"),
+            Self::ZeroByteSize { index } => {
+                write!(f, "pages[{index}].byteSize must be > 0")
+            }
             Self::InvalidSha256 { index, sha256 } => {
                 write!(
                     f,
@@ -104,7 +120,7 @@ pub struct PageEntry {
 }
 
 impl PageEntry {
-    /// Validate path safety, dimensions, and checksum shape for this page.
+    /// Validate path safety, dimensions, byte size, and checksum shape for this page.
     pub fn validate(&self) -> Result<(), BookMetaError> {
         validate_page_file(self.index, &self.file)?;
         if self.width < 1 || self.height < 1 {
@@ -112,6 +128,11 @@ impl PageEntry {
                 index: self.index,
                 width: self.width,
                 height: self.height,
+            });
+        }
+        if self.byte_size == 0 {
+            return Err(BookMetaError::ZeroByteSize {
+                index: self.index,
             });
         }
         if !is_lowercase_hex_sha256(&self.sha256) {
@@ -175,6 +196,7 @@ impl BookMeta {
         if self.format_version != 1 {
             return Err(BookMetaError::UnsupportedFormatVersion(self.format_version));
         }
+        validate_book_id(&self.id)?;
         if self.pages.is_empty() {
             return Err(BookMetaError::EmptyPages);
         }
@@ -185,10 +207,46 @@ impl BookMeta {
                 page_count,
             });
         }
-        for page in &self.pages {
+        for (position, page) in self.pages.iter().enumerate() {
+            if page.index as usize != position {
+                return Err(BookMetaError::PageIndexMismatch {
+                    position,
+                    index: page.index,
+                });
+            }
             page.validate()?;
         }
         Ok(())
+    }
+}
+
+/// Book `id` must be a safe library directory slug (matches schema pattern).
+fn validate_book_id(id: &str) -> Result<(), BookMetaError> {
+    let reason = if id.is_empty() {
+        Some("empty id")
+    } else if id.len() > 64 {
+        Some("longer than 64 characters")
+    } else if !id
+        .chars()
+        .next()
+        .is_some_and(|c| c.is_ascii_lowercase() || c.is_ascii_digit())
+    {
+        Some("must start with a lowercase letter or digit")
+    } else if !id
+        .chars()
+        .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || matches!(c, '.' | '_' | '-'))
+    {
+        Some("only lowercase alnum, '.', '_', '-' allowed")
+    } else {
+        None
+    };
+
+    match reason {
+        Some(reason) => Err(BookMetaError::InvalidBookId {
+            id: id.to_string(),
+            reason: reason.to_string(),
+        }),
+        None => Ok(()),
     }
 }
 
@@ -353,6 +411,59 @@ mod tests {
         match book.validate() {
             Err(BookMetaError::LastReadPageOutOfRange { .. }) => {}
             other => panic!("expected LastReadPageOutOfRange, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn validate_rejects_invalid_book_id() {
+        let validator = compile_schema(&load_schema());
+        for bad in ["", "../etc", "Has Caps", ".", "bad/id"] {
+            let mut book = BookMeta::sample();
+            book.id = bad.into();
+            assert!(
+                matches!(book.validate(), Err(BookMetaError::InvalidBookId { .. })),
+                "Rust must reject id {bad:?}"
+            );
+            let json = serde_json::to_value(&book).unwrap();
+            assert!(
+                !validator.is_valid(&json),
+                "schema must reject id {bad:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn validate_rejects_zero_byte_size() {
+        let mut book = BookMeta::sample();
+        book.pages[0].byte_size = 0;
+        match book.validate() {
+            Err(BookMetaError::ZeroByteSize { .. }) => {}
+            other => panic!("expected ZeroByteSize, got {other:?}"),
+        }
+        let json = serde_json::to_value(&book).unwrap();
+        let validator = compile_schema(&load_schema());
+        assert!(!validator.is_valid(&json), "schema must reject byteSize 0");
+    }
+
+    #[test]
+    fn validate_rejects_page_index_mismatch() {
+        let mut book = BookMeta::sample();
+        book.pages.push(PageEntry {
+            index: 0, // should be 1
+            file: "pages/001.jpg".into(),
+            width: 100,
+            height: 100,
+            byte_size: 10,
+            sha256: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa".into(),
+            page_label: None,
+            storage: StorageMode::Copied,
+        });
+        match book.validate() {
+            Err(BookMetaError::PageIndexMismatch {
+                position: 1,
+                index: 0,
+            }) => {}
+            other => panic!("expected PageIndexMismatch, got {other:?}"),
         }
     }
 

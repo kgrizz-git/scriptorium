@@ -32,7 +32,7 @@ still load.
 | Field | Type | Required | Notes |
 |---|---|---|---|
 | `formatVersion` | number | yes | `1` for this spec |
-| `id` | string | yes | stable book identifier |
+| `id` | string | yes | stable book identifier **and** package directory name; slug `^[a-z0-9][a-z0-9._-]{0,63}$` |
 | `title` | string | yes | display title |
 | `createdAt` | string | yes | ISO 8601 |
 | `updatedAt` | string | yes | ISO 8601 |
@@ -46,11 +46,11 @@ still load.
 
 | Field | Type | Required | Notes |
 |---|---|---|---|
-| `index` | number | yes | 0-based position |
+| `index` | number | yes | 0-based position; MUST equal array position (`pages[i].index == i`) |
 | `file` | string | yes | relative path under the package (no `..`, no absolutes) |
 | `width` | number | yes | image width in px (`minimum: 1`) |
 | `height` | number | yes | image height in px (`minimum: 1`) |
-| `byteSize` | number | yes | bytes on disk |
+| `byteSize` | number | yes | bytes on disk (`exclusiveMinimum: 0`) |
 | `sha256` | string | yes | hex digest of the page file |
 | `pageLabel` | string | no | optional human label |
 | `storage` | string | no | `"copied"` default; `"referenced"` reserved, not implemented in M1 |
@@ -69,9 +69,12 @@ an equivalent):
 
 | Check | Behavior |
 |---|---|
+| `id` | MUST match slug `^[a-z0-9][a-z0-9._-]{0,63}$` (safe as a library directory name). |
 | `lastReadPage` | MUST be `< pages.length`. Prefer reject (`LastReadPageOutOfRange`); UI may clamp to `pages.length - 1` if recovering a corrupt bookmark. |
+| `pages[].index` | MUST equal array position (`pages[i].index == i`); reject duplicates / gaps / out-of-order. |
 | `pages[].file` | Reject absolute paths, `..` segments, backslashes, null bytes, empty segments. |
 | `pages[].width` / `height` | Reject values `< 1` (degenerate images). |
+| `pages[].byteSize` | Reject `0` (empty page files). |
 
 ## Ingest rules
 

@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import struct
 import sys
 import zlib
@@ -29,6 +30,7 @@ DEFAULT_SEED = 20260824
 FIXTURES_ROOT = Path("tmp/fixtures")
 PAGE_WIDTH = 800
 PAGE_HEIGHT = 1100
+BOOK_ID_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{0,63}$")
 
 
 def _crc32(data: bytes) -> int:
@@ -72,6 +74,10 @@ def build_book_package(out_dir: Path, title: str, page_count: int, seed: int) ->
     """Generate the book directory and return the meta.json dict."""
     if page_count < 1:
         raise ValueError(f"--pages must be >= 1, got {page_count}")
+    if not BOOK_ID_RE.match(out_dir.name):
+        raise ValueError(
+            f"output directory name {out_dir.name!r} must match book id slug {BOOK_ID_RE.pattern}"
+        )
 
     pages_dir = out_dir / "pages"
     pages_dir.mkdir(parents=True, exist_ok=True)

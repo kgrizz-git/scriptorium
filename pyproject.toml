@@ -1,9 +1,12 @@
 [project]
 name = "scriptorium"
 version = "0.1.2"
-description = "Virtual book reader — harness + application (Tauri scaffold pending)"
+description = "Virtual book reader — harness + Tauri application"
 readme = "README.md"
 requires-python = ">=3.11"
+
+[project.optional-dependencies]
+test = ["pytest", "pytest-cov", "jsonschema"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

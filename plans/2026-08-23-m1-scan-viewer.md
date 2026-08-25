@@ -1,6 +1,6 @@
 # Plan: M1 — Scan viewer (first product milestone)
 
-Last reviewed: 2026-08-23
+Last reviewed: 2026-08-25
 Date: 2026-08-23
 Author: bootstrap session (revised after Hy3 + ox-alpha plan reviews)
 Status: draft
@@ -195,6 +195,29 @@ scripts/generate-fixture-book.*  — small + large corpora → tmp/
 | ADR library still painful in product UI | med | high | Phase 0 gate; escalate — no strip fallback |
 | Large books OOM | med | high | Budget A9; windowed load if needed |
 | Schema drift TS/Rust | med | med | JSON Schema + Rust serialize-and-validate test (M0/M1) |
+
+## Follow-ups from M0 senior review (2026-08-25)
+
+Before-M1 items (**S1**, **S2**, **S3**, **S5**) landed on the M0 branch. Remaining findings
+to address during M1 (ingest/load) or earlier harness work:
+
+| ID | Item | Home |
+|---|---|---|
+| S4 | Decide: enforce RFC 3339 for `createdAt`/`updatedAt` in `BookMeta::validate`, or drop the ISO claim from docs | M1 ingest validation |
+| S6 | Decide `#[serde(deny_unknown_fields)]` vs forward-compat leniency; document choice | M1 load path |
+| S7 | Fixture round-trip Rust test: unique tempdir + document `python3` dependency | M1 or next Rust touch |
+| S8 | Table-driven negative tests for `validate_page_file` / empty pages / unsupported version | M1 |
+| S12 | Drop redundant `cargo check` after clippy+test (or comment why); clear stale pages on fixture regenerate | M1 / next CI touch |
+
+Harness/docs (not M1 product):
+
+| ID | Item | Home |
+|---|---|---|
+| S9 | Archived M0 plan checklist still unticked; roadmap “app-data library root” is a decision, not delivered code | M0.5 / docs hygiene |
+| S10 | Stale pyproject description, README hedge, annotations `{}` “back-compat” wording | M0.5 |
+| S11 | `tsc -b` for project references; ESLint/Prettier for TS | [roadmap M0.5](2026-08-23-product-roadmap.md#m05--harness-follow-ups-after-tauri-scaffold--when-app-code-exists) |
+
+Source: `tmp/2026-08-25-m0-tauri-foundation-senior-review.md` (gitignored).
 
 ## Completion steps
 
