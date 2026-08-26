@@ -4,6 +4,10 @@
 Covers PNG layout, SHA-256, schema conformance, determinism, and --pages 0 rejection.
 Stdlib unittest only (no pytest required for local runs).
 
+Schema conformance requires the optional test extras (`jsonschema`, `rfc3339-validator`):
+  pip install -e '.[test]'
+  # or: pip install jsonschema rfc3339-validator
+
 Run:
   python3 -m unittest tests.test_generate_fixture_book -v
 """
@@ -141,6 +145,25 @@ class FixtureBookTests(unittest.TestCase):
             out = Path(tmp) / "empty"
             code = gen.main(["--pages", "0", "--out", str(out)])
             self.assertEqual(code, 2)
+            self.assertFalse(out.exists())
+            self.assertFalse((out / "meta.json").exists())
+
+    def test_pages_above_max_rejected_by_cli(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "too-many"
+            code = gen.main(["--pages", str(gen.PAGES_MAX_ITEMS + 1), "--out", str(out)])
+            self.assertEqual(code, 2)
+            self.assertFalse(out.exists())
+            self.assertFalse((out / "meta.json").exists())
+
+    def test_title_too_long_rejected_by_cli(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "long-title"
+            code = gen.main(
+                ["--pages", "1", "--out", str(out), "--title", "x" * (gen.TITLE_MAX_LEN + 1)]
+            )
+            self.assertEqual(code, 2)
+            self.assertFalse(out.exists())
             self.assertFalse((out / "meta.json").exists())
 
     def test_invalid_out_name_rejected_by_cli(self) -> None:
@@ -156,6 +179,55 @@ class FixtureBookTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 gen.build_book_package(Path(tmp) / "x", "x", page_count=0, seed=1)
 
+    def test_build_rejects_too_many_pages(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "too-many-api"
+            with self.assertRaises(ValueError):
+                gen.build_book_package(out, "TooMany", page_count=gen.PAGES_MAX_ITEMS + 1, seed=1)
+            self.assertFalse(out.exists())
+            self.assertFalse((out / "meta.json").exists())
+
+    def test_build_rejects_title_too_long(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "title-too-long"
+            # Multi-byte scalars must count as one character each (schema maxLength).
+            overlong = "é" * (gen.TITLE_MAX_LEN + 1)
+            self.assertEqual(len(overlong), gen.TITLE_MAX_LEN + 1)
+            with self.assertRaises(ValueError):
+                gen.build_book_package(out, overlong, page_count=1, seed=1)
+            self.assertFalse(out.exists())
+            self.assertFalse((out / "meta.json").exists())
+
+    def test_validate_accepts_boundary_maxima(self) -> None:
+        # Do not generate 100k pages; only assert the shared preflight accepts the bounds.
+        gen.validate_generator_inputs(
+            "boundary-book",
+            "x" * gen.TITLE_MAX_LEN,
+            gen.PAGES_MAX_ITEMS,
+            rights="r" * gen.TEXT_FIELD_MAX_LEN,
+            attribution="a" * gen.TEXT_FIELD_MAX_LEN,
+        )
+        with self.assertRaises(ValueError):
+            gen.validate_generator_inputs(
+                "boundary-book", "x" * (gen.TITLE_MAX_LEN + 1), gen.PAGES_MAX_ITEMS
+            )
+        with self.assertRaises(ValueError):
+            gen.validate_generator_inputs("boundary-book", "ok", gen.PAGES_MAX_ITEMS + 1)
+        with self.assertRaises(ValueError):
+            gen.validate_generator_inputs(
+                "boundary-book",
+                "ok",
+                1,
+                rights="r" * (gen.TEXT_FIELD_MAX_LEN + 1),
+            )
+        with self.assertRaises(ValueError):
+            gen.validate_generator_inputs(
+                "boundary-book",
+                "ok",
+                1,
+                attribution="a" * (gen.TEXT_FIELD_MAX_LEN + 1),
+            )
+
     def test_book_id_pattern_matches_schema(self) -> None:
         schema = json.loads((ROOT / "docs" / "book-format.schema.json").read_text())
         pattern = schema["properties"]["id"]["pattern"]
@@ -164,6 +236,10 @@ class FixtureBookTests(unittest.TestCase):
             pattern,
             "Python BOOK_ID_RE must match docs/book-format.schema.json",
         )
+        self.assertEqual(gen.TITLE_MAX_LEN, schema["properties"]["title"]["maxLength"])
+        self.assertEqual(gen.TEXT_FIELD_MAX_LEN, schema["properties"]["rights"]["maxLength"])
+        self.assertEqual(gen.TEXT_FIELD_MAX_LEN, schema["properties"]["attribution"]["maxLength"])
+        self.assertEqual(gen.PAGES_MAX_ITEMS, schema["properties"]["pages"]["maxItems"])
 
     def test_build_rejects_id_with_trailing_newline(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

@@ -31,10 +31,48 @@ DEFAULT_SEED = 20260824
 FIXTURES_ROOT = Path("tmp/fixtures")
 PAGE_WIDTH = 800
 PAGE_HEIGHT = 1100
+# Keep in lockstep with docs/book-format.schema.json (and Rust book_format constants).
+TITLE_MAX_LEN = 4096
+TEXT_FIELD_MAX_LEN = 8192  # rights + attribution (Rust TEXT_FIELD_MAX_LEN)
+PAGES_MAX_ITEMS = 100_000
 BOOK_ID_RE = re.compile(
     r"^(?!(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.[a-z0-9._-]*)?$)(?!.*\.$)[a-z0-9][a-z0-9._-]{0,63}$"
 )
 # Must match docs/book-format.schema.json properties.id.pattern (see tests).
+
+
+def validate_generator_inputs(
+    out_name: str,
+    title: str,
+    page_count: int,
+    *,
+    rights: str = "",
+    attribution: str = "",
+) -> None:
+    """Reject invalid inputs before any filesystem mutation.
+
+    String lengths use Unicode code-point count (``len(str)``), matching JSON Schema
+    ``maxLength`` and Rust ``chars().count()``.
+    """
+    if page_count < 1:
+        raise ValueError(f"--pages must be >= 1, got {page_count}")
+    if page_count > PAGES_MAX_ITEMS:
+        raise ValueError(f"--pages must be <= {PAGES_MAX_ITEMS}, got {page_count}")
+    title_len = len(title)
+    if title_len > TITLE_MAX_LEN:
+        raise ValueError(f"--title must be <= {TITLE_MAX_LEN} characters, got {title_len}")
+    rights_len = len(rights)
+    if rights_len > TEXT_FIELD_MAX_LEN:
+        raise ValueError(f"rights must be <= {TEXT_FIELD_MAX_LEN} characters, got {rights_len}")
+    attribution_len = len(attribution)
+    if attribution_len > TEXT_FIELD_MAX_LEN:
+        raise ValueError(
+            f"attribution must be <= {TEXT_FIELD_MAX_LEN} characters, got {attribution_len}"
+        )
+    if not BOOK_ID_RE.fullmatch(out_name):
+        raise ValueError(
+            f"output directory name {out_name!r} must match book id slug {BOOK_ID_RE.pattern}"
+        )
 
 
 def _crc32(data: bytes) -> int:
@@ -76,12 +114,11 @@ def sha256_hex(data: bytes) -> str:
 
 def build_book_package(out_dir: Path, title: str, page_count: int, seed: int) -> dict:
     """Generate the book directory and return the meta.json dict."""
-    if page_count < 1:
-        raise ValueError(f"--pages must be >= 1, got {page_count}")
-    if not BOOK_ID_RE.fullmatch(out_dir.name):
-        raise ValueError(
-            f"output directory name {out_dir.name!r} must match book id slug {BOOK_ID_RE.pattern}"
-        )
+    rights = ""
+    attribution = ""
+    validate_generator_inputs(
+        out_dir.name, title, page_count, rights=rights, attribution=attribution
+    )
 
     pages_dir = out_dir / "pages"
     # Generator owns the full pages/ tree — wipe so fewer pages or format changes
@@ -120,8 +157,8 @@ def build_book_package(out_dir: Path, title: str, page_count: int, seed: int) ->
         "updatedAt": updated,
         "renderMode": "scan",
         "lastReadPage": 0,
-        "rights": "",
-        "attribution": "",
+        "rights": rights,
+        "attribution": attribution,
         "pages": pages,
     }
 
@@ -138,29 +175,28 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--pages",
         type=int,
         default=DEFAULT_PAGES,
-        help="Number of pages (must be >= 1)",
+        help=f"Number of pages (1..{PAGES_MAX_ITEMS})",
     )
     parser.add_argument(
         "--out", type=Path, default=None, help="Output directory (default: tmp/fixtures/<id>)"
     )
-    parser.add_argument("--title", type=str, default="Fixture Book", help="Book title")
+    parser.add_argument(
+        "--title",
+        type=str,
+        default="Fixture Book",
+        help=f"Book title (max {TITLE_MAX_LEN} characters)",
+    )
     parser.add_argument("--seed", type=int, default=DEFAULT_SEED, help="Determinism seed")
     return parser.parse_args(argv)
 
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
-    if args.pages < 1:
-        print(f"error: --pages must be >= 1, got {args.pages}", file=sys.stderr)
-        return 2
-
     out_dir = args.out or FIXTURES_ROOT / "fixture-book"
-    if not BOOK_ID_RE.fullmatch(out_dir.name):
-        print(
-            f"error: output directory name {out_dir.name!r} must match book id slug "
-            f"{BOOK_ID_RE.pattern}",
-            file=sys.stderr,
-        )
+    try:
+        validate_generator_inputs(out_dir.name, args.title, args.pages)
+    except ValueError as exc:
+        print(f"error: {exc}", file=sys.stderr)
         return 2
 
     out_dir.mkdir(parents=True, exist_ok=True)
