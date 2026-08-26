@@ -9,7 +9,7 @@ Linked issue/PR: n/a
 ## Goal
 
 Single source of truth for **all** planned product phases and features. Immediate work lives in
-[`2026-08-23-m0-tauri-foundation.md`](2026-08-23-m0-tauri-foundation.md) →
+[`archive/completed/2026-08-23-m0-tauri-foundation.md`](archive/completed/2026-08-23-m0-tauri-foundation.md) (M0 complete) →
 [`2026-08-23-pre-m1-flipbook-spike.md`](2026-08-23-pre-m1-flipbook-spike.md) →
 [`2026-08-23-m1-scan-viewer.md`](2026-08-23-m1-scan-viewer.md). Later milestones stay here and in
 [`to_do.md`](../to_do.md) until promoted. Combined draft:
@@ -36,14 +36,14 @@ Three layers, not a single rendering choice:
 
 ## Milestones
 
-### M0 — Harness & scaffold (in progress)
+### M0 — Harness & scaffold (complete)
 
-**Active plan:** [`2026-08-23-m0-tauri-foundation.md`](2026-08-23-m0-tauri-foundation.md)
+**Completed plan:** [`archive/completed/2026-08-23-m0-tauri-foundation.md`](archive/completed/2026-08-23-m0-tauri-foundation.md)
 
 - [x] CI fast lane + Semgrep + pre-push basedpyright
-- [ ] Tauri shell + app-data library root + book schema v1 + JSON Schema
-- [ ] Rust CI: fmt / clippy -D warnings / test / check; commit `Cargo.lock`
-- [ ] `.envrc.example`, agent tooling contract
+- [x] Tauri shell + app-data library root + book schema v1 + JSON Schema
+- [x] Rust CI: fmt / clippy -D warnings / test / check; commit `Cargo.lock`
+- [x] `.envrc.example`, agent tooling contract
 
 ### M0.25 — Flipbook spike (blocks M1)
 
@@ -63,15 +63,18 @@ Promote when starting. Tracked in [`to_do.md`](../to_do.md).
 - [ ] Optional: CodeQL; Dependabot (required before public)
 - [ ] GitHub ruleset: required CI + Semgrep checks
 - [ ] Note: `cargo fmt` / `clippy` / `test` moved **into M0** (not deferred)
+- [ ] **From M0 senior review:** tick archived M0 plan evidence / rephrase roadmap “app-data library root” as decision not delivery (**S9**); refresh stale pyproject/README/annotations wording (**S10**); `tsc -b` + ESLint/Prettier for TS (**S11**); raise pytest `fail_under` (**LC-L3**); remove audit `continue-on-error` when ready (**LC-L4**) — see M1 plan follow-ups table
+- [ ] Add `cargo build` to CI Rust job (**LC-M2**) before relying on M1 Tauri commands
 
 ### M1 — Scan viewer (MVP core)
 
 **Active plan:** [`2026-08-23-m1-scan-viewer.md`](2026-08-23-m1-scan-viewer.md) (after M0 + flipbook spike ADR)
 
-- [ ] Atomic folder ingest → book package (relative paths, checksums)
+- [ ] Atomic folder ingest → book package (relative paths, checksums); reject non-slug `id` at ingest
 - [ ] Page-turn reader per ADR (not assumed StPageFlip)
 - [ ] Persist last-read page; Open… inspect-and-branch
 - [ ] Perf budget + error taxonomy tests
+- [ ] Close remaining M0 review format/load items (**A10–A13**, **LC-M2** cargo build, **LC-M3** CSP tracking) — see follow-ups section below
 
 **Out of scope for M1:** library shelf, authoring, OCR, hotspots, web deploy.
 
@@ -135,7 +138,7 @@ Promote when starting. Tracked in [`to_do.md`](../to_do.md).
 ## Book package schema (evolving)
 
 **Source of truth:** authored in M0 as `docs/book-format.md` + `docs/book-format.schema.json`
-(see [`2026-08-23-m0-tauri-foundation.md`](2026-08-23-m0-tauri-foundation.md)). Do not treat this
+(see [`archive/completed/2026-08-23-m0-tauri-foundation.md`](archive/completed/2026-08-23-m0-tauri-foundation.md)). Do not treat this
 roadmap as schema authority.
 
 Until those files exist, schema **v1** minimum (aligned with M0):

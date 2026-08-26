@@ -1,12 +1,12 @@
 # Plan: M1 — Scan viewer (first product milestone)
 
-Last reviewed: 2026-08-23
+Last reviewed: 2026-08-25
 Date: 2026-08-23
 Author: bootstrap session (revised after Hy3 + ox-alpha plan reviews)
 Status: draft
 Linked issue/PR: n/a
 Depends on:
-- [`2026-08-23-m0-tauri-foundation.md`](2026-08-23-m0-tauri-foundation.md) **complete**
+- [`archive/completed/2026-08-23-m0-tauri-foundation.md`](archive/completed/2026-08-23-m0-tauri-foundation.md) **complete**
 - [`2026-08-23-pre-m1-flipbook-spike.md`](2026-08-23-pre-m1-flipbook-spike.md) **complete** (ADR gates G1–G5)
 Follows: product roadmap M1
 
@@ -62,6 +62,10 @@ folder pickers.
 | A7 | Open… on an existing package directory loads without re-copy | Manual script |
 | A8 | Unsupported `formatVersion` → `SchemaVersionUnsupported` message | `cargo test` |
 | A9 | Perf budget (below) holds on the **named reference class** against the **pinned gate corpus** | Manual timed run; record results in PR |
+| A10 | Mutating one page byte causes `ChecksumMismatch` on load (negative checksum test) | `cargo test` |
+| A11 | Ingest rejects `id` that case-folds equal to an existing book directory on case-insensitive FS | `cargo test` |
+| A12 | Resolved page path canonicalizes under package root (prefix assertion after `join`) | `cargo test` |
+| A13 | Webview CSP is **not** `null` before Phase 2 commands + asset protocol ship | Review `tauri.conf.json` + manual |
 
 ### Error taxonomy (Rust enum → user message)
 
@@ -70,7 +74,7 @@ folder pickers.
 | `EmptyFolder` | No files | Folder has no files |
 | `NoSupportedImages` | No jpg/jpeg/png/webp | No supported images found |
 | `UnreadableFile` | I/O error on a page | Which file failed |
-| `DestinationExists` | Target book path exists | Refuse overwrite |
+| `DestinationExists` | Target book path exists (incl. case-insensitive `id` collision on macOS/Windows) | Refuse overwrite |
 | `DuplicatePageStem` | Two sources map to same stem (incl. case-insensitive) | Duplicate page names |
 | `InsufficientDiskSpace` | Pre-flight fail | Need more free space |
 | `SchemaVersionUnsupported` | Unknown/newer formatVersion | Unsupported book version |
@@ -119,9 +123,11 @@ If targets fail without lazy/windowed loading, **implement windowed page load in
 ## Tauri asset-protocol checklist (required before reader Phase)
 
 - [ ] `app.security.assetProtocol.enable: true`
+- [ ] **Replace `security.csp: null`** with an explicit CSP before Phase 2 (see A13)
 - [ ] `assetProtocol.scope.allow` covers app-data `books/**` (app-wide scope ≠ fs capability)
 - [ ] CSP allows `img-src` (and media if needed) for `asset:` and `https://asset.localhost`
 - [ ] `convertFileSrc` only given **absolute** paths (Rust resolves relative → absolute)
+- [ ] After `package_root.join(file)`, canonicalize and assert result is under `package_root` (A12)
 - [ ] macOS: account for `/var` → `/private/var` canonicalization in scopes
 - [ ] Windows: verify `https://asset.localhost` form
 - [ ] Persisted-scope plugin **not** required for app-data default; revisit if library root changes
@@ -152,13 +158,16 @@ scripts/generate-fixture-book.*  — small + large corpora → tmp/
 - [ ] Per-page width/height/sha256/byteSize written
 - [ ] load_book + schema validation
 - [ ] lastReadPage read/write keyed by book **`id`**; flush API for window close
-- [ ] load_book re-verifies per-page sha256
+- [ ] load_book re-verifies per-page sha256 (negative test: A10)
+- [ ] load_book canonical path prefix check (A12)
+- [ ] Ingest case-insensitive `id` collision check (A11)
 - [ ] Orphan temp-dir sweep + DuplicatePageStem tests
 - [ ] All error taxonomy variants tested with `tempfile`
 - [ ] Schema bind: Rust sample serialize ↔ `docs/book-format.schema.json`
 
 ### Phase 2 — Commands + UI
 
+- [ ] Replace `security.csp: null` with production CSP (**A13** — do this **first** in Phase 2 before commands/asset URLs; open tracking issue when starting Phase 2)
 - [ ] Commands + capabilities for dialog + app-data fs + asset scope
 - [ ] Open… inspect-and-branch + confirm before ingest copy
 - [ ] Map errors to dialogs/toasts
@@ -196,6 +205,43 @@ scripts/generate-fixture-book.*  — small + large corpora → tmp/
 | Large books OOM | med | high | Budget A9; windowed load if needed |
 | Schema drift TS/Rust | med | med | JSON Schema + Rust serialize-and-validate test (M0/M1) |
 
+## Follow-ups from M0 senior reviews (2026-08-25)
+
+Before-M1 items (**S1**, **S2**, **S3**, **S5**) landed on the M0 branch. Critical re-review
+(**#3**) added **A10–A13** (checksum negative test, case-fold `id`, path prefix, CSP). M0 branch
+also landed **S6** (`deny_unknown_fields`), expanded negative/index tests, slug lockstep tests,
+and **D2** annotations wording.
+
+Remaining findings to address during M1 (ingest/load) or harness work:
+
+| ID | Item | Home |
+|---|---|---|
+| S4 | ~~RFC 3339 timestamps in `BookMeta::validate`~~ — done on M0 branch | — |
+| S7 | ~~Unique tempdir + soft-skip without Python~~ — done on M0 branch | — |
+| S8 | ~~Table-driven negative tests~~ — largely done on M0 branch; extend if new variants appear | M1 |
+| S12 | ~~Clear stale pages on fixture regenerate~~ — done (full `pages/` wipe); drop redundant `cargo check` **or add `cargo build`** still open | next CI touch |
+| LC-M2 | Add `cargo build` (debug) to CI Rust job so Tauri/config/icon breakage is caught (LongCat M2). Note: `cargo check`/`clippy`/`test` already succeed without `../dist` (Greptile “missing frontend assets” is a false positive for those steps); re-verify when adding `cargo build`. | next CI / before M1 coding |
+| LC-M3 | **A13** first in Phase 2: replace `csp: null`; open a tracking issue when Phase 2 starts (LongCat M3) | M1 Phase 2 / A13 |
+| C3 | `load_book` must verify page bytes vs `sha256` — pinned as **A10** | M1 Phase 1 |
+| SEC2 | Case-insensitive `id` directory collision — pinned as **A11** | M1 Phase 1 |
+| SEC3 | Canonical path must stay under package root — pinned as **A12** | M1 Phase 1 |
+| SEC4 | `csp: null` must be replaced — pinned as **A13** | M1 Phase 2 |
+
+Harness/docs (not M1 product):
+
+| ID | Item | Home |
+|---|---|---|
+| S9 | Archived M0 plan checklist still unticked; roadmap “app-data library root” is a decision, not delivered code | M0.5 / docs hygiene |
+| S10 | README hedge; centralize or test slug regex triplication (Rust/Python/schema lockstep tests now exist) | M0.5 |
+| S11 | `tsc -b` for project references; ESLint/Prettier for TS | [roadmap M0.5](2026-08-23-product-roadmap.md#m05--harness-follow-ups-after-tauri-scaffold--when-app-code-exists) |
+| LC-L3 | Raise pytest `fail_under` from 0 (LongCat L3) | M0.5 |
+| LC-L4 | Remove audit job `continue-on-error` once deps stabilize (LongCat L4) | M0.5 / pre-public |
+| LC-T11 | Consider `pageLabel` `maxLength` (schema + Rust) to match title/rights/attribution (LongCat post-Qodo T11) | M1 format hardening |
+
+Sources: `tmp/2026-08-25-m0-tauri-foundation-senior-review.md`,
+`tmp/2026-08-25-m0-tauri-foundation-critical-senior-review.md`,
+`tmp/2026-08-26-m0-longcat-critical-review.md` (gitignored).
+
 ## Completion steps
 
 1. Status → `complete`; move to `plans/archive/completed/`
@@ -204,6 +250,6 @@ scripts/generate-fixture-book.*  — small + large corpora → tmp/
 
 ## Related
 
-- [`2026-08-23-m0-tauri-foundation.md`](2026-08-23-m0-tauri-foundation.md)
+- [`archive/completed/2026-08-23-m0-tauri-foundation.md`](archive/completed/2026-08-23-m0-tauri-foundation.md)
 - [`2026-08-23-pre-m1-flipbook-spike.md`](2026-08-23-pre-m1-flipbook-spike.md)
 - [`2026-08-23-product-roadmap.md`](2026-08-23-product-roadmap.md)

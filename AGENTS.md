@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Last reviewed: 2026-08-23
+Last reviewed: 2026-08-25
 
 Single source of truth for AI coding agents working in this repository. Other agent
 entrypoints (`CLAUDE.md`, `GEMINI.md`, `QWEN.md`, `.github/copilot-instructions.md`,
@@ -67,6 +67,21 @@ Do not load everything. Start here, then open only what the task needs.
 11. **Progress is written down, not remembered.** Multi-phase work records state in `.context/`
     as it goes. A session that ends mid-task leaves a `Next action`, not a gap.
 
+## Agent tooling policy
+
+Rule lives in [`policies/agent-tooling-contract.md`](policies/agent-tooling-contract.md); this is a summary.
+
+- Search and read targeted files before requesting broad repository context.
+- Use **one** primary code-intelligence/indexing tool per role or task.
+- Prefer a CLI plus task-specific skill for batch work; use MCP only when persistent,
+  interactive state materially helps.
+- Record decisions, changed files, verification, and next steps in a handoff before
+  changing agents or IDEs.
+- Keep credentials, generated indexes, and local agent state out of version control
+  (`.agent-state/` is gitignored; rebuildable by definition).
+- Smoke-test a tool before adopting it: index a fixture, run one query, tear down
+  (see the contract for the shape).
+
 ## Repo map
 
 - `prompts/` — reusable prompts (bootstrap, refactor, docs audit, subagent workflow, reviews).
@@ -77,8 +92,13 @@ Do not load everything. Start here, then open only what the task needs.
 - `hooks/` — pre-commit config + policy-check scripts (file size, TODO limits, secrets, lint).
 - `ci/` — CI selection guidance and example workflows.
 - `inventory/` — curated indexes of tools, skills, MCP servers, references (install-on-demand).
-- `docs/` — navigation helpers and quick-reference guides.
-- `scripts/` — automation scripts (setup, health check, environment validation).
+- `docs/` — navigation helpers and quick-reference guides (`book-format.md` / schema).
+- `src-tauri/` — Tauri 2 Rust host (`book_format` types + schema-bind tests).
+- `src/` — Vite + React + TypeScript frontend shell.
+- `scripts/` — automation scripts (setup, health check, environment validation,
+  `generate-fixture-book.py`).
+- `tests/` — Python tests; `tests/fixtures/` documents how to regenerate book fixtures
+  into gitignored `tmp/fixtures/`.
 - `plans/` — **active** implementation plans and the living roadmap. Layout:
   - `plans/deferred/` — postponed plans (not abandoned)
   - `plans/archive/completed/` — finished plans

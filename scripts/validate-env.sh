@@ -114,14 +114,45 @@ if [ -f .markdownlint-cli2.yaml ] || grep -q "markdownlint" .pre-commit-config.y
     fi
 fi
 
-# 4. Environment variables
+# 4. Tauri prerequisites (detected from src-tauri/ presence)
+section "Tauri Prerequisites"
+
+if [ -d src-tauri ]; then
+    if check_command rustc && check_command cargo; then
+        check "Rust toolchain available (rustc + cargo)"
+    else
+        warn "Rust toolchain required but not found"
+        info "Install via: https://rustup.rs"
+        increment_error
+    fi
+
+    if check_command node; then
+        check "Node.js available"
+    else
+        warn "Node.js required but not found"
+        info "Install Node LTS; enable pnpm via corepack"
+        increment_error
+    fi
+
+    if check_command pnpm; then
+        check "pnpm available"
+    else
+        warn "pnpm required but not found"
+        info "Enable with: corepack enable (or: npm i -g pnpm)"
+        increment_error
+    fi
+else
+    info "No src-tauri/ directory yet; skipping Tauri prereq checks"
+fi
+
+# 5. Environment variables
 section "Environment Variables"
 
 if [ -f .env.example ]; then
     info "Checking .env.example for required variables..."
 
     # Extract variable names from .env.example (lines like VAR_NAME=value)
-    required_vars=$(grep -E "^[A-Z_]+" .env.example | cut -d'=' -f1 | head -10)
+    required_vars=$(grep -E "^[A-Z_]+" .env.example | cut -d'=' -f1 | head -10 || true)
 
     if [ -n "$required_vars" ]; then
         for var in $required_vars; do
@@ -136,7 +167,7 @@ else
     info "No .env.example found, skipping variable checks"
 fi
 
-# 5. Git configuration
+# 6. Git configuration
 section "Git Configuration"
 
 if git rev-parse --git-dir > /dev/null 2>&1; then
@@ -157,7 +188,7 @@ else
     info "Not a git repository, skipping git config checks"
 fi
 
-# 6. File permissions
+# 7. File permissions
 section "File Permissions"
 
 if [ -f scripts/setup.sh ]; then
@@ -178,7 +209,7 @@ if [ -f scripts/health-check.sh ]; then
     fi
 fi
 
-# 7. Summary
+# 8. Summary
 section "Summary"
 
 if [ $error_count -eq 0 ]; then

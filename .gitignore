@@ -92,7 +92,8 @@ out/
 
 # ── Rust ─────────────────────────────────────────────────────────────────────
 target/
-Cargo.lock          # keep for binaries; remove this line for libraries
+.cargo-target/
+src-tauri/gen/schemas/
 
 # ── Go ───────────────────────────────────────────────────────────────────────
 *.test
@@ -145,7 +146,7 @@ worktrees/
 ._*
 .Spotlight-V100
 .Trashes
-Icon?
+/Icon?
 Thumbs.db
 ehthumbs.db
 Desktop.ini

@@ -1,22 +1,21 @@
 # Scriptorium backlog
 
-Last reviewed: 2026-08-23
+Last reviewed: 2026-08-26
 
 Agents: start at **Next Up** (3–5 pointer lines). Detail lives in linked plans, not here.
 Policy: [`policies/plans-and-todos.md`](policies/plans-and-todos.md).
 
 ## Next Up (keep 3–5; pointers only — not full checklists)
 
-1. [M0 Tauri foundation](plans/2026-08-23-m0-tauri-foundation.md) — Phase 1 scaffold + data architecture
-2. [Pre-M1 flipbook spike](plans/2026-08-23-pre-m1-flipbook-spike.md) — ADR gates G1–G5 after M0 window exists
-3. [M1 scan viewer](plans/2026-08-23-m1-scan-viewer.md) — blocked on spike ADR; acceptance A1–A9
+- [Pre-M1 flipbook spike](plans/2026-08-23-pre-m1-flipbook-spike.md) — ADR gates G1–G5 after M0 window exists
+- [M1 scan viewer](plans/2026-08-23-m1-scan-viewer.md) — blocked on spike ADR; acceptance A1–A13
+- [M0.5 harness follow-ups](plans/2026-08-23-product-roadmap.md#m05--harness-follow-ups-after-tauri-scaffold--when-app-code-exists) — TS lint, coverage gates, S9–S11
 
 ## Active plans
 
 | Plan | Status | Note |
 |---|---|---|
 | [Product roadmap](plans/2026-08-23-product-roadmap.md) | living | M0–M8 horizon; not a task queue |
-| [M0 Tauri foundation](plans/2026-08-23-m0-tauri-foundation.md) | draft | Scaffold, schema v1, Rust CI, Cargo.lock |
 | [Pre-M1 flipbook spike](plans/2026-08-23-pre-m1-flipbook-spike.md) | draft | Blocks M1 |
 | [M1 scan viewer](plans/2026-08-23-m1-scan-viewer.md) | draft | First product slice after M0 + spike |
 
@@ -29,7 +28,12 @@ _(none — use this section only for work that fits in one session and does not 
 Pointers only — promote via [`prompts/backlog-to-plans.md`](prompts/backlog-to-plans.md) or move to
 [`plans/deferred/`](plans/deferred/) when a real plan exists.
 
-- **M0.5 harness follow-ups** — TS lint pre-push, Vitest coverage gates, Dependabot/CodeQL →
+- **M0.5 harness follow-ups** — TS lint pre-push, Vitest coverage gates, Dependabot/CodeQL;
+  M0 senior-review docs/harness nits (**S9**–**S11**); raise pytest `fail_under` (**LC-L3**);
+  harden audit job (**LC-L4**) →
   [roadmap M0.5](plans/2026-08-23-product-roadmap.md#m05--harness-follow-ups-after-tauri-scaffold--when-app-code-exists)
+- **M1 format/load hardening** — **A10–A13**, CI `cargo build` (**LC-M2**), CSP tracking (**LC-M3**),
+  optional `pageLabel` maxLength (**LC-T11**) →
+  [M1 plan follow-ups](plans/2026-08-23-m1-scan-viewer.md#follow-ups-from-m0-senior-reviews-2026-08-25)
 - **Later product (M2–M8)** — OCR, text/hybrid modes, library, hotspots, polish, web/IIIF →
   [roadmap](plans/2026-08-23-product-roadmap.md)

@@ -5,7 +5,7 @@ Date: 2026-08-23
 Author: bootstrap session (revised after Hy3 + ox-alpha plan reviews)
 Status: draft
 Linked issue/PR: n/a
-Depends on: [`2026-08-23-m0-tauri-foundation.md`](2026-08-23-m0-tauri-foundation.md) Phase 1 window exists (minimal shell OK)
+Depends on: [`archive/completed/2026-08-23-m0-tauri-foundation.md`](archive/completed/2026-08-23-m0-tauri-foundation.md) Phase 1 window exists (minimal shell OK)
 Blocks: [`2026-08-23-m1-scan-viewer.md`](2026-08-23-m1-scan-viewer.md)
 
 ## Goal

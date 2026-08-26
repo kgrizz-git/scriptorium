@@ -14,6 +14,8 @@ Last reviewed: 2026-08-24
 | **Lint** | ✅ ruff, markdownlint, shellcheck | — | ✅ same + actionlint | — |
 | **Type check (Python)** | — | ✅ basedpyright | ✅ basedpyright | — |
 | **Rust fmt / clippy / test** | — | — | ✅ required from **M0** once `src-tauri/` exists | — |
+| **Type check (TypeScript)** | — | — | ✅ `pnpm exec tsc --noEmit` | — |
+| **Audit (pnpm + cargo)** | — | — | ✅ advisory (`continue-on-error`) | — |
 | **Tests + coverage** | — | — | ✅ pytest-cov (report; gate later) | — |
 | **SAST** | — | — | — | ✅ Semgrep on PR (whole repo; templates/scratch in `.semgrepignore`) |
 | **CodeQL** | — | — | — | later — [M0.5](../plans/2026-08-23-product-roadmap.md#m05--harness-follow-ups-after-tauri-scaffold--when-app-code-exists) |
@@ -40,6 +42,8 @@ After the first green `CI` run, set default-branch ruleset required checks to:
 - `Secret scan (gitleaks)`
 - `SAST — Semgrep` (from Security workflow)
 - `Rust (src-tauri)` — **required from M0** once `src-tauri/` exists (`cargo fmt` / `clippy` / `test` / `check`; exact job name must match `ci.yml`)
+- `Type check (TypeScript)` — `pnpm install` + `tsc --noEmit`
+- `Audit (advisory)` — `pnpm audit --prod` + `cargo audit`, both `continue-on-error`
 
 Until M0 lands, omit the Rust job from the ruleset so the branch is not blocked on a missing check.
 
