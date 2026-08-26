@@ -19,6 +19,7 @@ import argparse
 import hashlib
 import json
 import re
+import shutil
 import struct
 import sys
 import zlib
@@ -83,9 +84,10 @@ def build_book_package(out_dir: Path, title: str, page_count: int, seed: int) ->
         )
 
     pages_dir = out_dir / "pages"
+    # Generator owns the full pages/ tree — wipe so fewer pages or format changes
+    # cannot leave stale .jpg/.webp/.DS_Store siblings.
     if pages_dir.exists():
-        for old_page in pages_dir.glob("*.png"):
-            old_page.unlink()
+        shutil.rmtree(pages_dir)
     pages_dir.mkdir(parents=True, exist_ok=True)
 
     created = "2026-08-24T00:00:00Z"

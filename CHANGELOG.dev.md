@@ -15,12 +15,10 @@ Internal / developer-facing changes that do not belong in the public
 
 ### Changed
 - CI: install Tauri Linux system deps in `Rust (src-tauri)`; point `cargo audit` at `src-tauri/`; fix plan archive relative links broken by M0 move; pin Rust via `rust-toolchain.toml` (`1.96.0`); install `jsonschema` in the pytest job so schema conformance cannot silently skip (**S1**).
-- Book schema / Rust validate: `id` slug pattern (safe dirname) (**S5**); reject `byteSize: 0` (**S2**); enforce `pages[i].index == i` (**S3**); RFC 3339 `createdAt`/`updatedAt` (**S4**); `deny_unknown_fields` on `BookMeta`/`PageEntry` (**S6/SEC5**); reject `.` / `..` path segments; reject Windows-reserved device names + trailing periods on `id` and page path components; reject case-insensitive page-path collisions; table-driven negative path/index tests; slug lockstep tests (Rust + Python vs schema); structural validate accepts wrong-but-valid-shape `sha256` (documents M1 checksum gap); integer fields capped at Rust `u32`/`u64` maxima; `width`/`height` `minimum: 1`.
-- Python schema tests use `FormatChecker` + `rfc3339-validator` so `format: date-time` is enforced; invalid-timestamp negative assertion added.
-- Fixture generator: clear orphaned `pages/*.png` on regenerate (**S12**); write `meta.json`/`annotations.json` as UTF-8 LF bytes for cross-platform determinism.
-- Rust fixture round-trip test: unique tempdir; soft-skip when neither `python3` nor `python` is on PATH (**S7**).
-- M1 plan: acceptance **A10–A13** (checksum negative test, case-fold `id`, path prefix, CSP); critical review follow-ups tracked.
-- Deferred items: **S12** cargo-check nit; harness **S9–S11** → M1 plan / roadmap M0.5.
+- Book schema / Rust validate: `id` slug pattern (safe dirname) (**S5**); reject `byteSize: 0` (**S2**); enforce `pages[i].index == i` (**S3**); RFC 3339 `createdAt`/`updatedAt` (**S4**); `deny_unknown_fields` on `BookMeta`/`PageEntry` (**S6/SEC5**); reject `.` / `..` path segments; reject Windows-reserved device names + trailing periods on `id` and page path components; reject case-insensitive page-path collisions; `title`/`rights`/`attribution` max lengths + `pages` `maxItems: 100000`; table-driven negative path/index tests; slug lockstep tests (Rust + Python vs schema); structural validate accepts wrong-but-valid-shape `sha256` (documents M1 checksum gap); integer fields capped at Rust `u32`/`u64` maxima; `width`/`height` `minimum: 1`.
+- Fixture generator: wipe and recreate `pages/` on regenerate (clears non-PNG orphans too); write `meta.json`/`annotations.json` as UTF-8 LF bytes for cross-platform determinism; CLI validates book-id dirname before mkdir.
+- Documented page `file` schema-pattern invariants in `docs/book-format.md`.
+- LongCat review follow-ups tracked: **LC-M2** (`cargo build` in CI), **LC-M3**/A13 CSP, **LC-L3**/L4 coverage+audit → M1 plan / M0.5 icebox.
 - `annotations.json` empty form canonicalized to `[]` (`{}` back-compat only).
 - Removed unused Tauri `greet` command; Cargo.toml `authors` set to `kgrizz-git`.
 - Doc freshness: bumped Last reviewed on AGENTS/README/`to_do`/NAVIGATION; README covers fixture generator + book format.

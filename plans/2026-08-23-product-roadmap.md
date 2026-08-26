@@ -63,7 +63,8 @@ Promote when starting. Tracked in [`to_do.md`](../to_do.md).
 - [ ] Optional: CodeQL; Dependabot (required before public)
 - [ ] GitHub ruleset: required CI + Semgrep checks
 - [ ] Note: `cargo fmt` / `clippy` / `test` moved **into M0** (not deferred)
-- [ ] **From M0 senior review:** tick archived M0 plan evidence / rephrase roadmap “app-data library root” as decision not delivery (**S9**); refresh stale pyproject/README/annotations wording (**S10**); `tsc -b` + ESLint/Prettier for TS (**S11**) — see M1 plan follow-ups table
+- [ ] **From M0 senior review:** tick archived M0 plan evidence / rephrase roadmap “app-data library root” as decision not delivery (**S9**); refresh stale pyproject/README/annotations wording (**S10**); `tsc -b` + ESLint/Prettier for TS (**S11**); raise pytest `fail_under` (**LC-L3**); remove audit `continue-on-error` when ready (**LC-L4**) — see M1 plan follow-ups table
+- [ ] Add `cargo build` to CI Rust job (**LC-M2**) before relying on M1 Tauri commands
 
 ### M1 — Scan viewer (MVP core)
 
@@ -73,7 +74,7 @@ Promote when starting. Tracked in [`to_do.md`](../to_do.md).
 - [ ] Page-turn reader per ADR (not assumed StPageFlip)
 - [ ] Persist last-read page; Open… inspect-and-branch
 - [ ] Perf budget + error taxonomy tests
-- [ ] Close remaining M0 senior-review format/load items (**S12** cargo-check nit, **A10–A13**) — see follow-ups section below
+- [ ] Close remaining M0 review format/load items (**A10–A13**, **LC-M2** cargo build, **LC-M3** CSP tracking) — see follow-ups section below
 
 **Out of scope for M1:** library shelf, authoring, OCR, hotspots, web deploy.
 

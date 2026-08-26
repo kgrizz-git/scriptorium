@@ -179,10 +179,15 @@ class FixtureBookTests(unittest.TestCase):
             out = Path(tmp) / "regen-book"
             gen.build_book_package(out, "Regen", page_count=3, seed=1)
             self.assertTrue((out / "pages" / "002.png").exists())
+            # Stale non-PNG sibling must also be removed when regenerating.
+            (out / "pages" / "stale.jpg").write_bytes(b"not-a-real-jpeg")
+            (out / "pages" / ".DS_Store").write_bytes(b"junk")
             gen.build_book_package(out, "Regen", page_count=1, seed=1)
             self.assertTrue((out / "pages" / "000.png").exists())
             self.assertFalse((out / "pages" / "001.png").exists())
             self.assertFalse((out / "pages" / "002.png").exists())
+            self.assertFalse((out / "pages" / "stale.jpg").exists())
+            self.assertFalse((out / "pages" / ".DS_Store").exists())
             meta = json.loads((out / "meta.json").read_text(encoding="utf-8"))
             self.assertEqual(len(meta["pages"]), 1)
 

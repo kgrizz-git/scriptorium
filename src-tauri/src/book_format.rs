@@ -18,6 +18,13 @@ const WINDOWS_RESERVED_STEMS: &[&str] = &[
     "com9", "lpt1", "lpt2", "lpt3", "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9",
 ];
 
+/// Max character length for `title` (matches schema `maxLength`; Unicode scalar count).
+pub const TITLE_MAX_LEN: usize = 4096;
+/// Max character length for `rights` / `attribution`.
+pub const TEXT_FIELD_MAX_LEN: usize = 8192;
+/// Max number of pages in a package (matches schema `maxItems`).
+pub const PAGES_MAX_ITEMS: usize = 100_000;
+
 /// How a book renders. Default is `Scan`.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -73,6 +80,16 @@ pub enum BookMetaError {
         file: String,
         earlier_file: String,
     },
+    /// `title` exceeds the schema max length.
+    TitleTooLong { len: usize, max: usize },
+    /// `rights` or `attribution` exceeds the schema max length.
+    TextFieldTooLong {
+        field: &'static str,
+        len: usize,
+        max: usize,
+    },
+    /// `pages` exceeds the schema maxItems bound.
+    TooManyPages { count: usize, max: usize },
 }
 
 impl std::fmt::Display for BookMetaError {
@@ -127,6 +144,15 @@ impl std::fmt::Display for BookMetaError {
                 f,
                 "pages[{index}].file {file:?} collides case-insensitively with {earlier_file:?}"
             ),
+            Self::TitleTooLong { len, max } => {
+                write!(f, "title length {len} exceeds max {max}")
+            }
+            Self::TextFieldTooLong { field, len, max } => {
+                write!(f, "{field} length {len} exceeds max {max}")
+            }
+            Self::TooManyPages { count, max } => {
+                write!(f, "pages has {count} entries; max is {max}")
+            }
         }
     }
 }
@@ -229,8 +255,34 @@ impl BookMeta {
         validate_book_id(&self.id)?;
         validate_rfc3339("createdAt", &self.created_at)?;
         validate_rfc3339("updatedAt", &self.updated_at)?;
+        if self.title.chars().count() > TITLE_MAX_LEN {
+            return Err(BookMetaError::TitleTooLong {
+                len: self.title.chars().count(),
+                max: TITLE_MAX_LEN,
+            });
+        }
+        if self.rights.chars().count() > TEXT_FIELD_MAX_LEN {
+            return Err(BookMetaError::TextFieldTooLong {
+                field: "rights",
+                len: self.rights.chars().count(),
+                max: TEXT_FIELD_MAX_LEN,
+            });
+        }
+        if self.attribution.chars().count() > TEXT_FIELD_MAX_LEN {
+            return Err(BookMetaError::TextFieldTooLong {
+                field: "attribution",
+                len: self.attribution.chars().count(),
+                max: TEXT_FIELD_MAX_LEN,
+            });
+        }
         if self.pages.is_empty() {
             return Err(BookMetaError::EmptyPages);
+        }
+        if self.pages.len() > PAGES_MAX_ITEMS {
+            return Err(BookMetaError::TooManyPages {
+                count: self.pages.len(),
+                max: PAGES_MAX_ITEMS,
+            });
         }
         let page_count = self.pages.len();
         if (self.last_read_page as usize) >= page_count {
@@ -551,6 +603,58 @@ mod tests {
                 assert_eq!(earlier_file, "pages/Cover.png");
             }
             other => panic!("expected CaseInsensitivePathCollision, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn validate_rejects_title_too_long() {
+        let mut book = BookMeta::sample();
+        book.title = "x".repeat(TITLE_MAX_LEN + 1);
+        match book.validate() {
+            Err(BookMetaError::TitleTooLong { len, max }) => {
+                assert_eq!(len, TITLE_MAX_LEN + 1);
+                assert_eq!(max, TITLE_MAX_LEN);
+            }
+            other => panic!("expected TitleTooLong, got {other:?}"),
+        }
+        let json = serde_json::to_value(&book).unwrap();
+        let validator = compile_schema(&load_schema());
+        assert!(
+            !validator.is_valid(&json),
+            "schema must reject overlong title"
+        );
+    }
+
+    #[test]
+    fn validate_rejects_too_many_pages_bound_documented() {
+        // Building 100_001 real pages is expensive; assert the constant matches schema
+        // and that a synthetic oversize list is rejected by validate().
+        let schema = load_schema();
+        let max_items = schema["properties"]["pages"]["maxItems"]
+            .as_u64()
+            .expect("pages.maxItems") as usize;
+        assert_eq!(max_items, PAGES_MAX_ITEMS);
+        let mut book = BookMeta::sample();
+        book.pages = (0..=PAGES_MAX_ITEMS)
+            .map(|i| PageEntry {
+                index: i as u32,
+                file: format!("pages/{i:05}.png"),
+                width: 1,
+                height: 1,
+                byte_size: 1,
+                sha256: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa".into(),
+                page_label: None,
+                storage: StorageMode::Copied,
+            })
+            .collect();
+        // Cap last_read so we hit TooManyPages before LastReadPageOutOfRange.
+        book.last_read_page = 0;
+        match book.validate() {
+            Err(BookMetaError::TooManyPages { count, max }) => {
+                assert_eq!(count, PAGES_MAX_ITEMS + 1);
+                assert_eq!(max, PAGES_MAX_ITEMS);
+            }
+            other => panic!("expected TooManyPages, got {other:?}"),
         }
     }
 

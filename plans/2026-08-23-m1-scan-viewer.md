@@ -167,7 +167,7 @@ scripts/generate-fixture-book.*  — small + large corpora → tmp/
 
 ### Phase 2 — Commands + UI
 
-- [ ] Replace `security.csp: null` with production CSP (A13) before exposing commands/asset URLs
+- [ ] Replace `security.csp: null` with production CSP (**A13** — do this **first** in Phase 2 before commands/asset URLs; open tracking issue when starting Phase 2)
 - [ ] Commands + capabilities for dialog + app-data fs + asset scope
 - [ ] Open… inspect-and-branch + confirm before ingest copy
 - [ ] Map errors to dialogs/toasts
@@ -219,7 +219,9 @@ Remaining findings to address during M1 (ingest/load) or harness work:
 | S4 | ~~RFC 3339 timestamps in `BookMeta::validate`~~ — done on M0 branch | — |
 | S7 | ~~Unique tempdir + soft-skip without Python~~ — done on M0 branch | — |
 | S8 | ~~Table-driven negative tests~~ — largely done on M0 branch; extend if new variants appear | M1 |
-| S12 | Clear stale pages on fixture regenerate — **done**; drop redundant `cargo check` (or comment why) still open | M1 / next CI touch |
+| S12 | ~~Clear stale pages on fixture regenerate~~ — done (full `pages/` wipe); drop redundant `cargo check` **or add `cargo build`** still open | next CI touch |
+| LC-M2 | Add `cargo build` (debug) to CI Rust job so Tauri/config/icon breakage is caught (LongCat M2) | next CI / before M1 coding |
+| LC-M3 | **A13** first in Phase 2: replace `csp: null`; open a tracking issue when Phase 2 starts (LongCat M3) | M1 Phase 2 / A13 |
 | C3 | `load_book` must verify page bytes vs `sha256` — pinned as **A10** | M1 Phase 1 |
 | SEC2 | Case-insensitive `id` directory collision — pinned as **A11** | M1 Phase 1 |
 | SEC3 | Canonical path must stay under package root — pinned as **A12** | M1 Phase 1 |
@@ -232,9 +234,12 @@ Harness/docs (not M1 product):
 | S9 | Archived M0 plan checklist still unticked; roadmap “app-data library root” is a decision, not delivered code | M0.5 / docs hygiene |
 | S10 | README hedge; centralize or test slug regex triplication (Rust/Python/schema lockstep tests now exist) | M0.5 |
 | S11 | `tsc -b` for project references; ESLint/Prettier for TS | [roadmap M0.5](2026-08-23-product-roadmap.md#m05--harness-follow-ups-after-tauri-scaffold--when-app-code-exists) |
+| LC-L3 | Raise pytest `fail_under` from 0 (LongCat L3) | M0.5 |
+| LC-L4 | Remove audit job `continue-on-error` once deps stabilize (LongCat L4) | M0.5 / pre-public |
 
 Sources: `tmp/2026-08-25-m0-tauri-foundation-senior-review.md`,
-`tmp/2026-08-25-m0-tauri-foundation-critical-senior-review.md` (gitignored).
+`tmp/2026-08-25-m0-tauri-foundation-critical-senior-review.md`,
+`tmp/2026-08-26-m0-longcat-critical-review.md` (gitignored).
 
 ## Completion steps
 
