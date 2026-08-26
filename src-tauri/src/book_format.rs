@@ -78,10 +78,9 @@ impl std::fmt::Display for BookMetaError {
                 f,
                 "lastReadPage {last_read_page} out of range for {page_count} page(s)"
             ),
-            Self::PageIndexMismatch { position, index } => write!(
-                f,
-                "pages[{position}].index is {index}, expected {position}"
-            ),
+            Self::PageIndexMismatch { position, index } => {
+                write!(f, "pages[{position}].index is {index}, expected {position}")
+            }
             Self::InvalidPageFile {
                 index,
                 file,
@@ -137,9 +136,7 @@ impl PageEntry {
             });
         }
         if self.byte_size == 0 {
-            return Err(BookMetaError::ZeroByteSize {
-                index: self.index,
-            });
+            return Err(BookMetaError::ZeroByteSize { index: self.index });
         }
         if !is_lowercase_hex_sha256(&self.sha256) {
             return Err(BookMetaError::InvalidSha256 {
@@ -432,10 +429,7 @@ mod tests {
                 "Rust must reject id {bad:?}"
             );
             let json = serde_json::to_value(&book).unwrap();
-            assert!(
-                !validator.is_valid(&json),
-                "schema must reject id {bad:?}"
-            );
+            assert!(!validator.is_valid(&json), "schema must reject id {bad:?}");
         }
     }
 
@@ -616,10 +610,7 @@ mod tests {
             storage: StorageMode::Copied,
         });
         match huge.validate() {
-            Err(BookMetaError::PageIndexMismatch {
-                position: 1,
-                index,
-            }) if index == u32::MAX => {}
+            Err(BookMetaError::PageIndexMismatch { position: 1, index }) if index == u32::MAX => {}
             other => panic!("huge index at position 1 should fail, got {other:?}"),
         }
     }
