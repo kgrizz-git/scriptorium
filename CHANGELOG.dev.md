@@ -7,15 +7,14 @@ Internal / developer-facing changes that do not belong in the public
 
 ### Added
 - Fixture-generator unit tests (`tests/test_generate_fixture_book.py`); Rust round-trip test that deserializes generator `meta.json` into `BookMeta`.
-- `BookMeta::validate` / `PageEntry::validate` for `lastReadPage` bounds, path safety, and non-zero dimensions.
+- `BookMeta::validate` / `PageEntry::validate` for `lastReadPage` bounds, path safety, and non-zero dimensions (implementation detail for the public format rules in [`CHANGELOG.md`](CHANGELOG.md)).
 - CI jobs: `Rust (src-tauri)` (cargo fmt/clippy `-D warnings`/test/check, with cargo cache), `Type check (TypeScript)` (pnpm + tsc), `Audit (advisory)` (pnpm audit + cargo audit, continue-on-error).
-- `src-tauri/` scaffold (Tauri 2, Vite 7, React 19, TypeScript 5.8); pnpm v11 build-script approval via `pnpm-workspace.yaml`; Node 24 pinned (`engines` / `.nvmrc`).
-- `scripts/generate-fixture-book.py` — stdlib-only deterministic fixture generator (real PNGs, schema-valid meta.json); `tests/fixtures/README.md`.
-- Rust types in `src-tauri/src/book_format.rs` + schema-bind tests (jsonschema 0.51.0); `cargo fmt` clean.
+- pnpm v11 build-script approval via `pnpm-workspace.yaml`; Node 24 pinned (`engines` / `.nvmrc`); `tests/fixtures/README.md`.
+- Schema-bind / lockstep tests for Rust `BookMeta` (jsonschema 0.51.0); `cargo fmt` clean.
 
 ### Changed
 - CI: install Tauri Linux system deps in `Rust (src-tauri)`; point `cargo audit` at `src-tauri/`; fix plan archive relative links broken by M0 move; pin Rust via `rust-toolchain.toml` (`1.96.0`); install `jsonschema` in the pytest job so schema conformance cannot silently skip (**S1**).
-- Book schema / Rust validate: `id` slug pattern (safe dirname) (**S5**); reject `byteSize: 0` (**S2**); enforce `pages[i].index == i` (**S3**); RFC 3339 `createdAt`/`updatedAt` (**S4**); `deny_unknown_fields` on `BookMeta`/`PageEntry` (**S6/SEC5**); reject `.` / `..` path segments; reject Windows-reserved device names + trailing periods on `id` and page path components; reject case-insensitive page-path collisions; `title`/`rights`/`attribution` max lengths + `pages` `maxItems: 100000`; table-driven negative path/index tests; slug lockstep tests (Rust + Python vs schema); structural validate accepts wrong-but-valid-shape `sha256` (documents M1 checksum gap); integer fields capped at Rust `u32`/`u64` maxima; `width`/`height` `minimum: 1`.
+- Book schema / Rust validate (dev): table-driven negative path/index tests; slug lockstep tests (Rust + Python vs schema); structural validate documents M1 checksum gap (wrong-but-valid-shape `sha256` accepted); review IDs **S2–S6**/SEC5. User-visible format/schema rules are listed once in [`CHANGELOG.md`](CHANGELOG.md) and [`docs/book-format.md`](docs/book-format.md).
 - Fixture generator: wipe and recreate `pages/` on regenerate (clears non-PNG orphans too); write `meta.json`/`annotations.json` as UTF-8 LF bytes for cross-platform determinism; CLI validates book-id dirname before mkdir; reject `--title` / `--pages` / `rights` / `attribution` outside schema `maxLength` / `maxItems` before creating the output dir.
 - Documented page `file` schema-pattern invariants in `docs/book-format.md`.
 - LongCat review follow-ups tracked: **LC-M2** (`cargo build` in CI), **LC-M3**/A13 CSP, **LC-L3**/L4 coverage+audit → M1 plan / M0.5 icebox.

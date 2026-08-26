@@ -57,10 +57,17 @@ still load.
 
 ## Evolution rule
 
-While `formatVersion` is `1`, changes to `meta.json` MUST be **additive only** — add
-fields, don't rename or remove them, don't change the meaning of existing fields. A
-breaking change requires bumping `formatVersion` and a migration note describing how to
-upgrade a v1 package to the new version.
+While `formatVersion` is `1`, the schema and Rust loaders reject unknown keys
+(`additionalProperties: false` / `#[serde(deny_unknown_fields)]`). Therefore any
+**new field** in `meta.json` (or nested page objects) REQUIRES bumping
+`formatVersion` and a migration note — older v1 readers cannot ignore unknown keys.
+
+Within a given `formatVersion`, do not rename or remove fields, and do not change
+the meaning of existing fields. Forward-compatible additive extensions are only
+allowed for future versions whose readers deliberately support them (for example
+by dropping `deny_unknown_fields` or documenting an extension map). A breaking
+change (rename, remove, or semantic change of an existing field) likewise requires
+bumping `formatVersion` and a migration note describing how to upgrade packages.
 
 ## Loader validation
 
