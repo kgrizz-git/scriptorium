@@ -77,7 +77,7 @@ def build_book_package(out_dir: Path, title: str, page_count: int, seed: int) ->
     """Generate the book directory and return the meta.json dict."""
     if page_count < 1:
         raise ValueError(f"--pages must be >= 1, got {page_count}")
-    if not BOOK_ID_RE.match(out_dir.name):
+    if not BOOK_ID_RE.fullmatch(out_dir.name):
         raise ValueError(
             f"output directory name {out_dir.name!r} must match book id slug {BOOK_ID_RE.pattern}"
         )

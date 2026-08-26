@@ -157,6 +157,15 @@ class FixtureBookTests(unittest.TestCase):
             "Python BOOK_ID_RE must match docs/book-format.schema.json",
         )
 
+    def test_build_rejects_id_with_trailing_newline(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            # re.match would accept this because `$` allows a final newline; fullmatch must not.
+            out = Path(tmp) / "ok\n"
+            with self.assertRaises(ValueError):
+                gen.build_book_package(out, "Newline", page_count=1, seed=1)
+            self.assertFalse(gen.BOOK_ID_RE.fullmatch("ok\n"))
+            self.assertTrue(gen.BOOK_ID_RE.match("ok\n"))
+
     def test_regenerate_fewer_pages_clears_orphans(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp) / "regen-book"

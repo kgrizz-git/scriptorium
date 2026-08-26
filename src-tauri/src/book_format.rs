@@ -239,7 +239,8 @@ impl BookMeta {
                 page_count,
             });
         }
-        let mut seen_files: Vec<(String, String)> = Vec::with_capacity(page_count);
+        let mut seen_files: std::collections::HashMap<String, String> =
+            std::collections::HashMap::with_capacity(page_count);
         for (position, page) in self.pages.iter().enumerate() {
             if page.index as usize != position {
                 return Err(BookMetaError::PageIndexMismatch {
@@ -249,14 +250,14 @@ impl BookMeta {
             }
             page.validate()?;
             let folded = page.file.to_ascii_lowercase();
-            if let Some((_, earlier_file)) = seen_files.iter().find(|(f, _)| *f == folded) {
+            if let Some(earlier_file) = seen_files.get(&folded) {
                 return Err(BookMetaError::CaseInsensitivePathCollision {
                     index: page.index,
                     file: page.file.clone(),
                     earlier_file: earlier_file.clone(),
                 });
             }
-            seen_files.push((folded, page.file.clone()));
+            seen_files.insert(folded, page.file.clone());
         }
         Ok(())
     }
@@ -494,7 +495,7 @@ mod tests {
         let validator = compile_schema(&load_schema());
         for bad in [
             "", "../etc", "Has Caps", ".", "bad/id", "con", "aux", "nul", "com1", "lpt9",
-            "con.txt", "prn.png", "book.",
+            "con.txt", "prn.png", "book.", "ok\n",
         ] {
             let mut book = BookMeta::sample();
             book.id = bad.into();
