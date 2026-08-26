@@ -23,9 +23,9 @@
       "const": 1
     },
     "id": {
-      "description": "Stable book identifier and package directory name under the library root. Slug-style: lowercase letter/digit start, then lowercase alnum / . _ - (1–64 chars).",
+      "description": "Stable book identifier and package directory name under the library root. Lowercase slug (1–64 chars); no trailing period; not a Windows-reserved device name (con/prn/aux/nul/com1-9/lpt1-9, with or without extension).",
       "type": "string",
-      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+      "pattern": "^(?!(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\\.[a-z0-9._-]*)?$)(?!.*\\.$)[a-z0-9][a-z0-9._-]{0,63}$"
     },
     "title": {
       "description": "Display title.",
@@ -90,10 +90,10 @@
           "maximum": 4294967295
         },
         "file": {
-          "description": "Relative path under the package. No absolute paths, backslashes, null bytes, or . / .. path segments (including terminal).",
+          "description": "Relative path under the package. No absolute paths, backslashes, null bytes, . / .. segments, or trailing periods on any segment. Windows-reserved device-name segments and case-insensitive path collisions are rejected in BookMeta::validate (not fully expressible in JSON Schema).",
           "type": "string",
           "minLength": 1,
-          "pattern": "^(?!/)(?!.*\\\\)(?!.*(?:^|/)\\.\\.?(?:/|$))[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*$"
+          "pattern": "^(?!/)(?!.*\\\\)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*(?:^|/)[^/]*\\.(?:/|$))[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*$"
         },
         "width": {
           "description": "Image width in px.",

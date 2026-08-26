@@ -13,7 +13,7 @@ uses [Semantic Versioning](https://semver.org/).
 - Tauri 2 desktop shell (Vite + React + TypeScript) at repo root; book package format v1 spec and JSON Schema ([`docs/book-format.md`](docs/book-format.md), [`docs/book-format.schema.json`](docs/book-format.schema.json)); Rust types + schema-bind test; deterministic fixture generator.
 
 ### Changed
-- Book package schema tightened: page images must be at least 1×1; page `file` paths reject traversal/absolutes (including `.` and `..` segments); numeric fields bounded to Rust integer ranges; book `id` constrained to a slug safe as a library directory name; unknown JSON keys rejected at deserialize; `createdAt`/`updatedAt` must be RFC 3339; loaders must clamp or reject out-of-range `lastReadPage` and enforce `pages[i].index == i` / non-zero `byteSize` ([`docs/book-format.md`](docs/book-format.md)).
+- Book package schema tightened: page images must be at least 1×1; page `file` paths reject traversal/absolutes (including `.` / `..` segments and trailing periods); book `id` and page path components reject Windows-reserved device names; page paths must be unique case-insensitively; numeric fields bounded to Rust integer ranges; book `id` constrained to a portable library directory slug; unknown JSON keys rejected at deserialize; `createdAt`/`updatedAt` must be RFC 3339; loaders must clamp or reject out-of-range `lastReadPage` and enforce `pages[i].index == i` / non-zero `byteSize` ([`docs/book-format.md`](docs/book-format.md)).
 
 ## [0.1.2] - 2026-08-23
 

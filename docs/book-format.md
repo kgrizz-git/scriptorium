@@ -32,7 +32,7 @@ still load.
 | Field | Type | Required | Notes |
 |---|---|---|---|
 | `formatVersion` | number | yes | `1` for this spec |
-| `id` | string | yes | stable book identifier **and** package directory name; slug `^[a-z0-9][a-z0-9._-]{0,63}$` |
+| `id` | string | yes | stable book identifier **and** package directory name; lowercase slug (1–64 chars); no trailing `.`; not a Windows-reserved device name (`con`/`prn`/`aux`/`nul`/`com1`–`9`/`lpt1`–`9`, optional extension) |
 | `title` | string | yes | display title |
 | `createdAt` | string | yes | RFC 3339 / ISO 8601 date-time (enforced in schema + `BookMeta::validate`) |
 | `updatedAt` | string | yes | RFC 3339 / ISO 8601 date-time (enforced in schema + `BookMeta::validate`) |
@@ -47,7 +47,7 @@ still load.
 | Field | Type | Required | Notes |
 |---|---|---|---|
 | `index` | number | yes | 0-based position; MUST equal array position (`pages[i].index == i`) |
-| `file` | string | yes | relative path under the package (no `.` / `..` segments, no absolutes) |
+| `file` | string | yes | relative path under the package (no `.` / `..` segments, no absolutes, no trailing `.`; Windows-reserved components + case-insensitive uniqueness enforced in `BookMeta::validate`) |
 | `width` | number | yes | image width in px (`minimum: 1`) |
 | `height` | number | yes | image height in px (`minimum: 1`) |
 | `byteSize` | number | yes | bytes on disk (`exclusiveMinimum: 0`) |
@@ -69,11 +69,12 @@ an equivalent):
 
 | Check | Behavior |
 |---|---|
-| `id` | MUST match slug `^[a-z0-9][a-z0-9._-]{0,63}$` (safe as a library directory name). |
+| `id` | MUST be a portable library directory slug: lowercase `[a-z0-9][a-z0-9._-]{0,63}`, no trailing `.`, not a Windows-reserved device name (incl. `con.txt`-style extensions). |
 | `createdAt` / `updatedAt` | MUST parse as RFC 3339 date-time. |
 | `lastReadPage` | MUST be `< pages.length`. Prefer reject (`LastReadPageOutOfRange`); UI may clamp to `pages.length - 1` if recovering a corrupt bookmark. |
 | `pages[].index` | MUST equal array position (`pages[i].index == i`); reject duplicates / gaps / out-of-order. |
-| `pages[].file` | Reject absolute paths, `.` / `..` segments, backslashes, null bytes, empty segments. |
+| `pages[].file` | Reject absolute paths, `.` / `..` segments, backslashes, null bytes, empty segments, trailing `.`, and Windows-reserved components (`con`/`prn`/`aux`/`nul`/`com1`–`9`/`lpt1`–`9`, optional extension, case-insensitive). |
+| `pages[].file` (cross-page) | Reject two pages whose `file` paths collide case-insensitively (`pages/A.png` vs `pages/a.png`) — required for Windows/macOS default volumes; not expressible in JSON Schema. |
 | `pages[].width` / `height` | Reject values `< 1` (degenerate images). |
 | `pages[].byteSize` | Reject `0` (empty page files). |
 

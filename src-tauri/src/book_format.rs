@@ -10,7 +10,13 @@ use serde::{Deserialize, Serialize};
 
 /// Book `id` slug pattern — must stay in lockstep with
 /// `docs/book-format.schema.json` `properties.id.pattern` and Python `BOOK_ID_RE`.
-pub const BOOK_ID_PATTERN: &str = r"^[a-z0-9][a-z0-9._-]{0,63}$";
+pub const BOOK_ID_PATTERN: &str = r"^(?!(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.[a-z0-9._-]*)?$)(?!.*\.$)[a-z0-9][a-z0-9._-]{0,63}$";
+
+/// Windows-reserved device stems (matched case-insensitively on the component stem).
+const WINDOWS_RESERVED_STEMS: &[&str] = &[
+    "con", "prn", "aux", "nul", "com1", "com2", "com3", "com4", "com5", "com6", "com7", "com8",
+    "com9", "lpt1", "lpt2", "lpt3", "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9",
+];
 
 /// How a book renders. Default is `Scan`.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -61,6 +67,12 @@ pub enum BookMetaError {
     InvalidSha256 { index: u32, sha256: String },
     /// `createdAt` / `updatedAt` must be RFC 3339 (ISO 8601 date-time).
     InvalidTimestamp { field: &'static str, value: String },
+    /// Two page `file` paths collide when compared case-insensitively.
+    CaseInsensitivePathCollision {
+        index: u32,
+        file: String,
+        earlier_file: String,
+    },
 }
 
 impl std::fmt::Display for BookMetaError {
@@ -107,6 +119,14 @@ impl std::fmt::Display for BookMetaError {
             Self::InvalidTimestamp { field, value } => {
                 write!(f, "{field} {value:?} is not a valid RFC 3339 date-time")
             }
+            Self::CaseInsensitivePathCollision {
+                index,
+                file,
+                earlier_file,
+            } => write!(
+                f,
+                "pages[{index}].file {file:?} collides case-insensitively with {earlier_file:?}"
+            ),
         }
     }
 }
@@ -219,6 +239,7 @@ impl BookMeta {
                 page_count,
             });
         }
+        let mut seen_files: Vec<(String, String)> = Vec::with_capacity(page_count);
         for (position, page) in self.pages.iter().enumerate() {
             if page.index as usize != position {
                 return Err(BookMetaError::PageIndexMismatch {
@@ -227,6 +248,15 @@ impl BookMeta {
                 });
             }
             page.validate()?;
+            let folded = page.file.to_ascii_lowercase();
+            if let Some((_, earlier_file)) = seen_files.iter().find(|(f, _)| *f == folded) {
+                return Err(BookMetaError::CaseInsensitivePathCollision {
+                    index: page.index,
+                    file: page.file.clone(),
+                    earlier_file: earlier_file.clone(),
+                });
+            }
+            seen_files.push((folded, page.file.clone()));
         }
         Ok(())
     }
@@ -238,6 +268,10 @@ fn validate_book_id(id: &str) -> Result<(), BookMetaError> {
         Some("empty id")
     } else if id.len() > 64 {
         Some("longer than 64 characters")
+    } else if id.ends_with('.') {
+        Some("must not end with a period")
+    } else if is_windows_reserved_component(id) {
+        Some("Windows-reserved device name")
     } else if !id
         .chars()
         .next()
@@ -262,7 +296,8 @@ fn validate_book_id(id: &str) -> Result<(), BookMetaError> {
     }
 }
 
-/// Reject absolute paths, `.` / `..` segments, backslashes, and null bytes.
+/// Reject absolute paths, `.` / `..` segments, trailing periods, Windows-reserved
+/// components, backslashes, and null bytes.
 fn validate_page_file(index: u32, file: &str) -> Result<(), BookMetaError> {
     let reason = if file.is_empty() {
         Some("empty path")
@@ -277,6 +312,10 @@ fn validate_page_file(index: u32, file: &str) -> Result<(), BookMetaError> {
         .any(|seg| seg == "." || seg == ".." || seg.is_empty())
     {
         Some("empty, ., or .. path segment")
+    } else if file.split('/').any(|seg| seg.ends_with('.')) {
+        Some("path segment must not end with a period")
+    } else if file.split('/').any(is_windows_reserved_component) {
+        Some("Windows-reserved device name in path")
     } else if !file
         .chars()
         .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '-' | '/'))
@@ -294,6 +333,16 @@ fn validate_page_file(index: u32, file: &str) -> Result<(), BookMetaError> {
         }),
         None => Ok(()),
     }
+}
+
+/// True when `name` is a Windows-reserved device component (`CON`, `aux.txt`, …).
+fn is_windows_reserved_component(name: &str) -> bool {
+    let stem = name.split('.').next().unwrap_or(name);
+    if stem.is_empty() {
+        return false;
+    }
+    let stem_lower = stem.to_ascii_lowercase();
+    WINDOWS_RESERVED_STEMS.contains(&stem_lower.as_str())
 }
 
 fn is_lowercase_hex_sha256(s: &str) -> bool {
@@ -443,7 +492,10 @@ mod tests {
     #[test]
     fn validate_rejects_invalid_book_id() {
         let validator = compile_schema(&load_schema());
-        for bad in ["", "../etc", "Has Caps", ".", "bad/id"] {
+        for bad in [
+            "", "../etc", "Has Caps", ".", "bad/id", "con", "aux", "nul", "com1", "lpt9",
+            "con.txt", "prn.png", "book.",
+        ] {
             let mut book = BookMeta::sample();
             book.id = bad.into();
             assert!(
@@ -452,6 +504,52 @@ mod tests {
             );
             let json = serde_json::to_value(&book).unwrap();
             assert!(!validator.is_valid(&json), "schema must reject id {bad:?}");
+        }
+    }
+
+    #[test]
+    fn validate_rejects_windows_reserved_page_paths() {
+        let cases = [
+            "con",
+            "AUX",
+            "pages/nul.png",
+            "pages/COM1.jpg",
+            "pages/lpt9",
+            "pages/page.",
+            "pages/foo./bar.png",
+        ];
+        for file in cases {
+            match validate_page_file(0, file) {
+                Err(BookMetaError::InvalidPageFile { .. }) => {}
+                other => panic!("expected InvalidPageFile for {file:?}, got {other:?}"),
+            }
+        }
+    }
+
+    #[test]
+    fn validate_rejects_case_insensitive_path_collision() {
+        let mut book = BookMeta::sample();
+        book.pages[0].file = "pages/Cover.png".into();
+        book.pages.push(PageEntry {
+            index: 1,
+            file: "pages/cover.png".into(),
+            width: 100,
+            height: 100,
+            byte_size: 10,
+            sha256: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa".into(),
+            page_label: None,
+            storage: StorageMode::Copied,
+        });
+        match book.validate() {
+            Err(BookMetaError::CaseInsensitivePathCollision {
+                index: 1,
+                file,
+                earlier_file,
+            }) => {
+                assert_eq!(file, "pages/cover.png");
+                assert_eq!(earlier_file, "pages/Cover.png");
+            }
+            other => panic!("expected CaseInsensitivePathCollision, got {other:?}"),
         }
     }
 
