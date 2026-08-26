@@ -81,6 +81,9 @@ def build_book_package(out_dir: Path, title: str, page_count: int, seed: int) ->
         )
 
     pages_dir = out_dir / "pages"
+    if pages_dir.exists():
+        for old_page in pages_dir.glob("*.png"):
+            old_page.unlink()
     pages_dir.mkdir(parents=True, exist_ok=True)
 
     created = "2026-08-24T00:00:00Z"
@@ -118,9 +121,9 @@ def build_book_package(out_dir: Path, title: str, page_count: int, seed: int) ->
         "pages": pages,
     }
 
-    (out_dir / "meta.json").write_text(json.dumps(meta, indent=2) + "\n")
-    # Canonical empty annotations form is [] ({} accepted for backwards-compat only).
-    (out_dir / "annotations.json").write_text("[]\n")
+    (out_dir / "meta.json").write_bytes((json.dumps(meta, indent=2) + "\n").encode("utf-8"))
+    # Canonical empty annotations form is [] ({} tolerated on read, never written).
+    (out_dir / "annotations.json").write_bytes(b"[]\n")
 
     return meta
 

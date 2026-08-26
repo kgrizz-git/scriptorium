@@ -143,6 +143,29 @@ class FixtureBookTests(unittest.TestCase):
             "Python BOOK_ID_RE must match docs/book-format.schema.json",
         )
 
+    def test_regenerate_fewer_pages_clears_orphans(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "regen-book"
+            gen.build_book_package(out, "Regen", page_count=3, seed=1)
+            self.assertTrue((out / "pages" / "002.png").exists())
+            gen.build_book_package(out, "Regen", page_count=1, seed=1)
+            self.assertTrue((out / "pages" / "000.png").exists())
+            self.assertFalse((out / "pages" / "001.png").exists())
+            self.assertFalse((out / "pages" / "002.png").exists())
+            meta = json.loads((out / "meta.json").read_text(encoding="utf-8"))
+            self.assertEqual(len(meta["pages"]), 1)
+
+    def test_meta_and_annotations_use_lf_newlines(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "lf-book"
+            gen.build_book_package(out, "LF", page_count=1, seed=1)
+            meta_bytes = (out / "meta.json").read_bytes()
+            ann_bytes = (out / "annotations.json").read_bytes()
+            self.assertNotIn(b"\r", meta_bytes)
+            self.assertNotIn(b"\r", ann_bytes)
+            self.assertTrue(meta_bytes.endswith(b"\n"))
+            self.assertEqual(ann_bytes, b"[]\n")
+
 
 if __name__ == "__main__":
     unittest.main()

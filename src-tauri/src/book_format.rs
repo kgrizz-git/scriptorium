@@ -59,6 +59,8 @@ pub enum BookMetaError {
     ZeroByteSize { index: u32 },
     /// `sha256` must be 64 lowercase hex characters.
     InvalidSha256 { index: u32, sha256: String },
+    /// `createdAt` / `updatedAt` must be RFC 3339 (ISO 8601 date-time).
+    InvalidTimestamp { field: &'static str, value: String },
 }
 
 impl std::fmt::Display for BookMetaError {
@@ -101,6 +103,9 @@ impl std::fmt::Display for BookMetaError {
                     f,
                     "pages[{index}].sha256 {sha256:?} is not 64 lowercase hex"
                 )
+            }
+            Self::InvalidTimestamp { field, value } => {
+                write!(f, "{field} {value:?} is not a valid RFC 3339 date-time")
             }
         }
     }
@@ -191,7 +196,8 @@ impl BookMeta {
         }
     }
 
-    /// Enforce rules the JSON Schema cannot express alone.
+    /// Enforce rules the JSON Schema cannot express alone, plus RFC 3339 timestamps
+    /// so Rust-only loaders match the schema `date-time` contract.
     ///
     /// Callers that load packages MUST run this (or clamp `last_read_page`)
     /// before trusting the document. Out-of-range `lastReadPage` is rejected
@@ -201,6 +207,8 @@ impl BookMeta {
             return Err(BookMetaError::UnsupportedFormatVersion(self.format_version));
         }
         validate_book_id(&self.id)?;
+        validate_rfc3339("createdAt", &self.created_at)?;
+        validate_rfc3339("updatedAt", &self.updated_at)?;
         if self.pages.is_empty() {
             return Err(BookMetaError::EmptyPages);
         }
@@ -287,6 +295,17 @@ fn validate_page_file(index: u32, file: &str) -> Result<(), BookMetaError> {
 
 fn is_lowercase_hex_sha256(s: &str) -> bool {
     s.len() == 64 && s.chars().all(|c| matches!(c, '0'..='9' | 'a'..='f'))
+}
+
+fn validate_rfc3339(field: &'static str, value: &str) -> Result<(), BookMetaError> {
+    use time::format_description::well_known::Rfc3339;
+    use time::OffsetDateTime;
+
+    OffsetDateTime::parse(value, &Rfc3339).map_err(|_| BookMetaError::InvalidTimestamp {
+        field,
+        value: value.to_string(),
+    })?;
+    Ok(())
 }
 
 #[cfg(test)]
@@ -645,13 +664,61 @@ mod tests {
     }
 
     #[test]
+    fn validate_rejects_invalid_timestamps() {
+        for (field, bad) in [
+            ("createdAt", "not-a-date"),
+            ("createdAt", "2026-08-24"),
+            ("updatedAt", "2026/08/24 00:00:00"),
+        ] {
+            let mut book = BookMeta::sample();
+            if field == "createdAt" {
+                book.created_at = bad.into();
+            } else {
+                book.updated_at = bad.into();
+            }
+            match book.validate() {
+                Err(BookMetaError::InvalidTimestamp { field: f, .. }) if f == field => {}
+                other => panic!("expected InvalidTimestamp for {field}={bad:?}, got {other:?}"),
+            }
+        }
+        let mut ok = BookMeta::sample();
+        ok.created_at = "2026-08-24T12:34:56+00:00".into();
+        ok.updated_at = "2026-08-24T12:34:56.123Z".into();
+        ok.validate()
+            .expect("RFC 3339 variants with offset/fraction must pass");
+    }
+
+    #[test]
     fn fixture_generator_meta_round_trips_through_rust_types() {
+        // Integration-style: needs a Python interpreter on PATH (`python3` or `python`).
+        // Soft-skips when none is available so plain `cargo test` stays usable.
+        let python = ["python3", "python"].into_iter().find(|cmd| {
+            std::process::Command::new(cmd)
+                .arg("--version")
+                .stdout(std::process::Stdio::null())
+                .stderr(std::process::Stdio::null())
+                .status()
+                .map(|s| s.success())
+                .unwrap_or(false)
+        });
+        let Some(python) = python else {
+            eprintln!("skipping fixture round-trip: no python3/python on PATH");
+            return;
+        };
+
         let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
-        let out = root.join("tmp/fixtures/rust-roundtrip-book");
+        let out = std::env::temp_dir().join(format!(
+            "scriptorium-rust-roundtrip-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|d| d.as_nanos())
+                .unwrap_or(0)
+        ));
         let _ = std::fs::remove_dir_all(&out);
         std::fs::create_dir_all(&out).expect("create out dir");
 
-        let status = std::process::Command::new("python3")
+        let status = std::process::Command::new(python)
             .arg(root.join("scripts/generate-fixture-book.py"))
             .arg("--pages")
             .arg("2")
@@ -661,7 +728,7 @@ mod tests {
             .arg(&out)
             .current_dir(&root)
             .status()
-            .expect("spawn fixture generator");
+            .unwrap_or_else(|e| panic!("spawn {python}: {e}"));
         assert!(status.success(), "fixture generator failed: {status}");
 
         let meta_path = out.join("meta.json");
@@ -682,5 +749,7 @@ mod tests {
             validator.is_valid(&re_serialized),
             "round-tripped meta must match schema"
         );
+
+        let _ = std::fs::remove_dir_all(&out);
     }
 }

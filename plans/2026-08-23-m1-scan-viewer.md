@@ -216,10 +216,10 @@ Remaining findings to address during M1 (ingest/load) or harness work:
 
 | ID | Item | Home |
 |---|---|---|
-| S4 | Decide: enforce RFC 3339 for `createdAt`/`updatedAt` in `BookMeta::validate`, or drop the ISO claim from docs | M1 ingest validation |
-| S7 | Fixture round-trip Rust test: unique tempdir + document `python3` dependency | M1 or next Rust touch |
+| S4 | ~~RFC 3339 timestamps in `BookMeta::validate`~~ — done on M0 branch | — |
+| S7 | ~~Unique tempdir + soft-skip without Python~~ — done on M0 branch | — |
 | S8 | ~~Table-driven negative tests~~ — largely done on M0 branch; extend if new variants appear | M1 |
-| S12 | Drop redundant `cargo check` after clippy+test (or comment why); clear stale pages on fixture regenerate | M1 / next CI touch |
+| S12 | Clear stale pages on fixture regenerate — **done**; drop redundant `cargo check` (or comment why) still open | M1 / next CI touch |
 | C3 | `load_book` must verify page bytes vs `sha256` — pinned as **A10** | M1 Phase 1 |
 | SEC2 | Case-insensitive `id` directory collision — pinned as **A11** | M1 Phase 1 |
 | SEC3 | Canonical path must stay under package root — pinned as **A12** | M1 Phase 1 |

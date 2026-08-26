@@ -34,8 +34,8 @@ still load.
 | `formatVersion` | number | yes | `1` for this spec |
 | `id` | string | yes | stable book identifier **and** package directory name; slug `^[a-z0-9][a-z0-9._-]{0,63}$` |
 | `title` | string | yes | display title |
-| `createdAt` | string | yes | ISO 8601 |
-| `updatedAt` | string | yes | ISO 8601 |
+| `createdAt` | string | yes | RFC 3339 / ISO 8601 date-time (enforced in schema + `BookMeta::validate`) |
+| `updatedAt` | string | yes | RFC 3339 / ISO 8601 date-time (enforced in schema + `BookMeta::validate`) |
 | `renderMode` | string | yes | `"scan"` default; `"text"` / `"hybrid"` reserved |
 | `lastReadPage` | number | yes | 0-based index; loader MUST clamp or reject when `>= pages.length` |
 | `rights` | string | yes | may be empty |
@@ -70,6 +70,7 @@ an equivalent):
 | Check | Behavior |
 |---|---|
 | `id` | MUST match slug `^[a-z0-9][a-z0-9._-]{0,63}$` (safe as a library directory name). |
+| `createdAt` / `updatedAt` | MUST parse as RFC 3339 date-time. |
 | `lastReadPage` | MUST be `< pages.length`. Prefer reject (`LastReadPageOutOfRange`); UI may clamp to `pages.length - 1` if recovering a corrupt bookmark. |
 | `pages[].index` | MUST equal array position (`pages[i].index == i`); reject duplicates / gaps / out-of-order. |
 | `pages[].file` | Reject absolute paths, `..` segments, backslashes, null bytes, empty segments. |
