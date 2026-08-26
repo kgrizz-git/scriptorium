@@ -23,7 +23,7 @@ wins on types, this doc wins on rules and intent.
 **Portability:** everything inside the package is addressed with **relative paths**.
 `meta.json` MUST NOT contain absolute paths (no home directory, no root-anchored source
 path). Page `file` values MUST be package-relative, use forward slashes only, and MUST NOT
-contain `..` segments or null bytes (enforced in the schema and in Rust
+contain `.` or `..` path segments or null bytes (enforced in the schema and in Rust
 `BookMeta::validate`). A package directory can be moved or copied to another machine and
 still load.
 
@@ -47,7 +47,7 @@ still load.
 | Field | Type | Required | Notes |
 |---|---|---|---|
 | `index` | number | yes | 0-based position; MUST equal array position (`pages[i].index == i`) |
-| `file` | string | yes | relative path under the package (no `..`, no absolutes) |
+| `file` | string | yes | relative path under the package (no `.` / `..` segments, no absolutes) |
 | `width` | number | yes | image width in px (`minimum: 1`) |
 | `height` | number | yes | image height in px (`minimum: 1`) |
 | `byteSize` | number | yes | bytes on disk (`exclusiveMinimum: 0`) |
@@ -73,7 +73,7 @@ an equivalent):
 | `createdAt` / `updatedAt` | MUST parse as RFC 3339 date-time. |
 | `lastReadPage` | MUST be `< pages.length`. Prefer reject (`LastReadPageOutOfRange`); UI may clamp to `pages.length - 1` if recovering a corrupt bookmark. |
 | `pages[].index` | MUST equal array position (`pages[i].index == i`); reject duplicates / gaps / out-of-order. |
-| `pages[].file` | Reject absolute paths, `..` segments, backslashes, null bytes, empty segments. |
+| `pages[].file` | Reject absolute paths, `.` / `..` segments, backslashes, null bytes, empty segments. |
 | `pages[].width` / `height` | Reject values `< 1` (degenerate images). |
 | `pages[].byteSize` | Reject `0` (empty page files). |
 

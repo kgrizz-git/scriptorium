@@ -262,7 +262,7 @@ fn validate_book_id(id: &str) -> Result<(), BookMetaError> {
     }
 }
 
-/// Reject absolute paths, `..` segments, backslashes, and null bytes.
+/// Reject absolute paths, `.` / `..` segments, backslashes, and null bytes.
 fn validate_page_file(index: u32, file: &str) -> Result<(), BookMetaError> {
     let reason = if file.is_empty() {
         Some("empty path")
@@ -272,8 +272,11 @@ fn validate_page_file(index: u32, file: &str) -> Result<(), BookMetaError> {
         Some("absolute path")
     } else if file.contains('\\') {
         Some("backslash not allowed; use forward slashes")
-    } else if file.split('/').any(|seg| seg == ".." || seg.is_empty()) {
-        Some("empty or .. path segment")
+    } else if file
+        .split('/')
+        .any(|seg| seg == "." || seg == ".." || seg.is_empty())
+    {
+        Some("empty, ., or .. path segment")
     } else if !file
         .chars()
         .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '-' | '/'))
@@ -526,16 +529,29 @@ mod tests {
             ("/etc/passwd", "absolute path"),
             (r"pages\000.jpg", "backslash"),
             ("a//b", "empty segment"),
+            (".", "dot segment"),
+            ("pages/.", "dot segment under pages"),
             ("pages/..", "parent segment"),
             ("pages/foo bar.jpg", "space"),
             ("pages/foo:bar.jpg", "colon"),
             ("pages/über.jpg", "non-ascii"),
         ];
+        let validator = compile_schema(&load_schema());
         for (file, label) in cases {
             match validate_page_file(0, file) {
                 Err(BookMetaError::InvalidPageFile { .. }) => {}
                 other => panic!("{label} path {file:?} should fail, got {other:?}"),
             }
+            if file.is_empty() || file.contains('\0') {
+                continue;
+            }
+            let mut book = BookMeta::sample();
+            book.pages[0].file = file.into();
+            let json = serde_json::to_value(&book).unwrap();
+            assert!(
+                !validator.is_valid(&json),
+                "schema must also reject {label} path {file:?}"
+            );
         }
     }
 

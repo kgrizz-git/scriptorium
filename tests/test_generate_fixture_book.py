@@ -96,7 +96,21 @@ class FixtureBookTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp) / "schema-book"
             meta = gen.build_book_package(out, "Schema Book", page_count=2, seed=3)
-            jsonschema.validate(meta, schema)
+            format_checker = jsonschema.FormatChecker()
+            self.assertIn(
+                "date-time",
+                format_checker.checkers,
+                "date-time format checking requires rfc3339-validator "
+                "(pip install rfc3339-validator or pip install '.[test]')",
+            )
+            jsonschema.validate(meta, schema, format_checker=format_checker)
+            invalid_meta = dict(meta, createdAt="not-a-timestamp")
+            with self.assertRaises(jsonschema.ValidationError):
+                jsonschema.validate(
+                    invalid_meta,
+                    schema,
+                    format_checker=format_checker,
+                )
             self.assertEqual((out / "annotations.json").read_text(), "[]\n")
 
     def test_determinism_byte_identical(self) -> None:
