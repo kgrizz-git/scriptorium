@@ -153,9 +153,20 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     out_dir = args.out or FIXTURES_ROOT / "fixture-book"
-    out_dir.mkdir(parents=True, exist_ok=True)
+    if not BOOK_ID_RE.fullmatch(out_dir.name):
+        print(
+            f"error: output directory name {out_dir.name!r} must match book id slug "
+            f"{BOOK_ID_RE.pattern}",
+            file=sys.stderr,
+        )
+        return 2
 
-    meta = build_book_package(out_dir, args.title, args.pages, args.seed)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        meta = build_book_package(out_dir, args.title, args.pages, args.seed)
+    except ValueError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
 
     print(f"Generated book '{meta['id']}' ({args.pages} pages) → {out_dir}")
     print(f"  formatVersion: {meta['formatVersion']}")

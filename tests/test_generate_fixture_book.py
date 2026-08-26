@@ -143,6 +143,14 @@ class FixtureBookTests(unittest.TestCase):
             self.assertEqual(code, 2)
             self.assertFalse((out / "meta.json").exists())
 
+    def test_invalid_out_name_rejected_by_cli(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "BadName"
+            code = gen.main(["--pages", "1", "--out", str(out)])
+            self.assertEqual(code, 2)
+            self.assertFalse(out.exists())
+            self.assertFalse((out / "meta.json").exists())
+
     def test_build_rejects_zero_pages(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             with self.assertRaises(ValueError):
