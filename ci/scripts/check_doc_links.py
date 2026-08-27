@@ -35,6 +35,7 @@ import concurrent.futures
 import re
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 from datetime import date
 from pathlib import Path
@@ -100,16 +101,27 @@ def find_external(text: str) -> list[str]:
     return list(seen)
 
 
+def _hostname(url: str) -> str:
+    """Extract lowercased hostname safely; returns '' on parse error or missing host."""
+    try:
+        return (urllib.parse.urlparse(url).hostname or "").lower()
+    except ValueError:
+        return ""
+
+
 def check_link(url: str) -> tuple[str, str] | None:
     """Return (url, problem) when the link looks dead or moved, else None."""
-    if any(host in url for host in SKIP_HOSTS):
+    h = _hostname(url)
+    if any(h == host or h.endswith("." + host) for host in SKIP_HOSTS):
         return None
     request = urllib.request.Request(url, method="HEAD", headers={"User-Agent": USER_AGENT})
     try:
         with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
             final = response.geturl()
             # A GitHub repo redirect means the project was renamed or transferred.
-            if "github.com" in url and final.rstrip("/") != url.rstrip("/"):
+            if (h == "github.com" or h.endswith(".github.com")) and final.rstrip("/") != url.rstrip(
+                "/"
+            ):
                 return (url, f"redirects to {final} — renamed or transferred?")
         return None
     except urllib.error.HTTPError as error:
