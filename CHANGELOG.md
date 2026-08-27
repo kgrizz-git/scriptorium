@@ -10,6 +10,7 @@ uses [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- Public repository posture: [`SECURITY.md`](SECURITY.md) for vulnerability reporting; README reflects public/early-dev status.
 - Tauri 2 desktop shell (Vite + React + TypeScript) at repo root; book package format v1 spec and JSON Schema ([`docs/book-format.md`](docs/book-format.md), [`docs/book-format.schema.json`](docs/book-format.schema.json)); Rust types + schema-bind test; deterministic fixture generator.
 
 ### Changed

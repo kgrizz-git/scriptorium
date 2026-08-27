@@ -1,16 +1,17 @@
 # Scriptorium
 
-Last reviewed: 2026-08-25
+Last reviewed: 2026-08-27
 
 Tauri-first app for assembling scanned page folders into textured virtual books
 (page-turn reading, faithful page images, curator hotspots with lore popups) and
 browsing a multi-book library. Built for librarians and gallery directors (authors)
 and visitors/students (readers).
 
-Bootstrapped from [`kgrizz-git/project-seed-template`](https://github.com/kgrizz-git/project-seed-template).
-Private for now; public soon. Profile: `.context/project-profile.md` (local).
+**Status:** public, early development (pre-1.0). Bootstrapped from
+[`kgrizz-git/project-seed-template`](https://github.com/kgrizz-git/project-seed-template).
+Local agent profile (gitignored): `.context/project-profile.md`.
 
-**Agent sessions:** [`prompts/new-agent-session.md`](prompts/new-agent-session.md).
+**Security:** [`SECURITY.md`](SECURITY.md) · **Agent sessions:** [`prompts/new-agent-session.md`](prompts/new-agent-session.md).
 **Roadmap:** [`plans/2026-08-23-product-roadmap.md`](plans/2026-08-23-product-roadmap.md) · **Backlog:** [`to_do.md`](to_do.md).
 **CI & hooks:** [`docs/ci-and-hooks.md`](docs/ci-and-hooks.md).
 **Domain menu:** [`inventory/virtual-books-flipbook.md`](inventory/virtual-books-flipbook.md).
