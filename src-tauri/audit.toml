@@ -1,0 +1,10 @@
+# cargo-audit ignore list — see tmp/dependency-update-plan.md §3
+# glib 0.18.5 is transitive via gtk 0.18.2 → tauri 2.11.5 (Linux-only)
+# Vulnerability: RUSTSEC-2024-0429 / GHSA-wrw7-89jp-8q8g — VariantStrIter unsoundness
+# Vulnerable range: >=0.15.0, <0.20.0 ; fixed in 0.20.0 (breaking, blocked by GTK 0.18 ecosystem)
+# Suppression expires: 2026-11-27 — re-check `cargo update -p glib` and Tauri GTK bump
+# Tracking: create GitHub issue "Track tauri GTK 0.20 bump for glib fix" and link to Dependabot #21
+# To verify locally: cargo install cargo-audit && cargo audit (from src-tauri or root)
+
+[advisories]
+ignore = ["RUSTSEC-2024-0429"]
