@@ -109,11 +109,21 @@ def _hostname(url: str) -> str:
         return ""
 
 
+def _normalized_hostname(url: str) -> str:
+    """Hostname for skip/GitHub checks; strips trailing-dot FQDN form (e.g. twitter.com.)."""
+    return _hostname(url).rstrip(".")
+
+
+def _is_skipped_host(hostname: str) -> bool:
+    """True when hostname is a SKIP_HOSTS entry or a subdomain of one."""
+    return any(hostname == host or hostname.endswith("." + host) for host in SKIP_HOSTS)
+
+
 def check_link(url: str) -> tuple[str, str] | None:
     """Return (url, problem) when the link looks dead or moved, else None."""
     # Trailing-dot FQDNs (e.g. twitter.com.) must still match SKIP_HOSTS.
-    h = _hostname(url).rstrip(".")
-    if any(h == host or h.endswith("." + host) for host in SKIP_HOSTS):
+    h = _normalized_hostname(url)
+    if _is_skipped_host(h):
         return None
     request = urllib.request.Request(url, method="HEAD", headers={"User-Agent": USER_AGENT})
     try:
