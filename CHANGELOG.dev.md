@@ -7,14 +7,15 @@ Internal / developer-facing changes that do not belong in the public
 
 ### Added
 - Public-repo docs: `SECURITY.md`; README no longer marks the project private. GitHub description/topics updated via `gh` (not in-tree).
-- Time-bound cargo-audit ignores: `src-tauri/.cargo/audit.toml` + `audit-exceptions.toml`, enforced by `ci/scripts/check_audit_exceptions.py` in the required **Policy** CI job (RUSTSEC-2024-0429 / glib via GTK expires 2026-11-27). Advisory `cargo audit` stays in the continue-on-error Audit job. Unit tests: `tests/test_check_audit_exceptions.py`, `tests/test_check_doc_links.py`. CLI `--audit`/`--exceptions` paths must resolve under `--root` (default cwd) to satisfy Sonar path-escape rule S8707. `--today` and exception `expires` accept only dashed `YYYY-MM-DD` (reject compact/week ISO forms accepted by Python 3.11+ `fromisoformat`).
+- Time-bound cargo-audit ignores: `src-tauri/.cargo/audit.toml` + `audit-exceptions.toml`, enforced by `ci/scripts/check_audit_exceptions.py` in the required **Policy** CI job (RUSTSEC-2024-0429 / glib via GTK expires 2026-11-27). Unit tests: `tests/test_check_audit_exceptions.py`, `tests/test_check_doc_links.py`. CLI `--audit`/`--exceptions` paths must resolve under `--root` (default cwd) to satisfy Sonar path-escape rule S8707. `--today` and exception `expires` accept only dashed `YYYY-MM-DD` (reject compact/week ISO forms accepted by Python 3.11+ `fromisoformat`).
 - Fixture-generator unit tests (`tests/test_generate_fixture_book.py`); Rust round-trip test that deserializes generator `meta.json` into `BookMeta`.
 - `BookMeta::validate` / `PageEntry::validate` for `lastReadPage` bounds, path safety, and non-zero dimensions (implementation detail for the public format rules in [`CHANGELOG.md`](CHANGELOG.md)).
-- CI jobs: `Rust (src-tauri)` (cargo fmt/clippy `-D warnings`/test/check, with cargo cache), `Type check (TypeScript)` (pnpm + tsc), `Audit (advisory)` (pnpm audit + cargo audit, continue-on-error).
+- CI jobs: `Rust (src-tauri)` (cargo fmt/clippy `-D warnings`/test/check, with cargo cache), `Type check (TypeScript)` (pnpm + tsc), `Dependency audit` (`pnpm audit --prod` + `cargo audit`).
 - pnpm v11 build-script approval via `pnpm-workspace.yaml`; Node 24 pinned (`engines` / `.nvmrc`); `tests/fixtures/README.md`.
 - Schema-bind / lockstep tests for Rust `BookMeta` (jsonschema 0.51.0); `cargo fmt` clean.
 
 ### Changed
+- CI **Dependency audit** job: run `cargo audit` directly (respects `src-tauri/.cargo/audit.toml`), drop `rustsec/audit-check` (Check API permission failures on `main`), remove `continue-on-error` / `pnpm audit || true` so the job is a real gate. Cache pinned `cargo-audit` 0.22.2 binary.
 - Removed unused seed-template `scaffolds/` trees (Next.js, Workers, Go, Rust CLI, Python). Scriptorium ships Tauri + Vite/React; example lockfiles only fed Dependabot/Trivy noise.
 - Link checker: normalize trailing-dot FQDN hostnames before `SKIP_HOSTS` / GitHub redirect checks (`ci/scripts/check_doc_links.py`).
 - CI: install Tauri Linux system deps in `Rust (src-tauri)`; point `cargo audit` at `src-tauri/` (config under `src-tauri/.cargo/`); fix plan archive relative links broken by M0 move; pin Rust via `rust-toolchain.toml` (`1.96.0`); install `jsonschema` in the pytest job so schema conformance cannot silently skip (**S1**).
