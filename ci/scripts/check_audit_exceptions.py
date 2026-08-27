@@ -11,6 +11,8 @@ Inputs:
   --audit PATH       path to audit.toml (default: src-tauri/.cargo/audit.toml)
   --exceptions PATH  path to audit-exceptions.toml
                      (default: src-tauri/.cargo/audit-exceptions.toml)
+  --root PATH        directory that audit/exception paths must stay under
+                     (default: current working directory)
   --today YYYY-MM-DD override "today" for tests
 
 Outputs:
@@ -34,6 +36,16 @@ from typing import Any
 
 DEFAULT_AUDIT = Path("src-tauri/.cargo/audit.toml")
 DEFAULT_EXCEPTIONS = Path("src-tauri/.cargo/audit-exceptions.toml")
+
+
+def resolve_under_root(path: Path, root: Path) -> Path:
+    """Resolve path and require it stays under root (blocks CLI path escape)."""
+    root_resolved = root.resolve()
+    candidate = path if path.is_absolute() else root_resolved / path
+    resolved = candidate.resolve()
+    if not resolved.is_relative_to(root_resolved):
+        raise ValueError(f"{path}: must stay under {root_resolved}")
+    return resolved
 
 
 def load_toml(path: Path) -> dict[str, Any]:
@@ -93,48 +105,26 @@ def load_exceptions(path: Path) -> list[dict[str, str]]:
     return out
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(
-        description=(__doc__ or "").split("\n\n", 1)[0],
-    )
-    parser.add_argument("--audit", type=Path, default=DEFAULT_AUDIT)
-    parser.add_argument("--exceptions", type=Path, default=DEFAULT_EXCEPTIONS)
-    parser.add_argument("--today", type=str, default=None, help="YYYY-MM-DD override")
-    args = parser.parse_args()
-
-    try:
-        today = date.fromisoformat(args.today) if args.today else date.today()
-    except ValueError as err:
-        print(f"[audit-exceptions] ERROR: bad --today: {err}", file=sys.stderr)
-        return 2
-
-    if not args.audit.is_file():
-        print(f"[audit-exceptions] ERROR: missing {args.audit}", file=sys.stderr)
-        return 2
-    if not args.exceptions.is_file():
-        print(f"[audit-exceptions] ERROR: missing {args.exceptions}", file=sys.stderr)
-        return 2
-
-    try:
-        ignore_ids = parse_ignore_ids(args.audit)
-        exceptions = load_exceptions(args.exceptions)
-    except (OSError, ValueError) as err:
-        print(f"[audit-exceptions] ERROR: {err}", file=sys.stderr)
-        return 2
-
+def collect_problems(
+    ignore_ids: list[str],
+    exceptions: list[dict[str, str]],
+    today: date,
+    audit_label: Path,
+    exceptions_label: Path,
+) -> list[str]:
+    """Return policy problems (sync drift, bad dates, expired ignores)."""
     by_id = {row["id"]: row for row in exceptions}
     if len(by_id) != len(exceptions):
-        print("[audit-exceptions] ERROR: duplicate exception ids", file=sys.stderr)
-        return 1
+        return ["duplicate exception ids"]
 
     problems: list[str] = []
     ignore_set = set(ignore_ids)
     exception_set = set(by_id)
 
     for missing in sorted(ignore_set - exception_set):
-        problems.append(f"ignore {missing} has no row in {args.exceptions}")
+        problems.append(f"ignore {missing} has no row in {exceptions_label}")
     for orphan in sorted(exception_set - ignore_set):
-        problems.append(f"exception {orphan} is not listed in {args.audit} ignore")
+        problems.append(f"exception {orphan} is not listed in {audit_label} ignore")
 
     for row in exceptions:
         try:
@@ -149,7 +139,48 @@ def main() -> int:
             )
         else:
             print(f"[audit-exceptions] ok {row['id']} until {expires.isoformat()}")
+    return problems
 
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description=(__doc__ or "").split("\n\n", 1)[0],
+    )
+    parser.add_argument("--audit", type=Path, default=DEFAULT_AUDIT)
+    parser.add_argument("--exceptions", type=Path, default=DEFAULT_EXCEPTIONS)
+    parser.add_argument(
+        "--root",
+        type=Path,
+        default=Path.cwd(),
+        help="directory that --audit/--exceptions must stay under",
+    )
+    parser.add_argument("--today", type=str, default=None, help="YYYY-MM-DD override")
+    args = parser.parse_args()
+
+    try:
+        today = date.fromisoformat(args.today) if args.today else date.today()
+        root = args.root.resolve()
+        audit_path = resolve_under_root(args.audit, root)
+        exceptions_path = resolve_under_root(args.exceptions, root)
+    except ValueError as err:
+        print(f"[audit-exceptions] ERROR: {err}", file=sys.stderr)
+        return 2
+
+    if not audit_path.is_file():
+        print(f"[audit-exceptions] ERROR: missing {audit_path}", file=sys.stderr)
+        return 2
+    if not exceptions_path.is_file():
+        print(f"[audit-exceptions] ERROR: missing {exceptions_path}", file=sys.stderr)
+        return 2
+
+    try:
+        ignore_ids = parse_ignore_ids(audit_path)
+        exceptions = load_exceptions(exceptions_path)
+    except (OSError, ValueError) as err:
+        print(f"[audit-exceptions] ERROR: {err}", file=sys.stderr)
+        return 2
+
+    problems = collect_problems(ignore_ids, exceptions, today, audit_path, exceptions_path)
     if problems:
         for problem in problems:
             print(f"[audit-exceptions] ERROR: {problem}", file=sys.stderr)

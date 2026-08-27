@@ -27,7 +27,8 @@ def _load_module() -> ModuleType:
     """Load the hyphenated CI script as a module for direct calls."""
     path = ROOT / "ci" / "scripts" / "check_audit_exceptions.py"
     spec = importlib.util.spec_from_file_location("check_audit_exceptions", path)
-    assert spec and spec.loader
+    assert spec is not None
+    assert spec.loader is not None
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
@@ -60,10 +61,12 @@ def _write_pair(
     return audit, exc
 
 
-def _run(audit: Path, exceptions: Path, today: str) -> int:
-    """Invoke main() with argv for the given paths and --today override."""
+def _run(audit: Path, exceptions: Path, today: str, root: Path) -> int:
+    """Invoke main() with argv for the given paths, --root, and --today."""
     argv = [
         "check_audit_exceptions.py",
+        "--root",
+        str(root),
         "--audit",
         str(audit),
         "--exceptions",
@@ -90,7 +93,7 @@ class CheckAuditExceptionsTests(unittest.TestCase):
                 ignore_ids=[ADVISORY],
                 exceptions=[(ADVISORY, "2026-11-27", "gtk glib")],
             )
-            self.assertEqual(_run(audit, exc, "2026-11-27"), 0)
+            self.assertEqual(_run(audit, exc, "2026-11-27", tmp), 0)
 
     def test_single_quoted_ignore_list(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
@@ -102,14 +105,14 @@ class CheckAuditExceptionsTests(unittest.TestCase):
                 use_single_quotes=True,
             )
             self.assertEqual(mod.parse_ignore_ids(audit), [ADVISORY])
-            self.assertEqual(_run(audit, exc, "2026-08-27"), 0)
+            self.assertEqual(_run(audit, exc, "2026-08-27", tmp), 0)
 
     def test_exceptions_file_missing_table(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             tmp = Path(raw)
             audit, exc = _write_pair(tmp, ignore_ids=[ADVISORY], exceptions=[])
             exc.write_text("# no exceptions table\n", encoding="utf-8")
-            self.assertEqual(_run(audit, exc, "2026-08-27"), 2)
+            self.assertEqual(_run(audit, exc, "2026-08-27", tmp), 2)
 
     def test_missing_exception_row_for_ignore(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
@@ -119,13 +122,13 @@ class CheckAuditExceptionsTests(unittest.TestCase):
                 ignore_ids=[ADVISORY, "RUSTSEC-2099-0001"],
                 exceptions=[(ADVISORY, "2026-11-27", "gtk glib")],
             )
-            self.assertEqual(_run(audit, exc, "2026-08-27"), 1)
+            self.assertEqual(_run(audit, exc, "2026-08-27", tmp), 1)
 
     def test_ignore_without_any_exception_rows(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             tmp = Path(raw)
             audit, exc = _write_pair(tmp, ignore_ids=[ADVISORY], exceptions=[])
-            self.assertEqual(_run(audit, exc, "2026-08-27"), 1)
+            self.assertEqual(_run(audit, exc, "2026-08-27", tmp), 1)
 
     def test_orphan_exception(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
@@ -135,7 +138,7 @@ class CheckAuditExceptionsTests(unittest.TestCase):
                 ignore_ids=[],
                 exceptions=[(ADVISORY, "2026-11-27", "gtk glib")],
             )
-            self.assertEqual(_run(audit, exc, "2026-08-27"), 1)
+            self.assertEqual(_run(audit, exc, "2026-08-27", tmp), 1)
 
     def test_expired(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
@@ -145,7 +148,7 @@ class CheckAuditExceptionsTests(unittest.TestCase):
                 ignore_ids=[ADVISORY],
                 exceptions=[(ADVISORY, "2026-11-27", "gtk glib")],
             )
-            self.assertEqual(_run(audit, exc, "2026-11-28"), 1)
+            self.assertEqual(_run(audit, exc, "2026-11-28", tmp), 1)
 
     def test_bad_expires_date(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
@@ -155,7 +158,7 @@ class CheckAuditExceptionsTests(unittest.TestCase):
                 ignore_ids=[ADVISORY],
                 exceptions=[(ADVISORY, "not-a-date", "gtk glib")],
             )
-            self.assertEqual(_run(audit, exc, "2026-08-27"), 1)
+            self.assertEqual(_run(audit, exc, "2026-08-27", tmp), 1)
 
     def test_duplicate_exception_id(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
@@ -168,7 +171,7 @@ class CheckAuditExceptionsTests(unittest.TestCase):
                     (ADVISORY, "2026-12-01", "second"),
                 ],
             )
-            self.assertEqual(_run(audit, exc, "2026-08-27"), 1)
+            self.assertEqual(_run(audit, exc, "2026-08-27", tmp), 1)
 
     def test_malformed_ignore_not_a_list(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
@@ -180,7 +183,22 @@ class CheckAuditExceptionsTests(unittest.TestCase):
                 f'[[exceptions]]\nid = "{ADVISORY}"\nexpires = "2026-11-27"\nreason = "x"\n',
                 encoding="utf-8",
             )
-            self.assertEqual(_run(audit, exc, "2026-08-27"), 2)
+            self.assertEqual(_run(audit, exc, "2026-08-27", tmp), 2)
+
+    def test_path_escape_rejected(self) -> None:
+        """CLI paths outside --root must fail closed (Sonar S8707)."""
+        with tempfile.TemporaryDirectory() as raw:
+            tmp = Path(raw)
+            outside = tmp / "outside"
+            inside = tmp / "inside"
+            outside.mkdir()
+            inside.mkdir()
+            audit, exc = _write_pair(
+                outside,
+                ignore_ids=[ADVISORY],
+                exceptions=[(ADVISORY, "2026-11-27", "gtk glib")],
+            )
+            self.assertEqual(_run(audit, exc, "2026-08-27", inside), 2)
 
     def test_committed_repo_files_pass(self) -> None:
         """Guardrail: the real src-tauri/.cargo pair stays in sync for today."""
@@ -188,7 +206,7 @@ class CheckAuditExceptionsTests(unittest.TestCase):
         exc = ROOT / "src-tauri" / ".cargo" / "audit-exceptions.toml"
         self.assertTrue(audit.is_file())
         self.assertTrue(exc.is_file())
-        self.assertEqual(_run(audit, exc, "2026-08-27"), 0)
+        self.assertEqual(_run(audit, exc, "2026-08-27", ROOT), 0)
 
 
 if __name__ == "__main__":

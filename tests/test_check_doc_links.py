@@ -25,7 +25,8 @@ def _load_module() -> ModuleType:
     """Load the hyphenated CI script as a module for direct calls."""
     path = ROOT / "ci" / "scripts" / "check_doc_links.py"
     spec = importlib.util.spec_from_file_location("check_doc_links", path)
-    assert spec and spec.loader
+    assert spec is not None
+    assert spec.loader is not None
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
