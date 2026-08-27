@@ -37,7 +37,7 @@ Related to #issue_number
 If this PR introduces breaking changes:
 - Describe what breaks
 - Migration steps for existing projects
-- Impact on existing templates/scaffolds
+- Impact on existing templates or harness docs
 
 ## Additional Notes
 Any additional context, screenshots, or considerations for reviewers.

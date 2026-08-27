@@ -26,5 +26,4 @@ tmp/
 backups/
 
 # Example templates, not product code
-scaffolds/
 ci/examples/

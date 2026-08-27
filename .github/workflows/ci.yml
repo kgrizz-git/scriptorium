@@ -41,6 +41,9 @@ jobs:
       - name: Internal documentation links
         run: python ci/scripts/check_doc_links.py --internal-only --strict
 
+      - name: Cargo-audit exception expiry (required)
+        run: python ci/scripts/check_audit_exceptions.py
+
       - name: Doc freshness (advisory on PR)
         if: github.event_name == 'pull_request'
         env:

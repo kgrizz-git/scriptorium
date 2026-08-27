@@ -6,6 +6,7 @@ Internal / developer-facing changes that do not belong in the public
 ## [Unreleased]
 
 ### Added
+- Time-bound cargo-audit ignores: `src-tauri/.cargo/audit.toml` + `audit-exceptions.toml`, enforced by `ci/scripts/check_audit_exceptions.py` in the required **Policy** CI job (RUSTSEC-2024-0429 / glib via GTK expires 2026-11-27). Advisory `cargo audit` stays in the continue-on-error Audit job. Unit tests: `tests/test_check_audit_exceptions.py`, `tests/test_check_doc_links.py`. CLI `--audit`/`--exceptions` paths must resolve under `--root` (default cwd) to satisfy Sonar path-escape rule S8707. `--today` and exception `expires` accept only dashed `YYYY-MM-DD` (reject compact/week ISO forms accepted by Python 3.11+ `fromisoformat`).
 - Fixture-generator unit tests (`tests/test_generate_fixture_book.py`); Rust round-trip test that deserializes generator `meta.json` into `BookMeta`.
 - `BookMeta::validate` / `PageEntry::validate` for `lastReadPage` bounds, path safety, and non-zero dimensions (implementation detail for the public format rules in [`CHANGELOG.md`](CHANGELOG.md)).
 - CI jobs: `Rust (src-tauri)` (cargo fmt/clippy `-D warnings`/test/check, with cargo cache), `Type check (TypeScript)` (pnpm + tsc), `Audit (advisory)` (pnpm audit + cargo audit, continue-on-error).
@@ -13,7 +14,9 @@ Internal / developer-facing changes that do not belong in the public
 - Schema-bind / lockstep tests for Rust `BookMeta` (jsonschema 0.51.0); `cargo fmt` clean.
 
 ### Changed
-- CI: install Tauri Linux system deps in `Rust (src-tauri)`; point `cargo audit` at `src-tauri/`; fix plan archive relative links broken by M0 move; pin Rust via `rust-toolchain.toml` (`1.96.0`); install `jsonschema` in the pytest job so schema conformance cannot silently skip (**S1**).
+- Removed unused seed-template `scaffolds/` trees (Next.js, Workers, Go, Rust CLI, Python). Scriptorium ships Tauri + Vite/React; example lockfiles only fed Dependabot/Trivy noise.
+- Link checker: normalize trailing-dot FQDN hostnames before `SKIP_HOSTS` / GitHub redirect checks (`ci/scripts/check_doc_links.py`).
+- CI: install Tauri Linux system deps in `Rust (src-tauri)`; point `cargo audit` at `src-tauri/` (config under `src-tauri/.cargo/`); fix plan archive relative links broken by M0 move; pin Rust via `rust-toolchain.toml` (`1.96.0`); install `jsonschema` in the pytest job so schema conformance cannot silently skip (**S1**).
 - Book schema / Rust validate (dev): table-driven negative path/index tests; slug lockstep tests (Rust + Python vs schema); structural validate documents M1 checksum gap (wrong-but-valid-shape `sha256` accepted); review IDs **S2–S6**/SEC5. User-visible format/schema rules are listed once in [`CHANGELOG.md`](CHANGELOG.md) and [`docs/book-format.md`](docs/book-format.md).
 - Fixture generator: wipe and recreate `pages/` on regenerate (clears non-PNG orphans too); write `meta.json`/`annotations.json` as UTF-8 LF bytes for cross-platform determinism; CLI validates book-id dirname before mkdir; reject `--title` / `--pages` / `rights` / `attribution` outside schema `maxLength` / `maxItems` before creating the output dir.
 - Documented page `file` schema-pattern invariants in `docs/book-format.md`.
@@ -25,8 +28,8 @@ Internal / developer-facing changes that do not belong in the public
 - `docs/ci-and-hooks.md`: added Rust, TS typecheck, and audit to the recommendation table and required-checks list.
 - M0 plan archived to [`plans/archive/completed/2026-08-23-m0-tauri-foundation.md`](plans/archive/completed/2026-08-23-m0-tauri-foundation.md); `to_do.md` updated to remove M0 from Next Up and Active.
 - `to_do.md` is now strictly actionable: completed work is removed rather than retained in a `Recently done` section, and every meaningful completion is logged once.
-- Semgrep (`security.yml`) scans the whole repo. Path skips are in `.semgrepignore` (`scaffolds/`, `ci/examples/`, scratch dirs). Live `.github/` workflows are included and SHA-pinned; Dependabot has an explicit 7-day `cooldown` so Semgrep's Dependabot rule passes.
-- Changelog routing: user-visible security → `CHANGELOG.md`; CI/SAST harness → `CHANGELOG.dev.md`; operational maintenance only → `MAINTENANCE.md` (no double-logging). Aligned `templates/maintenance-log.md` with the same tree.
+- Semgrep (`security.yml`) scans the whole repo. Path skips are in `.semgrepignore` (`ci/examples/`, scratch dirs). Live `.github/` workflows are included and SHA-pinned; Dependabot has an explicit 7-day `cooldown` so Semgrep's Dependabot rule passes.
+- Changelog routing: user-facing security → `CHANGELOG.md`; CI/SAST harness → `CHANGELOG.dev.md`; operational maintenance only → `MAINTENANCE.md` (no double-logging). Aligned `templates/maintenance-log.md` with the same tree.
 
 ## [0.1.2] - 2026-08-23
 
