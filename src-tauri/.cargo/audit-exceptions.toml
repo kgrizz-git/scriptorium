@@ -1,0 +1,8 @@
+# Machine-readable cargo-audit ignore expirations.
+# Kept in sync with advisories.ignore in audit.toml.
+# Enforced by ci/scripts/check_audit_exceptions.py (CI audit job).
+
+[[exceptions]]
+id = "RUSTSEC-2024-0429"
+expires = "2026-11-27"
+reason = "glib transitive via gtk 0.18 → tauri; fixed in glib 0.20 (breaking GTK bump)"

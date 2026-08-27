@@ -1,6 +1,6 @@
 # Template Enhancements Summary
 
-Last reviewed: 2026-07-27
+Last reviewed: 2026-08-27
 
 Overview of lightweight enhancements added to improve template setup, integration, and best practices compliance.
 
@@ -68,42 +68,12 @@ All enhancements follow the template's core principles:
 - Common commands reference
 - File size quick reference
 
-### 4. Project Type Scaffolds (`scaffolds/`)
+### 4. Project Type Scaffolds (removed)
 
-#### Python Application (`scaffolds/python-app/`)
-- Modern `pyproject.toml` configuration
-- `src/` layout with tests
-- Ruff, pytest, mypy integration
-- GitHub Actions CI workflow
-- Example code and tests
-
-#### Next.js Application (`scaffolds/nextjs-app/`)
-- TypeScript and Next.js 14 configuration
-- App router structure
-- ESLint, Prettier, Jest integration
-- GitHub Actions CI workflow
-- Example pages and components
-
-#### Cloudflare Workers API (`scaffolds/workers-api/`)
-- Wrangler configuration
-- TypeScript setup
-- Example API handler
-- Vitest testing
-- GitHub Actions deployment workflow
-
-#### Go Service (`scaffolds/go-service/`)
-- Standard Go module structure
-- `cmd/` and `pkg/` layout
-- Makefile with common commands
-- GitHub Actions CI workflow
-- Example service and package
-
-#### Rust CLI (`scaffolds/rust-cli/`)
-- Cargo configuration
-- Standard Rust project layout
-- Clippy, rustfmt integration
-- GitHub Actions CI workflow
-- Example CLI code
+Seed-template starter trees under `scaffolds/` (Next.js, Workers, Go, Rust CLI, Python)
+were removed from Scriptorium. This product uses Tauri + Vite/React; keeping unused
+example lockfiles only created Dependabot/Trivy noise. Starters remain available in
+the upstream `project-seed-template` if needed for other projects.
 
 ### 5. GitHub Integration Templates
 
@@ -138,14 +108,9 @@ All enhancements follow the template's core principles:
 
 2. Follow cleanup suggestions to remove irrelevant content
 
-3. Choose and copy a scaffold if applicable:
-   ```bash
-   cp -r scaffolds/python-app/* .  # or other scaffold
-   ```
+3. Configure GitHub templates (already under `.github/` for this repo)
 
-4. Configure GitHub templates (copy from `.github/`)
-
-5. Run health check:
+4. Run health check:
    ```bash
    bash scripts/health-check.sh
    ```
@@ -176,7 +141,7 @@ All enhancements follow the template's core principles:
 - **AGENTS.md** - Updated to reference `docs/NAVIGATION.md` and new scripts
 - **Bootstrap prompt** - Works with `setup.sh` for initial configuration
 - **Health checks** - Complement `prompts/maintenance-loop.md`
-- **CI/CD** - Scaffolds provide workflow examples that enhance `ci/examples/`
+- **CI/CD** - Workflow examples under `ci/examples/`
 - **Documentation** - `NAVIGATION.md` indexes all existing documentation
 
 ### With Devin CLI
@@ -192,19 +157,16 @@ All enhancements follow the template's core principles:
 Any component can be safely removed:
 - Delete script files if not needed
 - Remove `.devin/` if not using Devin CLI
-- Skip scaffolds that don't match your project type
 - Use custom GitHub templates instead of provided ones
 
 ### Adapting Components
 
 - **Scripts**: Modify thresholds, checks, and behavior per project needs
-- **Scaffolds**: Customize dependencies, tool versions, and configurations
 - **Templates**: Adjust issue/PR templates to match project workflow
 - **Navigation**: Update `NAVIGATION.md` if adding custom documentation
 
 ### Extending Components
 
-- Add new scaffolds for other project types
 - Create additional automation scripts
 - Extend GitHub templates with project-specific sections
 - Add project-specific Devin skills
@@ -225,7 +187,6 @@ Any component can be safely removed:
 
 ### Maintainability
 - Well-documented scripts with clear error messages
-- Consistent structure across scaffolds
 - Standard CI patterns
 - Version-pinned dependencies where appropriate
 
@@ -239,24 +200,19 @@ Any component can be safely removed:
 
 These enhancements provide a foundation for potential future improvements:
 
-1. **Additional scaffolds** for other project types (Java, .NET, etc.)
-2. **Interactive setup** with user prompts for scaffold selection
-3. **Template update checking** to compare with upstream template
-4. **Project type detection** for automatic scaffold suggestions
-5. **Integration with inventory** for tool selection in scaffolds
-6. **Migration guides** for existing projects to adopt these enhancements
+1. **Interactive setup** with clearer cleanup of unused seed-template assets
+2. **Template update checking** to compare with upstream template
+3. **Migration guides** for existing projects to adopt these enhancements
 
 ## Impact Assessment
 
 ### Template Weight
 - **Minimal**: Scripts are lightweight shell scripts
-- **Scaffolds**: Each scaffold is self-contained and optional
 - **Documentation**: Single navigation file, no major documentation bloat
 - **Configuration**: Minimal Devin config, optional GitHub templates
 
 ### Maintenance
 - **Low**: Scripts use standard tools (git, basic commands)
-- **Scaffolds**: Follow standard patterns for each ecosystem
 - **Templates**: Standard GitHub issue/PR template format
 - **Documentation**: Static reference, minimal maintenance required
 
@@ -273,8 +229,7 @@ These enhancements significantly improve the template's ease of setup and integr
 1. **Automation** for common setup tasks
 2. **Validation** for environment and project health
 3. **Navigation** for the extensive documentation
-4. **Starting points** for common project types
-5. **Best practices** for GitHub integration
+4. **Best practices** for GitHub integration
 
 All components are designed to be:
 - Simple to understand and use

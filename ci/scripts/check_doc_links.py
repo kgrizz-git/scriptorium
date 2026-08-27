@@ -111,7 +111,8 @@ def _hostname(url: str) -> str:
 
 def check_link(url: str) -> tuple[str, str] | None:
     """Return (url, problem) when the link looks dead or moved, else None."""
-    h = _hostname(url)
+    # Trailing-dot FQDNs (e.g. twitter.com.) must still match SKIP_HOSTS.
+    h = _hostname(url).rstrip(".")
     if any(h == host or h.endswith("." + host) for host in SKIP_HOSTS):
         return None
     request = urllib.request.Request(url, method="HEAD", headers={"User-Agent": USER_AGENT})

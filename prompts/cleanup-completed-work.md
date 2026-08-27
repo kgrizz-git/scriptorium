@@ -56,7 +56,7 @@ User-visible impact? (features, UX, caller-facing security)
 
 **User-visible feature:** "Added user authentication" → `CHANGELOG.md`
 **Caller-facing security fix:** "Patched session fixation in login" → `CHANGELOG.md` (`### Security`)
-**CI/SAST harness:** "Pinned Actions SHAs; Semgrep exclude scaffolds" → `CHANGELOG.dev.md`
+**CI/SAST harness:** "Pinned Actions SHAs; Semgrep path skips" → `CHANGELOG.dev.md`
 **Internal tooling:** "Updated pre-commit hooks" → `CHANGELOG.dev.md`
 **Operational security maintenance:** "Rotated staging API keys (no product release)" → `MAINTENANCE.md`
 **Documentation:** "Updated API docs" → `CHANGELOG.dev.md`
