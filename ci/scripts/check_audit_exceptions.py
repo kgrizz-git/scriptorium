@@ -70,7 +70,9 @@ def load_exceptions(path: Path) -> list[dict[str, str]]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__.split("\n\n", 1)[0])
+    parser = argparse.ArgumentParser(
+        description=(__doc__ or "").split("\n\n", 1)[0],
+    )
     parser.add_argument("--audit", type=Path, default=DEFAULT_AUDIT)
     parser.add_argument("--exceptions", type=Path, default=DEFAULT_EXCEPTIONS)
     parser.add_argument("--today", type=str, default=None, help="YYYY-MM-DD override")
