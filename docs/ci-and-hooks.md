@@ -44,7 +44,7 @@ After the first green `CI` run, set default-branch ruleset required checks to:
 - `Rust (src-tauri)` — **required from M0** once `src-tauri/` exists (`cargo fmt` / `clippy` / `test` / `check`; exact job name must match `ci.yml`)
 - `Type check (TypeScript)` — `pnpm install` + `tsc --noEmit`
 - `Dependency audit` — `pnpm audit --prod` + `cargo audit` (uses `src-tauri/.cargo/audit.toml`; fails on vulnerabilities only)
-- `CodeQL` — default setup / code scanning
+- `CodeQL` — GitHub **default setup** (`dynamic/github-code-scanning/codeql`), not a workflow file in this repo; already a ruleset-required check
 
 `Dependency audit` replaced the old `Audit (advisory)` job (`rustsec/audit-check` + `continue-on-error`), which failed spuriously on `main` for missing `checks: write` while still going green on PRs.
 
