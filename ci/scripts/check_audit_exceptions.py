@@ -27,6 +27,7 @@ Requirements:
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 import tomllib
 from datetime import date
@@ -36,6 +37,8 @@ from typing import Any
 
 DEFAULT_AUDIT = Path("src-tauri/.cargo/audit.toml")
 DEFAULT_EXCEPTIONS = Path("src-tauri/.cargo/audit-exceptions.toml")
+# Strict calendar date only — Python 3.11+ fromisoformat also accepts compact/week forms.
+CANONICAL_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
 def resolve_under_root(path: Path, root: Path) -> Path:
@@ -46,6 +49,13 @@ def resolve_under_root(path: Path, root: Path) -> Path:
     if not resolved.is_relative_to(root_resolved):
         raise ValueError(f"{path}: must stay under {root_resolved}")
     return resolved
+
+
+def parse_canonical_date(value: str, *, label: str) -> date:
+    """Parse YYYY-MM-DD only; reject compact and week-date ISO forms."""
+    if not CANONICAL_DATE_RE.fullmatch(value):
+        raise ValueError(f"{label} must be YYYY-MM-DD, got {value!r}")
+    return date.fromisoformat(value)
 
 
 def load_toml(path: Path) -> dict[str, Any]:
@@ -128,9 +138,9 @@ def collect_problems(
 
     for row in exceptions:
         try:
-            expires = date.fromisoformat(row["expires"])
-        except ValueError:
-            problems.append(f"{row['id']}: bad expires date {row['expires']!r}")
+            expires = parse_canonical_date(row["expires"], label=f"{row['id']} expires")
+        except ValueError as err:
+            problems.append(str(err))
             continue
         if today > expires:
             problems.append(
@@ -158,7 +168,7 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
-        today = date.fromisoformat(args.today) if args.today else date.today()
+        today = parse_canonical_date(args.today, label="--today") if args.today else date.today()
         root = args.root.resolve()
         audit_path = resolve_under_root(args.audit, root)
         exceptions_path = resolve_under_root(args.exceptions, root)

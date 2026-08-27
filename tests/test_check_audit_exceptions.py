@@ -150,6 +150,28 @@ class CheckAuditExceptionsTests(unittest.TestCase):
             )
             self.assertEqual(_run(audit, exc, "2026-11-28", tmp), 1)
 
+    def test_today_rejects_compact_iso(self) -> None:
+        """Python 3.11+ fromisoformat accepts YYYYMMDD; we must not."""
+        with tempfile.TemporaryDirectory() as raw:
+            tmp = Path(raw)
+            audit, exc = _write_pair(
+                tmp,
+                ignore_ids=[ADVISORY],
+                exceptions=[(ADVISORY, "2026-11-27", "gtk glib")],
+            )
+            self.assertEqual(_run(audit, exc, "20261127", tmp), 2)
+
+    def test_today_rejects_week_date(self) -> None:
+        """Python 3.11+ fromisoformat accepts YYYY-Www-D; we must not."""
+        with tempfile.TemporaryDirectory() as raw:
+            tmp = Path(raw)
+            audit, exc = _write_pair(
+                tmp,
+                ignore_ids=[ADVISORY],
+                exceptions=[(ADVISORY, "2026-11-27", "gtk glib")],
+            )
+            self.assertEqual(_run(audit, exc, "2026-W48-5", tmp), 2)
+
     def test_bad_expires_date(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             tmp = Path(raw)
@@ -157,6 +179,27 @@ class CheckAuditExceptionsTests(unittest.TestCase):
                 tmp,
                 ignore_ids=[ADVISORY],
                 exceptions=[(ADVISORY, "not-a-date", "gtk glib")],
+            )
+            self.assertEqual(_run(audit, exc, "2026-08-27", tmp), 1)
+
+    def test_expires_rejects_compact_iso(self) -> None:
+        """expires must be YYYY-MM-DD, same contract as --today."""
+        with tempfile.TemporaryDirectory() as raw:
+            tmp = Path(raw)
+            audit, exc = _write_pair(
+                tmp,
+                ignore_ids=[ADVISORY],
+                exceptions=[(ADVISORY, "20261127", "gtk glib")],
+            )
+            self.assertEqual(_run(audit, exc, "2026-08-27", tmp), 1)
+
+    def test_expires_rejects_week_date(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            tmp = Path(raw)
+            audit, exc = _write_pair(
+                tmp,
+                ignore_ids=[ADVISORY],
+                exceptions=[(ADVISORY, "2026-W48-5", "gtk glib")],
             )
             self.assertEqual(_run(audit, exc, "2026-08-27", tmp), 1)
 
