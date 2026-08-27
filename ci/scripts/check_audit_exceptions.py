@@ -25,30 +25,54 @@ Requirements:
 from __future__ import annotations
 
 import argparse
-import re
 import sys
 import tomllib
 from datetime import date
 from pathlib import Path
+from typing import Any
 
 
 DEFAULT_AUDIT = Path("src-tauri/.cargo/audit.toml")
 DEFAULT_EXCEPTIONS = Path("src-tauri/.cargo/audit-exceptions.toml")
-IGNORE_RE = re.compile(r"^\s*ignore\s*=\s*\[(.*?)\]", re.MULTILINE | re.DOTALL)
-ID_RE = re.compile(r'"([^"]+)"')
 
 
-def parse_ignore_ids(audit_text: str) -> list[str]:
-    """Extract advisory IDs from the advisories.ignore list in audit.toml."""
-    match = IGNORE_RE.search(audit_text)
-    if not match:
+def load_toml(path: Path) -> dict[str, Any]:
+    """Parse a TOML file into a dict; raise ValueError with path context on failure."""
+    try:
+        data = tomllib.loads(path.read_text(encoding="utf-8"))
+    except tomllib.TOMLDecodeError as err:
+        raise ValueError(f"{path}: invalid TOML: {err}") from err
+    if not isinstance(data, dict):
+        raise ValueError(f"{path}: expected a TOML table at the root")
+    return data
+
+
+def parse_ignore_ids(path: Path) -> list[str]:
+    """Return advisories.ignore as a list of non-empty strings from audit.toml."""
+    data = load_toml(path)
+    advisories = data.get("advisories")
+    if advisories is None:
         return []
-    return ID_RE.findall(match.group(1))
+    if not isinstance(advisories, dict):
+        raise ValueError(f"{path}: [advisories] must be a table")
+    if "ignore" not in advisories:
+        return []
+    ignore = advisories["ignore"]
+    if not isinstance(ignore, list):
+        raise ValueError(f"{path}: advisories.ignore must be a list of strings")
+    ids: list[str] = []
+    for i, item in enumerate(ignore):
+        if not isinstance(item, str) or not item.strip():
+            raise ValueError(
+                f"{path}: advisories.ignore[{i}] must be a non-empty string, got {item!r}"
+            )
+        ids.append(item.strip())
+    return ids
 
 
 def load_exceptions(path: Path) -> list[dict[str, str]]:
     """Load [[exceptions]] rows; each needs id, expires (YYYY-MM-DD), reason."""
-    data = tomllib.loads(path.read_text(encoding="utf-8"))
+    data = load_toml(path)
     rows = data.get("exceptions")
     if not isinstance(rows, list):
         raise ValueError(f"{path}: missing [[exceptions]] table array")
@@ -92,9 +116,9 @@ def main() -> int:
         return 2
 
     try:
-        ignore_ids = parse_ignore_ids(args.audit.read_text(encoding="utf-8"))
+        ignore_ids = parse_ignore_ids(args.audit)
         exceptions = load_exceptions(args.exceptions)
-    except (OSError, ValueError, tomllib.TOMLDecodeError) as err:
+    except (OSError, ValueError) as err:
         print(f"[audit-exceptions] ERROR: {err}", file=sys.stderr)
         return 2
 

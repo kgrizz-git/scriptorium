@@ -41,6 +41,9 @@ jobs:
       - name: Internal documentation links
         run: python ci/scripts/check_doc_links.py --internal-only --strict
 
+      - name: Cargo-audit exception expiry (required)
+        run: python ci/scripts/check_audit_exceptions.py
+
       - name: Doc freshness (advisory on PR)
         if: github.event_name == 'pull_request'
         env:
@@ -248,9 +251,6 @@ jobs:
         run: |
           corepack enable && corepack prepare pnpm@11.17.0 --activate
           pnpm audit --prod || true
-
-      - name: Enforce cargo-audit exception expiry
-        run: python ci/scripts/check_audit_exceptions.py
 
       - name: cargo audit
         uses: rustsec/audit-check@69366f33c96575abad1ee0dba8212993eecbe998 # v2.0.0
